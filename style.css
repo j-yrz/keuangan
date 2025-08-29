@@ -1,50 +1,70 @@
 /* ===== Global ===== */
-body{margin:0;padding:0;font-family:Arial,sans-serif;transition:0.3s}
-.dark{background:#222;color:#ddd}
-.dark .card{background:#333;color:#fff}
-.dark table{color:#ddd}
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f8f8f8; transition: background 0.3s; }
+.hidden { display:none; }
+button { cursor:pointer; border:none; border-radius:5px; padding:8px 12px; transition: 0.2s; }
+button:hover { opacity:0.85; }
+input, select { padding:6px; border:1px solid #ccc; border-radius:4px; }
 
-/* ===== Header & Top Menu ===== */
-header{background:#2d7d2d;color:#fff;padding:10px;display:flex;justify-content:space-between;align-items:center}
-header h1{margin:0;font-size:20px}
-.top-menu{position:relative;z-index:500;display:flex;gap:5px}
-.top-menu button{position:relative;z-index:500;background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
+/* ===== Header ===== */
+header { background:#2d7d2d; color:#fff; padding:10px 15px; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1000; }
+header h1 { margin:0; font-size:20px; }
+header .top-menu { display:flex; gap:10px; }
+header button { font-size:20px; background:none; color:#fff; }
 
 /* ===== Summary Cards ===== */
-.summary-cards{display:flex;justify-content:space-around;padding:10px;flex-wrap:wrap}
-.card{background:#f0f0f0;padding:15px;border-radius:8px;min-width:100px;text-align:center;margin:5px}
-.btn-main{background:#2d7d2d;color:#fff;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;font-size:16px;margin:10px}
+.summary-cards { display:flex; justify-content:space-around; flex-wrap:wrap; padding:15px; gap:10px; }
+.summary-cards .card { flex:1; min-width:100px; background:#fff; padding:15px; border-radius:8px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); transition:0.2s; }
+.summary-cards .card:hover { box-shadow:0 4px 10px rgba(0,0,0,0.15); }
+.summary-cards .card span { font-weight:bold; font-size:18px; display:block; margin-top:5px; }
 
-/* ===== Sections ===== */
-.hidden{display:none}
-#formSection,#historySection,#chartSection{padding:15px;background:#fff;transition:0.3s}
+/* ===== Main Button ===== */
+.btn-main { display:block; margin:15px auto; background:#2d7d2d; color:#fff; font-size:16px; padding:10px 20px; }
 
-/* ===== Form ===== */
-#transactionForm{display:flex;flex-direction:column;gap:10px}
-#transactionForm input,#transactionForm select{padding:8px}
-.member-actions{display:flex;gap:5px;margin-top:5px}
-.form-buttons{display:flex;gap:10px;margin-top:10px}
+/* ===== Form Section ===== */
+#formSection { background:#fff; padding:15px; margin:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+#transactionForm { display:flex; flex-direction:column; gap:12px; }
+#transactionForm label { display:flex; flex-direction:column; font-size:14px; }
+.member-actions { display:flex; gap:5px; margin-top:5px; }
+.form-buttons { display:flex; gap:10px; }
 
-/* ===== History ===== */
-#historyTable{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
-#historyTable th,#historyTable td{border:1px solid #ccc;padding:5px;text-align:left}
-#historyTable th{background:#eee}
-.history-actions{margin-top:10px;display:flex;gap:5px;align-items:center}
-.export-dropdown{position:relative}
-.export-dropdown div{position:absolute;top:30px;left:0;background:#fff;border:1px solid #ccc;display:flex;flex-direction:column}
-.export-dropdown div button{border:none;background:none;padding:5px;cursor:pointer;text-align:left;width:100%}
+/* ===== History Section ===== */
+#historySection { background:#fff; margin:15px; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.history-actions { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; align-items:center; }
+#historyTable { width:100%; border-collapse:collapse; font-size:14px; }
+#historyTable th, #historyTable td { border:1px solid #ccc; padding:6px; text-align:left; }
+#historyTable th { background:#eee; }
+#historyTable tr:nth-child(even) { background:#f9f9f9; }
+#historyTable tr:hover { background:#f1f1f1; }
+#historyTable td button { padding:4px 6px; font-size:12px; }
 
-/* ===== Sidebar & Charts ===== */
-#sidebar{position:fixed;top:0;right:0;width:250px;height:100%;background:#fff;box-shadow:-2px 0 5px rgba(0,0,0,0.2);padding:15px;z-index:200;transition:0.3s}
-#chartSection{z-index:100}
-#sidebar.hidden{display:none}
-.sidebar-header{display:flex;justify-content:space-between;align-items:center}
-.sidebar-header button{font-size:20px}
-button:hover{opacity:0.8}
+/* ===== Chart Section ===== */
+#chartSection { background:#fff; margin:15px; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+#chartSection canvas { max-width:100%; margin-bottom:15px; }
+
+/* ===== Sidebar ===== */
+#sidebar { position:fixed; top:0; right:-260px; width:250px; height:100%; background:#fff; box-shadow:-2px 0 5px rgba(0,0,0,0.2); padding:15px; transition:0.3s; z-index:900; }
+#sidebar.show { right:0; }
+.sidebar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.sidebar-header button { font-size:20px; background:none; }
+#sidebar ul { list-style:none; padding:0; }
+#sidebar ul li { margin-bottom:10px; }
+#sidebar ul li button { width:100%; text-align:left; background:#f0f0f0; padding:8px 10px; }
+
+/* ===== Export Dropdown ===== */
+.export-dropdown { position:relative; display:inline-block; }
+#exportOptions { position:absolute; top:35px; left:0; background:#fff; border:1px solid #ccc; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.15); }
+#exportOptions button { display:block; width:100%; padding:8px 10px; text-align:left; background:none; border:none; }
+
+/* ===== Dark Mode ===== */
+body.dark { background:#1c1c1c; color:#eee; }
+body.dark header { background:#111; }
+body.dark .card { background:#222; color:#fff; }
+body.dark #formSection, body.dark #historySection, body.dark #chartSection { background:#222; color:#fff; }
+body.dark #sidebar { background:#222; color:#fff; }
+body.dark #historyTable th, body.dark #historyTable td { border-color:#444; }
 
 /* ===== Responsive ===== */
 @media(max-width:600px){
-  .summary-cards{flex-direction:column}
-  .card{width:90%;margin:auto}
-  #historyTable{font-size:12px}
+  .summary-cards { flex-direction:column; }
+  #historyTable { font-size:12px; }
 }
