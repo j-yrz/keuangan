@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   // ===== Helper =====
   const el = id => document.getElementById(id);
   const formatRupiah = num => {
@@ -164,50 +163,44 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== Dark Mode =====
   themeToggle?.addEventListener("click",()=>document.body.classList.toggle("dark"));
 
-  // ===== Sidebar & Menu Fix =====
-  menuBtn?.addEventListener("click",()=>{
-    sidebar.classList.toggle("show");
-    historySection.classList.add("hidden");
-    chartSection.classList.add("hidden");
-  });
+  // ===== Sidebar & Menu =====
+  menuBtn?.addEventListener("click",()=>sidebar.classList.toggle("show"));
   closeMenu?.addEventListener("click",()=>sidebar.classList.remove("show"));
   openHistoryBtn?.addEventListener("click",()=>{
-    historySection.classList.remove("hidden");
-    homeSection.classList.add("hidden");
-    chartSection.classList.add("hidden");
-    sidebar.classList.remove("show");
+    historySection.classList.remove("hidden"); homeSection.classList.add("hidden"); chartSection.classList.add("hidden"); sidebar.classList.remove("show");
   });
   openChartSidebar?.addEventListener("click",()=>{
-    chartSection.classList.remove("hidden");
-    homeSection.classList.add("hidden");
-    historySection.classList.add("hidden");
-    sidebar.classList.remove("show");
+    chartSection.classList.remove("hidden"); homeSection.classList.add("hidden"); historySection.classList.add("hidden"); sidebar.classList.remove("show");
   });
-  el("closeHistory")?.addEventListener("click",()=>{historySection.classList.add("hidden"); homeSection.classList.remove("hidden");});
-  el("closeChart")?.addEventListener("click",()=>{chartSection.classList.add("hidden"); homeSection.classList.remove("hidden");});
-
-  // ===== Format Rupiah saat mengetik =====
-  amountEl?.addEventListener("input",e=>{ const pos=e.target.selectionStart; const val=e.target.value.replace(/[^0-9]/g,''); e.target.value=formatRupiah(val); e.target.selectionEnd=pos; });
-
-  // ===== Tambah / Hapus Anggota =====
-  addMemberBtn?.addEventListener("click",()=>{ const name=prompt("Nama anggota baru:"); if(name){ members.push(name); saveData(); }});
-  removeMemberBtn?.addEventListener("click",()=>{ const name=memberEl.value; if(name&&confirm("Hapus anggota "+name+"?")){ members=members.filter(m=>m!==name); saveData(); }});
 
   // ===== Charts =====
   let pieChart,lineChart;
   function renderCharts(){
-    if(!pieCtx || !lineCtx) return;
+    if(!pieCtx||!lineCtx) return;
     const incomeSum=transactions.filter(t=>t.type==="pemasukan").reduce((a,b)=>a+Number(b.amount),0);
     const expenseSum=transactions.filter(t=>t.type==="pengeluaran").reduce((a,b)=>a+Number(b.amount),0);
     if(pieChart) pieChart.destroy();
     pieChart=new Chart(pieCtx,{type:"pie",data:{labels:["Pemasukan","Pengeluaran"],datasets:[{data:[incomeSum,expenseSum],backgroundColor:["#2d7d2d","#d12d2d"]}]},options:{responsive:true}});
-    const labels=[...new Set(transactions.map(t=>t.date.split(" ")[0]))];
-    const balanceArr=[]; let bal=0; labels.forEach(l=>{ const tDay=transactions.filter(t=>t.date.startsWith(l)); tDay.forEach(tt=>bal+=tt.type==="pemasukan"?Number(tt.amount):-Number(tt.amount)); balanceArr.push(bal);});
+    const labels=[...new Set(transactions.map(t=>t.date.split(" ")[0]))]; const balanceArr=[]; let bal=0;
+    labels.forEach(l=>{ const tDay=transactions.filter(t=>t.date.startsWith(l)); tDay.forEach(tt=>bal+=tt.type==="pemasukan"?Number(tt.amount):-Number(tt.amount)); balanceArr.push(bal);});
     if(lineChart) lineChart.destroy();
     lineChart=new Chart(lineCtx,{type:"line",data:{labels:labels,datasets:[{label:"Saldo",data:balanceArr,borderColor:"#2d7d2d",fill:false}]},options:{responsive:true}});
   }
 
+  // ===== Tambah/Hapus Anggota =====
+  addMemberBtn?.addEventListener("click",()=>{ const name=prompt("Nama anggota baru:"); if(name){ members.push(name); saveData(); }});
+  removeMemberBtn?.addEventListener("click",()=>{ const name=memberEl.value; if(name&&confirm("Hapus anggota "+name+"?")){ members=members.filter(m=>m!==name); saveData(); }});
+
+  // ===== Format Rupiah saat mengetik =====
+  amountEl?.addEventListener("input",e=>{ const pos=e.target.selectionStart; e.target.value=formatRupiah(e.target.value); e.target.selectionEnd=pos; });
+
+  // ===== Tambah Catatan =====
+  addBtn?.addEventListener("click",()=>{
+    form.reset(); editId=null; formTitle.textContent="Tambah Transaksi";
+    homeSection.classList.add("hidden"); formSection.classList.remove("hidden");
+  });
+  cancelForm?.addEventListener("click",()=>{ form.reset(); formSection.classList.add("hidden"); homeSection.classList.remove("hidden"); });
+
   // ===== Init =====
   saveData();
-
 });
