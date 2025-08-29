@@ -1,275 +1,24 @@
-// ================== INIT ==================
-document.addEventListener("DOMContentLoaded", () => {
-  const dateInput = document.getElementById("dateInput");
-  dateInput.value = new Date().toISOString().slice(0, 10);
+// ==================== Data ====================
+let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+let members = JSON.parse(localStorage.getItem("members")) || ["Umum"];
+let editingIndex = null;
 
-  window.members = JSON.parse(localStorage.getItem("members")) || [];
-  window.transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-  window.memberSelect = document.getElementById("memberSelect");
+// ==================== Elemen ====================
+const addBtn = document.getElementById("addBtn");
+const addModal = document.getElementById("addModal");
+const historyContainer = document.getElementById("historyContainer");
+const chartContainer = document.getElementById("chartContainer");
+const restoreContainer = document.getElementById("restoreContainer");
+const menuIcon = document.getElementById("menuIcon");
+const sideMenu = document.getElementById("sideMenu");
+const memberSelect = document.getElementById("memberSelect");
+const historyTable = document.getElementById("historyTable").querySelector("tbody");
 
-  renderMembers();
-  renderDashboard();
+const pemasukanEl = document.getElementById("pemasukan");
+const pengeluaranEl = document.getElementById("pengeluaran");
+const saldoEl = document.getElementById("saldo");
 
-  // Input jumlah otomatis format rupiah
-  const amountInput = document.getElementById("amountInput");
-  amountInput.addEventListener("input", function () {
-    let cursorPos = this.selectionStart;
-    let value = this.value.replace(/\D/g, "");
-    this.value = value ? Number(value).toLocaleString("id-ID") : "";
-    this.setSelectionRange(cursorPos, cursorPos);
-  });
-
-  // Tombol simpan transaksi
-  document.getElementById("saveBtn").addEventListener("click", addTransaction);
-});
-
-// ================== MENU TOGGLE ==================
-function toggleMenu() {
-  const menu = document.getElementById("sideMenu");
-  menu.style.left = menu.style.left === "0px" ? "-250px" : "0px";
-
-  // Sembunyikan tombol tambah saat menu dibuka
-  document.getElementById("addBtn").style.display =
-    menu.style.left === "0px" ? "none" : "block";
-}
-
-// ================== MODALS ==================
-function openForm(editIndex = null) {
-  const modal = document.getElementById("formModal");
-  modal.classList.add("show");
-
-  // Sembunyikan tombol tambah di beranda
-  document.getElementById("addBtn").style.display = "none";
-
-  if (editIndex !== null) {
-    const t = transactions[editIndex];
-    document.getElementById("dateInput").value = t.date;
-    document.getElementById("descInput").value = t.desc;
-    document.getElementById("amountInput").value = t.amount.toLocaleString("id-ID");
-    document.getElementById("typeInput").value = t.type;
-    document.getElementById("memberSelect").value = t.member;
-
-    document.getElementById("saveBtn").onclick = function () {
-      updateTransaction(editIndex);
-    };
-  } else {
-    clearForm();
-    document.getElementById("saveBtn").onclick = addTransaction;
-  }
-}
-
-function closeForm() {
-  document.getElementById("formModal").classList.remove("show");
-  document.getElementById("addBtn").style.display = "block"; // tampil lagi di home
-}
-
-function showHistory() {
-  document.getElementById("historyContainer").classList.add("show");
-  document.getElementById("addBtn").style.display = "none";
-  renderHistory();
-}
-function closeHistory() {
-  document.getElementById("historyContainer").classList.remove("show");
-  document.getElementById("addBtn").style.display = "block";
-}
-
-function showChart() {
-  document.getElementById("chartContainer").classList.add("show");
-  document.getElementById("addBtn").style.display = "none";
-  renderChart();
-}
-function closeChart() {
-  document.getElementById("chartContainer").classList.remove("show");
-  document.getElementById("addBtn").style.display = "block";
-}
-
-function showRestore() {
-  document.getElementById("restoreContainer").classList.add("show");
-  document.getElementById("addBtn").style.display = "none";
-}
-function closeRestore() {
-  document.getElementById("restoreContainer").classList.remove("show");
-  document.getElementById("addBtn").style.display = "block";
-}
-
-// ================== TRANSACTIONS ==================
-function addTransaction() {
-  const date = document.getElementById("dateInput").value;
-  const desc = document.getElementById("descInput").value.trim();
-  const amount = parseRupiah(document.getElementById("amountInput").value);
-  const member = memberSelect.value;
-  const type = document.getElementById("typeInput").value;
-
-  if (!desc || amount <= 0) {
-    alert("Isi semua field!");
-    return;
-  }
-
-  transactions.push({
-    date,
-    desc,
-    amount,
-    member,
-    type,
-    edited: false,
-  });
-
-  saveData();
-  renderDashboard();
-  renderHistory();
-
-  closeForm();
-  alert("Transaksi tersimpan!");
-}
-
-function updateTransaction(index) {
-  const t = transactions[index];
-  t.date = document.getElementById("dateInput").value;
-  t.desc = document.getElementById("descInput").value.trim();
-  t.amount = parseRupiah(document.getElementById("amountInput").value);
-  t.member = memberSelect.value;
-  t.type = document.getElementById("typeInput").value;
-  t.edited = true;
-
-  saveData();
-  renderDashboard();
-  renderHistory();
-
-  closeForm();
-  alert("Transaksi berhasil diedit!");
-}
-
-// ================== MEMBERS ==================
-function memberOptionChange() {
-  const val = memberSelect.value;
-  if (val === "+") {
-    const name = prompt("Masukkan nama anggota baru:").trim();
-    if (name && !members.includes(name)) {
-      members.push(name);
-      saveData();
-      renderMembers();
-    }
-  } else if (val === "-") {
-    if (members.length === 0) {
-      alert("Tidak ada anggota!");
-      return;
-    }
-    const name = prompt(`Pilih anggota untuk dihapus:\n${members.join(", ")}`);
-    if (name && members.includes(name)) {
-      if (confirm(`Hapus anggota "${name}"?`)) {
-        members = members.filter((m) => m !== name);
-        saveData();
-        renderMembers();
-      }
-    }
-  }
-}
-
-// ================== RENDER FUNCTIONS ==================
-function renderDashboard() {
-  let income = transactions
-    .filter((t) => t.type === "pemasukan")
-    .reduce((a, b) => a + b.amount, 0);
-  let expense = transactions
-    .filter((t) => t.type === "pengeluaran")
-    .reduce((a, b) => a + b.amount, 0);
-  let balance = income - expense;
-
-  document.getElementById("incomeCard").innerText = formatRupiah(income);
-  document.getElementById("expenseCard").innerText = formatRupiah(expense);
-  document.getElementById("balanceCard").innerText = formatRupiah(balance);
-}
-
-function renderHistory() {
-  const tbody = document.querySelector("#historyTable tbody");
-  tbody.innerHTML = "";
-
-  transactions.forEach((t, i) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><input type="checkbox" class="chkDel" data-index="${i}" onchange="toggleDeleteSelected()"></td>
-      <td>${t.date}</td>
-      <td>${t.desc}</td>
-      <td>${t.member || ""}</td>
-      <td>${t.type}</td>
-      <td>${formatRupiah(t.amount)}</td>
-      <td>${t.edited ? "✏️ Diedit" : "-"}</td>
-      <td>
-        <button onclick="openForm(${i})">✏️ Edit</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  toggleDeleteSelected();
-}
-
-function renderMembers() {
-  memberSelect.innerHTML =
-    '<option value="" disabled selected>Pilih anggota</option>';
-  members.forEach((m) => {
-    memberSelect.innerHTML += `<option value="${m}">${m}</option>`;
-  });
-  memberSelect.innerHTML += `
-    <option value="+">+ Tambah Anggota</option>
-    <option value="-">- Hapus Anggota</option>`;
-}
-
-function renderChart() {
-  const totalIncome = transactions
-    .filter((t) => t.type === "pemasukan")
-    .reduce((a, b) => a + b.amount, 0);
-  const totalExpense = transactions
-    .filter((t) => t.type === "pengeluaran")
-    .reduce((a, b) => a + b.amount, 0);
-
-  document.getElementById(
-    "incomeBar"
-  ).style.width = `${Math.min(totalIncome / 1000, 100)}%`;
-  document.getElementById(
-    "expenseBar"
-  ).style.width = `${Math.min(totalExpense / 1000, 100)}%`;
-}
-
-// ================== DELETE ==================
-function toggleDeleteSelected() {
-  const checked = document.querySelectorAll(".chkDel:checked").length;
-  document.getElementById("deleteSelectedBtn").style.display =
-    checked > 0 ? "inline-block" : "none";
-}
-
-function deleteSelected() {
-  if (!confirm("Hapus transaksi terpilih?")) return;
-
-  const checked = document.querySelectorAll(".chkDel:checked");
-  let indexes = Array.from(checked).map((c) => Number(c.dataset.index));
-  transactions = transactions.filter((_, i) => !indexes.includes(i));
-
-  saveData();
-  renderDashboard();
-  renderHistory();
-}
-
-// ================== EXPORT CSV ==================
-function exportCSV() {
-  let csv =
-    "Tanggal,Deskripsi,Anggota,Jenis,Pemasukan,Pengeluaran,Status\n";
-  transactions.forEach((t) => {
-    csv += `${t.date},${t.desc},${t.member || ""},${t.type},${
-      t.type === "pemasukan" ? t.amount : ""
-    },${t.type === "pengeluaran" ? t.amount : ""},${
-      t.edited ? "Diedit" : "Original"
-    }\n`;
-  });
-  let blob = new Blob([csv], { type: "text/csv" });
-  let url = window.URL.createObjectURL(blob);
-  let a = document.createElement("a");
-  a.href = url;
-  a.download = "laporan_keuangan.csv";
-  a.click();
-}
-
-// ================== HELPERS ==================
+// ==================== Helper ====================
 function formatRupiah(angka) {
   return "Rp " + angka.toLocaleString("id-ID");
 }
@@ -280,12 +29,154 @@ function saveData() {
   localStorage.setItem("transactions", JSON.stringify(transactions));
   localStorage.setItem("members", JSON.stringify(members));
 }
-function clearForm() {
-  document.getElementById("dateInput").value = new Date()
-    .toISOString()
-    .slice(0, 10);
-  document.getElementById("descInput").value = "";
-  document.getElementById("amountInput").value = "";
-  document.getElementById("typeInput").value = "pemasukan";
-  document.getElementById("memberSelect").selectedIndex = 0;
+function renderMembers() {
+  memberSelect.innerHTML = '<option value="" disabled selected>Pilih anggota</option>';
+  members.forEach(m => {
+    memberSelect.innerHTML += `<option value="${m}">${m}</option>`;
+  });
+  memberSelect.innerHTML += `<option value="+">+ Tambah Anggota</option>`;
+  memberSelect.innerHTML += `<option value="-">- Hapus Anggota</option>`;
 }
+
+// ==================== Update Dashboard ====================
+function updateDashboard() {
+  let pemasukan = 0, pengeluaran = 0;
+  transactions.forEach(t => {
+    if (t.type === "pemasukan") pemasukan += t.amount;
+    else pengeluaran += t.amount;
+  });
+  let saldo = pemasukan - pengeluaran;
+  pemasukanEl.textContent = formatRupiah(pemasukan);
+  pengeluaranEl.textContent = formatRupiah(pengeluaran);
+  saldoEl.textContent = formatRupiah(saldo);
+}
+
+// ==================== Render History ====================
+function renderHistory() {
+  historyTable.innerHTML = "";
+  transactions.forEach((t, i) => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td><input type="checkbox" class="rowCheck" data-index="${i}"></td>
+      <td>${t.date}</td>
+      <td>${t.desc}</td>
+      <td>${t.member}</td>
+      <td>${t.type}</td>
+      <td>${formatRupiah(t.amount)}</td>
+      <td>
+        <button class="btn-edit" data-index="${i}">✏️</button>
+      </td>
+      <td>${t.edited ? "✎ Edited" : ""}</td>
+    `;
+
+    historyTable.appendChild(tr);
+  });
+
+  // event edit
+  document.querySelectorAll(".btn-edit").forEach(btn => {
+    btn.addEventListener("click", () => {
+      editingIndex = btn.dataset.index;
+      openEditModal(editingIndex);
+    });
+  });
+
+  // cekbox
+  document.querySelectorAll(".rowCheck").forEach(chk => {
+    chk.addEventListener("change", toggleDeleteSelectedBtn);
+  });
+}
+
+// ==================== Add Transaction ====================
+function openAddModal() {
+  addModal.style.display = "block";
+  document.getElementById("transactionForm").reset();
+  editingIndex = null;
+  addBtn.style.display = "none"; // sembunyikan tombol utama
+}
+function closeAddModal() {
+  addModal.style.display = "none";
+  addBtn.style.display = "block"; // tampilkan lagi tombol di beranda
+}
+document.getElementById("cancelBtn").addEventListener("click", closeAddModal);
+
+document.getElementById("transactionForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const desc = document.getElementById("desc").value;
+  const member = memberSelect.value;
+  const amount = parseInt(document.getElementById("amount").value);
+  const type = document.getElementById("type").value;
+  const date = new Date().toLocaleString();
+
+  if (editingIndex === null) {
+    transactions.push({ desc, member, amount, type, date, edited: false });
+  } else {
+    transactions[editingIndex] = { desc, member, amount, type, date, edited: true };
+  }
+
+  saveData();
+  updateDashboard();
+  renderHistory();
+  closeAddModal();
+});
+
+// ==================== Edit Transaction ====================
+function openEditModal(index) {
+  const t = transactions[index];
+  addModal.style.display = "block";
+  document.getElementById("desc").value = t.desc;
+  memberSelect.value = t.member;
+  document.getElementById("amount").value = t.amount;
+  document.getElementById("type").value = t.type;
+  editingIndex = index;
+  addBtn.style.display = "none";
+}
+
+// ==================== History Modal ====================
+document.getElementById("historyBtn").addEventListener("click", () => {
+  historyContainer.style.display = "block";
+  renderHistory();
+  addBtn.style.display = "none";
+});
+document.getElementById("closeHistory").addEventListener("click", () => {
+  historyContainer.style.display = "none";
+  addBtn.style.display = "block";
+});
+
+// ==================== Delete Selected ====================
+function toggleDeleteSelectedBtn() {
+  const anyChecked = document.querySelectorAll(".rowCheck:checked").length > 0;
+  document.getElementById("deleteSelected").style.display = anyChecked ? "inline-block" : "none";
+}
+document.getElementById("deleteSelected").addEventListener("click", () => {
+  const checked = document.querySelectorAll(".rowCheck:checked");
+  if (!checked.length) return;
+  if (!confirm("Apakah Anda sudah melakukan export sebelum menghapus?")) return;
+  const indexes = [...checked].map(c => parseInt(c.dataset.index)).sort((a, b) => b - a);
+  indexes.forEach(i => transactions.splice(i, 1));
+  saveData();
+  updateDashboard();
+  renderHistory();
+  toggleDeleteSelectedBtn();
+});
+
+// ==================== Menu ====================
+menuIcon.addEventListener("click", () => {
+  sideMenu.classList.toggle("active");
+  addBtn.style.display = sideMenu.classList.contains("active") ? "none" : "block";
+});
+
+// ==================== Chart & Restore (opsional) ====================
+document.getElementById("closeChart").addEventListener("click", () => {
+  chartContainer.style.display = "none";
+  addBtn.style.display = "block";
+});
+document.getElementById("closeRestore").addEventListener("click", () => {
+  restoreContainer.style.display = "none";
+  addBtn.style.display = "block";
+});
+
+// ==================== Init ====================
+renderMembers();
+updateDashboard();
+renderHistory();
