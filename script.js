@@ -1,67 +1,54 @@
-// =======================
-// Variabel global
-// =======================
+// ====== Data & Storage ======
 let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
 let members = JSON.parse(localStorage.getItem("members")) || ["Umum"];
-let editingIndex = null;
 
-// Elemen DOM
 const addBtn = document.getElementById("addBtn");
 const addModal = document.getElementById("addModal");
 const closeAdd = document.getElementById("closeAdd");
 const saveBtn = document.getElementById("saveBtn");
 
-const sideMenu = document.getElementById("sideMenu");
 const menuIcon = document.getElementById("menuIcon");
+const sideMenu = document.getElementById("sideMenu");
 const closeMenu = document.getElementById("closeMenu");
+const openHistory = document.getElementById("openHistory");
 
 const historyContainer = document.getElementById("historyContainer");
-const historyContent = document.getElementById("historyContent");
 const closeHistory = document.getElementById("closeHistory");
+const historyContent = document.getElementById("historyContent");
 
-const memberSelect = document.getElementById("memberSelect");
 const typeSelect = document.getElementById("typeSelect");
+const memberSelect = document.getElementById("memberSelect");
 const amountInput = document.getElementById("amountInput");
 const noteInput = document.getElementById("noteInput");
 
 const totalIncome = document.getElementById("totalIncome");
 const totalExpense = document.getElementById("totalExpense");
 const balance = document.getElementById("balance");
+const modalTitle = document.getElementById("modalTitle");
 
-// =======================
-// Helper functions
-// =======================
+let editIndex = null;
+
+// ====== Helper ======
 function formatRupiah(angka) {
   return "Rp " + angka.toLocaleString("id-ID");
 }
-
-function parseRupiah(str) {
-  return Number(str.replace(/[^0-9]/g, "")) || 0;
-}
-
 function saveData() {
   localStorage.setItem("transactions", JSON.stringify(transactions));
   localStorage.setItem("members", JSON.stringify(members));
 }
-
 function renderMembers() {
-  memberSelect.innerHTML =
-    '<option value="" disabled selected>Pilih anggota</option>';
-  members.forEach((m) => {
+  memberSelect.innerHTML = '<option value="" disabled selected>Pilih anggota</option>';
+  members.forEach(m => {
     memberSelect.innerHTML += `<option value="${m}">${m}</option>`;
   });
-  memberSelect.innerHTML +=
-    `<option value="+">+ Tambah Anggota</option>` +
-    `<option value="-">- Hapus Anggota</option>`;
+  memberSelect.innerHTML += `<option value="+">+ Tambah Anggota</option>`;
+  memberSelect.innerHTML += `<option value="-">- Hapus Anggota</option>`;
 }
 
-// =======================
-// Summary
-// =======================
+// ====== Update Ringkasan ======
 function updateSummary() {
-  let income = 0,
-    expense = 0;
-  transactions.forEach((t) => {
+  let income = 0, expense = 0;
+  transactions.forEach(t => {
     if (t.type === "income") income += t.amount;
     else expense += t.amount;
   });
@@ -70,34 +57,71 @@ function updateSummary() {
   balance.textContent = formatRupiah(income - expense);
 }
 
-// =======================
-// Modal
-// =======================
-function openModal() {
-  addModal.classList.add("show");
+// ====== Render History ======
+function renderHistory() {
+  if (transactions.length === 0) {
+    historyContent.innerHTML = "<p>Belum ada transaksi</p>";
+    return;
+  }
+  let html = `
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Jenis</th>
+            <th>Anggota</th>
+            <th>Jumlah</th>
+            <th>Catatan</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  transactions.forEach((t, i) => {
+    html += `
+      <tr>
+        <td>${t.type === "income" ? "Pemasukan" : "Pengeluaran"}</td>
+        <td>${t.member}</td>
+        <td>${formatRupiah(t.amount)}</td>
+        <td>${t.note || "-"}</td>
+        <td>${t.edited ? "✏️ Diedit" : "-"}</td>
+        <td>
+          <button onclick="editTransaction(${i})">✏️</button>
+          <button onclick="deleteTransaction(${i})">🗑️</button>
+        </td>
+      </tr>
+    `;
+  });
+  html += "</tbody></table></div>";
+  historyContent.innerHTML = html;
 }
 
-function closeModal() {
-  addModal.classList.remove("show");
-  clearForm();
-  editingIndex = null;
-}
-
-function clearForm() {
+// ====== Tambah / Edit ======
+function resetForm() {
   typeSelect.value = "";
   memberSelect.value = "";
   amountInput.value = "";
   noteInput.value = "";
 }
 
-// =======================
-// Transaksi
-// =======================
-function addTransaction() {
+function openAddModal(edit = false) {
+  addModal.classList.add("show");
+  if (!edit) {
+    modalTitle.textContent = "Tambah Transaksi";
+    editIndex = null;
+    resetForm();
+  }
+}
+function closeAddModal() {
+  addModal.classList.remove("show");
+}
+
+function addOrEditTransaction() {
   const type = typeSelect.value;
-  const member = memberSelect.value;
-  const amount = parseRupiah(amountInput.value);
-  const note = noteInput.value.trim();
+  let member = memberSelect.value;
+  const amount = parseInt(amountInput.value);
+  const note = noteInput.value;
 
   if (!type || !member || !amount) {
     alert("Lengkapi semua field!");
@@ -105,136 +129,71 @@ function addTransaction() {
   }
 
   if (member === "+") {
-    const newMember = prompt("Nama anggota baru:");
+    const newMember = prompt("Masukkan nama anggota:");
     if (newMember) {
       members.push(newMember);
       saveData();
       renderMembers();
-    }
-    return;
-  } else if (member === "-") {
-    const delMember = prompt("Nama anggota yang ingin dihapus:");
+      member = newMember;
+    } else return;
+  }
+  if (member === "-") {
+    const delMember = prompt("Masukkan nama anggota yang ingin dihapus:");
     if (delMember && members.includes(delMember)) {
-      members = members.filter((m) => m !== delMember);
+      members = members.filter(m => m !== delMember);
       saveData();
       renderMembers();
+    } else {
+      alert("Anggota tidak ditemukan!");
     }
     return;
   }
 
-  const transaction = {
-    type,
-    member,
-    amount,
-    note,
-    date: new Date().toLocaleString("id-ID"),
-    edited: false,
-  };
-
-  if (editingIndex !== null) {
-    transaction.edited = true;
-    transactions[editingIndex] = transaction;
+  if (editIndex !== null) {
+    transactions[editIndex] = { type, member, amount, note, edited: true };
+    editIndex = null;
   } else {
-    transactions.push(transaction);
+    transactions.push({ type, member, amount, note, edited: false });
   }
 
   saveData();
   updateSummary();
   renderHistory();
-  closeModal();
+  closeAddModal();
+  resetForm();
 }
 
-// =======================
-// History
-// =======================
-function renderHistory() {
-  if (!historyContent) return;
-  historyContent.innerHTML = "";
-  if (transactions.length === 0) {
-    historyContent.innerHTML = "<p>Belum ada transaksi</p>";
-    return;
-  }
-
-  let table = `<div class="table-container"><table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Tanggal</th>
-          <th>Jenis</th>
-          <th>Anggota</th>
-          <th>Jumlah</th>
-          <th>Catatan</th>
-          <th>Status</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>`;
-
-  transactions.forEach((t, i) => {
-    table += `
-      <tr>
-        <td><input type="checkbox" class="deleteCheck" data-index="${i}"></td>
-        <td>${t.date}</td>
-        <td>${t.type === "income" ? "Pemasukan" : "Pengeluaran"}</td>
-        <td>${t.member}</td>
-        <td>${formatRupiah(t.amount)}</td>
-        <td>${t.note || "-"}</td>
-        <td>${t.edited ? "✏️ Edit" : "-"}</td>
-        <td>
-          <button onclick="editTransaction(${i})">✏️</button>
-        </td>
-      </tr>
-    `;
-  });
-
-  table += "</tbody></table></div>";
-  historyContent.innerHTML = table;
-}
-
-// =======================
-// Edit transaksi
-// =======================
-function editTransaction(index) {
-  const t = transactions[index];
-  if (!t) return;
-
-  editingIndex = index;
+// ====== Edit & Hapus ======
+window.editTransaction = function(i) {
+  const t = transactions[i];
+  openAddModal(true);
+  modalTitle.textContent = "Edit Transaksi";
   typeSelect.value = t.type;
   memberSelect.value = t.member;
   amountInput.value = t.amount;
   noteInput.value = t.note;
-
-  openModal();
-}
-
-// =======================
-// Event Listeners
-// =======================
-document.addEventListener("DOMContentLoaded", () => {
-  renderMembers();
-  updateSummary();
-  renderHistory();
-});
-
-if (addBtn) addBtn.addEventListener("click", openModal);
-if (closeAdd) closeAdd.addEventListener("click", closeModal);
-if (saveBtn) saveBtn.addEventListener("click", addTransaction);
-
-if (menuIcon) {
-  menuIcon.addEventListener("click", () => {
-    sideMenu.classList.add("show");
-  });
-}
-if (closeMenu) {
-  closeMenu.addEventListener("click", () => {
-    sideMenu.classList.remove("show");
-  });
-}
-
-if (historyContainer) {
-  if (closeHistory) {
-    closeHistory.addEventListener("click", () => {
-      historyContainer.classList.remove("show");
-    });
+  editIndex = i;
+};
+window.deleteTransaction = function(i) {
+  if (confirm("Yakin ingin menghapus transaksi ini?")) {
+    transactions.splice(i, 1);
+    saveData();
+    updateSummary();
+    renderHistory();
   }
-}
+};
+
+// ====== Event Listeners ======
+addBtn.onclick = () => openAddModal();
+closeAdd.onclick = closeAddModal;
+saveBtn.onclick = addOrEditTransaction;
+
+menuIcon.onclick = () => sideMenu.classList.add("show");
+closeMenu.onclick = () => sideMenu.classList.remove("show");
+openHistory.onclick = () => { historyContainer.classList.add("show"); renderHistory(); };
+closeHistory.onclick = () => historyContainer.classList.remove("show");
+
+// ====== Init ======
+renderMembers();
+updateSummary();
+renderHistory();
