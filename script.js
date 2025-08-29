@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   window.transactions = JSON.parse(localStorage.getItem("transactions"))||[];
   window.memberSelect = document.getElementById("memberSelect");
   renderMembers();
-  
+
   // Event input jumlah
   const amountInput = document.getElementById("amountInput");
   amountInput.addEventListener("input",function(e){
@@ -15,10 +15,11 @@ document.addEventListener("DOMContentLoaded",()=>{
     this.value=value?Number(value).toLocaleString("id-ID"):"";
     this.setSelectionRange(cursorPos,cursorPos);
   });
-  
+
   // Tombol simpan
   document.getElementById("saveBtn").addEventListener("click", addTransaction);
   updateDashboard();
+  renderHistory();
   renderChart();
 });
 
@@ -42,7 +43,10 @@ function closeForm(){ document.getElementById("formModal").classList.remove("sho
 // Helper functions
 function formatRupiah(angka){ return "Rp "+angka.toLocaleString("id-ID"); }
 function parseRupiah(str){ return Number(str.replace(/[^0-9]/g,""))||0; }
-function saveData(){ localStorage.setItem("transactions", JSON.stringify(transactions)); localStorage.setItem("members", JSON.stringify(members)); }
+function saveData(){ 
+  localStorage.setItem("transactions", JSON.stringify(transactions)); 
+  localStorage.setItem("members", JSON.stringify(members)); 
+}
 function renderMembers(){ 
   memberSelect.innerHTML = '<option value="" disabled selected>Pilih anggota</option>'; 
   members.forEach(m=>{ memberSelect.innerHTML += `<option value="${m}">${m}</option>`; }); 
@@ -56,7 +60,14 @@ function addTransaction(){
   const amount=parseRupiah(document.getElementById("amountInput").value);
   const member=memberSelect.value;
   if(!desc||amount<=0){ showToast("Isi semua field!"); return; }
-  transactions.push({date,desc,amount,member,type:document.getElementById("typeInput").value,source:document.getElementById("sourceInput").value});
+  transactions.push({
+    date,
+    desc,
+    amount,
+    member,
+    type:document.getElementById("typeInput").value,
+    source:document.getElementById("sourceInput").value
+  });
   saveData();
   showToast("Transaksi tersimpan!");
   closeForm();
@@ -102,7 +113,7 @@ function exportCSV(){
   a.click();
 }
 
-// Dashboard & Chart
+// Dashboard & History
 function updateDashboard(){
   let income=0,expense=0;
   transactions.forEach(t=>{ if(t.type==="pemasukan") income+=t.amount; else if(t.type==="pengeluaran") expense+=t.amount; });
@@ -116,22 +127,50 @@ function renderHistory(){
   tbody.innerHTML="";
   transactions.forEach((t,i)=>{
     const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${i+1}</td><td>${t.date}</td><td>${t.desc}</td><td>${t.member||""}</td><td>${t.source||""}</td><td>${t.type==="pemasukan"?formatRupiah(t.amount):""}</td><td>${t.type==="pengeluaran"?formatRupiah(t.amount):""}</td><td class="statusCell">-</td><td><button onclick="deleteTransaction(${i})">Hapus</button></td>`;
+    tr.innerHTML=`<td>${i+1}</td>
+      <td>${t.date}</td>
+      <td>${t.desc}</td>
+      <td>${t.member||""}</td>
+      <td>${t.source||""}</td>
+      <td>${t.type==="pemasukan"?formatRupiah(t.amount):""}</td>
+      <td>${t.type==="pengeluaran"?formatRupiah(t.amount):""}</td>
+      <td class="statusCell">-</td>
+      <td><button onclick="deleteTransaction(${i})">Hapus</button></td>`;
     tbody.appendChild(tr);
   });
 }
 
-function deleteTransaction(index){ if(confirm("Hapus transaksi ini?")){ transactions.splice(index,1); saveData(); updateDashboard(); renderHistory(); renderChart(); } }
+function deleteTransaction(index){
+  if(confirm("Hapus transaksi ini?")){
+    transactions.splice(index,1); 
+    saveData(); 
+    updateDashboard(); 
+    renderHistory(); 
+    renderChart();
+  }
+}
 
 // Chart.js
 let chartInstance=null;
 function renderChart(){
-  const ctx=document.getElementById("incomeExpenseChart").getContext("2d");
+  const canvas=document.getElementById("incomeExpenseChart");
+  if(!canvas) return;
+  const ctx=canvas.getContext("2d");
   const labels=transactions.map(t=>t.date);
   const dataIncome=transactions.map(t=>t.type==="pemasukan"?t.amount:0);
   const dataExpense=transactions.map(t=>t.type==="pengeluaran"?t.amount:0);
   if(chartInstance) chartInstance.destroy();
-  chartInstance=new Chart(ctx,{type:"bar",data:{labels:labels,datasets:[{label:"Pemasukan",data:dataIncome,backgroundColor:"#28a745"},{label:"Pengeluaran",data:dataExpense,backgroundColor:"#dc3545"}]},options:{responsive:true,plugins:{legend:{position:"top"}}}});
+  chartInstance=new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels:labels,
+      datasets:[
+        {label:"Pemasukan", data:dataIncome, backgroundColor:"#28a745"},
+        {label:"Pengeluaran", data:dataExpense, backgroundColor:"#dc3545"}
+      ]
+    },
+    options:{responsive:true, plugins:{legend:{position:"top"}}}
+  });
 }
 
 // Toast
