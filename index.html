@@ -1,94 +1,304 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laporan Keuangan Ultimate</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Keuangan</title>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; font-family:Arial, sans-serif; }
+    body { background:linear-gradient(135deg,#f0f4ff,#e0f0ff); min-height:100vh; overflow-x:hidden; }
+
+    /* Header */
+    .home-header { display:flex; justify-content:space-between; align-items:center; padding:15px 20px; background:#007bff; color:#fff; position:fixed; top:0; left:0; right:0; z-index:100; box-shadow:0 2px 5px rgba(0,0,0,0.2);}
+    .home-header h1 { font-size:1.4em; }
+    .menu-icon { cursor:pointer; font-size:1.5em; }
+
+    /* Dashboard */
+    .home-dashboard { display:flex; justify-content:center; gap:15px; margin-top:80px; flex-wrap:wrap; padding:10px; }
+    .card { flex:1 1 150px; background:#fff; padding:15px; border-radius:10px; text-align:center; font-weight:bold; box-shadow:0 3px 10px rgba(0,0,0,0.15); transition:.3s; }
+    .card strong { display:block; margin-bottom:5px; }
+    .card:hover { transform:translateY(-5px); box-shadow:0 6px 15px rgba(0,0,0,0.2); }
+    .income { border-left:6px solid #28a745; }
+    .expense { border-left:6px solid #dc3545; }
+    .balance { border-left:6px solid #007bff; }
+
+    /* Floating button */
+    .btn-floating { position:fixed; bottom:30px; right:30px; background:#28a745; color:white; border-radius:50px; border:none; cursor:pointer; font-size:1.2em; box-shadow:0 5px 15px rgba(0,0,0,0.3); padding:15px 20px; transition:transform .3s; z-index:500; }
+    .btn-floating:hover { transform:scale(1.1) translateY(-3px); }
+
+    /* Side menu */
+    .side-menu { position:fixed; top:0; left:-250px; width:250px; height:100%; background:#fff; box-shadow:2px 0 10px rgba(0,0,0,0.2); z-index:200; transition:left .3s; padding-top:80px; }
+    .side-menu ul { list-style:none; }
+    .side-menu li { padding:15px 20px; cursor:pointer; border-bottom:1px solid #eee; }
+    .side-menu li:hover { background:#f0f0f0; }
+    .side-menu .close-btn { background:#dc3545; color:#fff; text-align:center; padding:10px; cursor:pointer; }
+
+    /* Modal & container */
+    .modal, .history-container { display:none; position:fixed; z-index:300; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.4); }
+    .modal.show, .history-container.show { display:block; }
+    .modal-content { background:#fff; margin:10% auto; padding:20px; border-radius:8px; width:90%; max-width:400px; box-shadow:0 5px 15px rgba(0,0,0,0.3); }
+    .modal-content input, .modal-content select { width:100%; padding:10px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc; }
+    .btn-add { background:#007bff; color:white; border:none; width:100%; padding:10px; margin-bottom:5px; cursor:pointer; }
+    .btn-cancel { background:#dc3545; color:white; border:none; width:100%; padding:10px; cursor:pointer; }
+
+    /* History */
+    .history-content { background:#fff; margin:5% auto; padding:20px; border-radius:8px; width:95%; max-width:800px; box-shadow:0 5px 15px rgba(0,0,0,0.3); overflow-x:auto; }
+    .btn-close { background:#dc3545; color:white; border:none; padding:8px 12px; cursor:pointer; margin-bottom:10px; border-radius:4px; }
+    table { width:100%; border-collapse:collapse; font-size:.9em; }
+    th, td { border:1px solid #ddd; padding:6px; text-align:center; }
+    th { background:#28a745; color:white; }
+    .action-icons { display:flex; gap:10px; justify-content:center; }
+    .action-icons i { cursor:pointer; }
+    .status { font-size:0.8em; color:#555; }
+
+    .delete-selected { display:none; margin-top:10px; background:#dc3545; color:#fff; padding:8px 12px; border:none; border-radius:4px; cursor:pointer; }
+
+    @media(max-width:600px){
+      .home-dashboard { flex-direction:column; gap:10px; }
+      .home-header h1 { font-size:1.2em; }
+      .history-content { width:98%; padding:10px; }
+      table { font-size:0.8em; }
+    }
+  </style>
 </head>
 <body>
-
-<header class="home-header">
-  <div class="menu-icon" onclick="toggleMenu()">☰</div>
-  <h1>Laporan Keuangan</h1>
-</header>
-
-<section class="home-dashboard">
-  <div class="card income small">💰<strong>Pemasukan</strong><span id="homeIncome">Rp 0</span></div>
-  <div class="card expense small">🛑<strong>Pengeluaran</strong><span id="homeExpense">Rp 0</span></div>
-  <div class="card balance small">🏦<strong>Saldo</strong><span id="homeBalance">Rp 0</span></div>
-</section>
-
-<button class="btn-floating" id="btnAddNote" onclick="openForm()">➕ Tambah Catatan</button>
-
-<nav id="sideMenu" class="side-menu">
-  <button class="btn-close-small" onclick="toggleMenu()">❌</button>
-  <ul>
-    <li onclick="showHistory()">📋 History Transaksi</li>
-    <li onclick="showChart()">📊 Diagram Pemasukan & Pengeluaran</li>
-    <li onclick="showRestore()">🔄 Restore Backup</li>
-  </ul>
-</nav>
-
-<div id="formModal" class="modal">
-  <div class="modal-content animate-slide">
-    <h3 id="formTitle">Tambah Transaksi</h3>
-    <input type="date" id="dateInput">
-    <input type="text" id="descInput" placeholder="Deskripsi">
-    <input type="text" id="amountInput" placeholder="Jumlah">
-    <select id="memberSelect" onchange="memberOptionChange()"></select>
-    <input type="text" id="sourceInput" placeholder="Sumber Dana">
-    <select id="typeInput">
-      <option value="pemasukan">Pemasukan</option>
-      <option value="pengeluaran">Pengeluaran</option>
-    </select>
-    <button class="btn-add" id="saveBtn">Simpan</button>
-    <button class="btn-cancel" onclick="closeForm()">Batal</button>
+  <div class="home-header">
+    <h1>Keuangan</h1>
+    <div class="menu-icon" onclick="toggleMenu()">☰</div>
   </div>
-</div>
 
-<div id="historyContainer" class="history-container animate-slide">
-  <button class="btn-close" onclick="closeHistory()">❌</button>
-  <h3>History Transaksi</h3>
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-          <th>No</th>
-          <th>Tanggal</th>
-          <th>Deskripsi</th>
-          <th>Anggota</th>
-          <th>Sumber Dana</th>
-          <th>Pemasukan</th>
-          <th>Pengeluaran</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="transactionTable"></tbody>
-    </table>
+  <!-- Dashboard -->
+  <div class="home-dashboard">
+    <div class="card income"><strong>Pemasukan</strong><span id="totalIncome">Rp 0</span></div>
+    <div class="card expense"><strong>Pengeluaran</strong><span id="totalExpense">Rp 0</span></div>
+    <div class="card balance"><strong>Saldo</strong><span id="balance">Rp 0</span></div>
   </div>
-  <button class="btn-exp" onclick="deleteSelected()">Hapus Terpilih</button>
-  <button class="btn-exp" onclick="exportCSV()">Export CSV</button>
-</div>
 
-<div id="chartContainer" class="chart-container animate-slide">
-  <button class="btn-close" onclick="closeChart()">❌ Tutup</button>
-  <h3>Diagram Pemasukan & Pengeluaran</h3>
-  <canvas id="incomeExpenseChart"></canvas>
-</div>
+  <!-- Floating Add Button -->
+  <button class="btn-floating" id="addNoteBtn" onclick="openForm()">+ Catatan</button>
 
-<div id="restoreContainer" class="restore-container animate-slide">
-  <button class="btn-close" onclick="closeRestore()">❌ Tutup</button>
-  <h3>Restore Backup Harian</h3>
-  <select id="backupSelect"></select>
-  <button onclick="restoreBackupUI()">Restore</button>
-</div>
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <div class="close-btn" onclick="toggleMenu()">Tutup ✖</div>
+    <ul>
+      <li onclick="showHistory()">📜 History Transaksi</li>
+      <li onclick="exportCSV()">📂 Export CSV</li>
+    </ul>
+  </div>
 
-<div id="toast"></div>
-<div id="editTooltip"></div>
+  <!-- Form Modal -->
+  <div class="modal" id="formModal">
+    <div class="modal-content">
+      <input type="date" id="dateInput">
+      <input type="text" id="descInput" placeholder="Deskripsi">
+      <input type="text" id="amountInput" placeholder="Jumlah">
+      <select id="typeInput">
+        <option value="pemasukan">Pemasukan</option>
+        <option value="pengeluaran">Pengeluaran</option>
+      </select>
+      <select id="memberSelect" onchange="memberOptionChange()"></select>
+      <button class="btn-add" id="saveBtn">Simpan</button>
+      <button class="btn-cancel" onclick="closeForm()">Batal</button>
+    </div>
+  </div>
 
-<script src="script.js"></script>
+  <!-- History Container -->
+  <div class="history-container" id="historyContainer">
+    <div class="history-content">
+      <button class="btn-close" onclick="closeHistory()">Tutup</button>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Pilih</th><th>Tanggal</th><th>Deskripsi</th><th>Anggota</th><th>Jenis</th><th>Jumlah</th><th>Status</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="historyTable"></tbody>
+        </table>
+      </div>
+      <button class="delete-selected" id="deleteSelectedBtn" onclick="deleteSelected()">Hapus Terpilih</button>
+    </div>
+  </div>
+
+  <script>
+    // Data
+    let members = JSON.parse(localStorage.getItem("members"))||[];
+    let transactions = JSON.parse(localStorage.getItem("transactions"))||[];
+    let editIndex = null;
+
+    // On load
+    document.addEventListener("DOMContentLoaded",()=>{
+      document.getElementById("dateInput").value=new Date().toISOString().slice(0,10);
+      renderMembers();
+      renderSummary();
+
+      // Input rupiah
+      const amountInput=document.getElementById("amountInput");
+      amountInput.addEventListener("input",function(){
+        let pos=this.selectionStart;
+        let value=this.value.replace(/\\D/g,'');
+        this.value=value?Number(value).toLocaleString("id-ID"):"";
+        this.setSelectionRange(pos,pos);
+      });
+
+      document.getElementById("saveBtn").addEventListener("click",saveTransaction);
+    });
+
+    // Toggle menu
+    function toggleMenu(){
+      const menu=document.getElementById("sideMenu");
+      const btn=document.getElementById("addNoteBtn");
+      if(menu.style.left==="0px"){
+        menu.style.left="-250px";
+        btn.style.display="block";
+      } else {
+        menu.style.left="0px";
+        btn.style.display="none";
+      }
+    }
+
+    // Form open/close
+    function openForm(){
+      document.getElementById("formModal").classList.add("show");
+      document.getElementById("addNoteBtn").style.display="none";
+    }
+    function closeForm(){
+      document.getElementById("formModal").classList.remove("show");
+      document.getElementById("addNoteBtn").style.display="block";
+      clearForm();
+    }
+    function clearForm(){
+      editIndex=null;
+      document.getElementById("descInput").value="";
+      document.getElementById("amountInput").value="";
+      document.getElementById("typeInput").value="pemasukan";
+      document.getElementById("memberSelect").selectedIndex=0;
+    }
+
+    // Save transaction
+    function saveTransaction(){
+      const date=document.getElementById("dateInput").value;
+      const desc=document.getElementById("descInput").value.trim();
+      const amount=parseRupiah(document.getElementById("amountInput").value);
+      const member=document.getElementById("memberSelect").value;
+      const type=document.getElementById("typeInput").value;
+
+      if(!desc||amount<=0){ alert("Lengkapi data!"); return; }
+
+      if(editIndex!==null){
+        transactions[editIndex]={...transactions[editIndex], date,desc,amount,member,type, edited:true};
+      } else {
+        transactions.push({date,desc,amount,member,type,edited:false});
+      }
+
+      saveData();
+      renderSummary();
+      closeForm();
+    }
+
+    // Members
+    function renderMembers(){
+      const sel=document.getElementById("memberSelect");
+      sel.innerHTML='<option value="" disabled selected>Pilih anggota</option>';
+      members.forEach(m=> sel.innerHTML+=`<option value="${m}">${m}</option>`);
+      sel.innerHTML+=`<option value="+">+ Tambah Anggota</option><option value="-">- Hapus Anggota</option>`;
+    }
+    function memberOptionChange(){
+      const val=document.getElementById("memberSelect").value;
+      if(val==="+"){
+        const name=prompt("Nama anggota baru:");
+        if(name && !members.includes(name)){ members.push(name); saveData(); renderMembers(); }
+      } else if(val==="-"){
+        const name=prompt("Pilih anggota hapus:\\n"+members.join(", "));
+        if(name && members.includes(name)){
+          if(confirm("Hapus "+name+"?")){ members=members.filter(m=>m!==name); saveData(); renderMembers(); }
+        }
+      }
+    }
+
+    // History
+    function showHistory(){
+      document.getElementById("historyContainer").classList.add("show");
+      document.getElementById("addNoteBtn").style.display="none";
+      renderHistory();
+    }
+    function closeHistory(){
+      document.getElementById("historyContainer").classList.remove("show");
+      document.getElementById("addNoteBtn").style.display="block";
+    }
+    function renderHistory(){
+      const tbody=document.getElementById("historyTable");
+      tbody.innerHTML="";
+      transactions.forEach((t,i)=>{
+        tbody.innerHTML+=`
+          <tr>
+            <td><input type="checkbox" class="rowCheck" data-idx="${i}" onchange="toggleDeleteBtn()"></td>
+            <td>${t.date}</td>
+            <td>${t.desc}</td>
+            <td>${t.member||""}</td>
+            <td>${t.type}</td>
+            <td>Rp ${t.amount.toLocaleString("id-ID")}</td>
+            <td class="status">${t.edited?"Edited":""}</td>
+            <td class="action-icons">
+              <i onclick="editTransaction(${i})">✏️</i>
+            </td>
+          </tr>`;
+      });
+      toggleDeleteBtn();
+    }
+
+    // Edit
+    function editTransaction(i){
+      editIndex=i;
+      const t=transactions[i];
+      document.getElementById("dateInput").value=t.date;
+      document.getElementById("descInput").value=t.desc;
+      document.getElementById("amountInput").value=t.amount.toLocaleString("id-ID");
+      document.getElementById("typeInput").value=t.type;
+      document.getElementById("memberSelect").value=t.member;
+      document.getElementById("historyContainer").classList.remove("show");
+      openForm();
+    }
+
+    // Delete
+    function toggleDeleteBtn(){
+      const checks=document.querySelectorAll(".rowCheck:checked");
+      document.getElementById("deleteSelectedBtn").style.display=checks.length>0?"inline-block":"none";
+    }
+    function deleteSelected(){
+      if(confirm("Sudah export data sebelum hapus?")) exportCSV();
+      if(confirm("Hapus transaksi terpilih?")){
+        const checks=document.querySelectorAll(".rowCheck:checked");
+        const idxs=[...checks].map(c=>parseInt(c.dataset.idx));
+        transactions=transactions.filter((_,i)=>!idxs.includes(i));
+        saveData(); renderHistory(); renderSummary();
+      }
+    }
+
+    // Export
+    function exportCSV(){
+      let csv="Tanggal,Deskripsi,Anggota,Jenis,Jumlah\\n";
+      transactions.forEach(t=>{
+        csv+=`${t.date},${t.desc},${t.member||""},${t.type},${t.amount}\\n`;
+      });
+      const blob=new Blob([csv],{type:"text/csv"});
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);
+      a.download="laporan_keuangan.csv";
+      a.click();
+    }
+
+    // Helpers
+    function formatRupiah(n){ return "Rp "+n.toLocaleString("id-ID"); }
+    function parseRupiah(s){ return Number(s.replace(/[^0-9]/g,""))||0; }
+    function saveData(){ localStorage.setItem("transactions",JSON.stringify(transactions)); localStorage.setItem("members",JSON.stringify(members)); }
+    function renderSummary(){
+      let income=0, expense=0;
+      transactions.forEach(t=>{ if(t.type==="pemasukan") income+=t.amount; else expense+=t.amount; });
+      document.getElementById("totalIncome").textContent=formatRupiah(income);
+      document.getElementById("totalExpense").textContent=formatRupiah(expense);
+      document.getElementById("balance").textContent=formatRupiah(income-expense);
+    }
+  </script>
 </body>
 </html>
