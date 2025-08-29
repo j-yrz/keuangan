@@ -3,35 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laporan Keuangan - Home</title>
+<title>Laporan Keuangan Ultimate</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Header Home -->
 <header class="home-header">
   <div class="menu-icon" onclick="toggleMenu()">☰</div>
   <h1>Laporan Keuangan</h1>
 </header>
 
-<!-- Home Content -->
-<main class="home-main">
-  <p class="welcome-text">Selamat datang! Kelola catatan keuanganmu dengan mudah.</p>
-  <button class="btn-add-note" onclick="openForm()">➕ Tambah Catatan</button>
-</main>
+<section class="home-dashboard">
+  <div class="card income">💰<strong>Pemasukan</strong><span id="homeIncome">Rp 0</span></div>
+  <div class="card expense">🛑<strong>Pengeluaran</strong><span id="homeExpense">Rp 0</span></div>
+  <div class="card balance">🏦<strong>Saldo</strong><span id="homeBalance">Rp 0</span></div>
+</section>
 
-<!-- Side Menu / Hamburger -->
+<button class="btn-floating" onclick="openForm()">➕</button>
+
 <nav id="sideMenu" class="side-menu">
   <ul>
     <li onclick="showHistory()">📋 History Transaksi</li>
     <li onclick="showChart()">📊 Diagram Pemasukan & Pengeluaran</li>
+    <li onclick="showRestore()">🔄 Restore Backup</li>
   </ul>
 </nav>
 
-<!-- Modal Form Transaksi -->
+<!-- Modal Tambah / Edit -->
 <div id="formModal" class="modal">
-  <div class="modal-content">
-    <h3>Tambah Transaksi</h3>
+  <div class="modal-content animate-slide">
+    <h3 id="formTitle">Tambah Transaksi</h3>
     <input type="date" id="dateInput">
     <input type="text" id="descInput" placeholder="Deskripsi">
     <input type="text" id="amountInput" placeholder="Jumlah">
@@ -41,13 +42,12 @@
       <option value="pemasukan">Pemasukan</option>
       <option value="pengeluaran">Pengeluaran</option>
     </select>
-    <button class="btn-add" onclick="addTransaction()">Simpan</button>
+    <button class="btn-add" id="saveBtn">Simpan</button>
     <button class="btn-cancel" onclick="closeForm()">Batal</button>
   </div>
 </div>
 
-<!-- History & Chart Container -->
-<div id="historyContainer" class="history-container">
+<div id="historyContainer" class="history-container animate-slide">
   <button class="btn-close" onclick="closeHistory()">❌ Tutup</button>
   <h3>History Transaksi</h3>
   <div class="table-container">
@@ -61,21 +61,31 @@
           <th>Sumber Dana</th>
           <th>Pemasukan</th>
           <th>Pengeluaran</th>
+          <th>Status</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody id="transactionTable"></tbody>
     </table>
   </div>
-  <button class="btn-exp" onclick="exportExcel()">Export CSV</button>
+  <button class="btn-exp" onclick="exportCSV()">Export CSV</button>
 </div>
 
-<!-- Chart Modal -->
-<div id="chartContainer" class="chart-container">
+<div id="chartContainer" class="chart-container animate-slide">
   <button class="btn-close" onclick="closeChart()">❌ Tutup</button>
   <h3>Diagram Pemasukan & Pengeluaran</h3>
   <div class="bar incomeBar" style="width:50%"></div>
   <div class="bar expenseBar" style="width:50%"></div>
 </div>
+
+<div id="restoreContainer" class="restore-container animate-slide">
+  <button class="btn-close" onclick="closeRestore()">❌ Tutup</button>
+  <h3>Restore Backup Harian</h3>
+  <select id="backupSelect"></select>
+  <button onclick="restoreBackupUI()">Restore</button>
+</div>
+
+<div id="editTooltip"></div>
 
 <script src="script.js"></script>
 </body>
