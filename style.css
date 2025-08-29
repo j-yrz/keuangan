@@ -1,32 +1,29 @@
-body { font-family: Arial,sans-serif; margin:0; padding:0; transition: background 0.3s, color 0.3s; }
-header { background:#2d7d2d; color:#fff; padding:10px; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:400; }
-header h1 { margin:0; font-size:20px; }
-.header-buttons button { margin-left:5px; background:none; border:none; color:#fff; font-size:24px; cursor:pointer; }
-.summary-cards { display:flex; justify-content:space-around; padding:10px; margin-top:10px; }
-.summary-cards .card { flex:1; margin:0 5px; background:#f0f0f0; padding:15px; border-radius:8px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-.primary-btn { background:#2d7d2d; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer; font-size:16px; }
-button { margin:5px; padding:8px 12px; border:none; border-radius:5px; cursor:pointer; }
-.hidden { display:none; }
-#formSection,#historySection,#chartSection { padding:15px; background:white; margin:10px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-#transactionForm { display:flex; flex-direction:column; gap:10px; }
-#transactionForm input, #transactionForm select { padding:8px; }
-.member-buttons { display:flex; gap:5px; margin-bottom:10px; }
-.form-actions { display:flex; gap:5px; }
-#historyTable { width:100%; border-collapse:collapse; margin-top:10px; font-size:14px; }
-#historyTable th, #historyTable td { border:1px solid #ccc; padding:5px; text-align:left; }
-#historyTable th { background:#eee; }
-.history-filters { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:5px; }
-#sidebar { position:fixed; top:0; right:-260px; width:250px; height:100%; background:white; box-shadow:-2px 0 5px rgba(0,0,0,0.2); padding:15px; z-index:300; transition:right 0.3s; }
-#sidebar.show { right:0; }
-.sidebar-header { display:flex; justify-content:space-between; align-items:center; }
-.sidebar-header button { font-size:20px; }
-.history-actions { margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
-.export-dropdown { position:relative; }
-#exportOptions { position:absolute; top:100%; left:0; background:#fff; border:1px solid #ccc; display:flex; flex-direction:column; }
-#exportOptions button { padding:5px 10px; width:100%; text-align:left; }
-.status-btn { cursor:pointer; padding:2px 5px; font-size:12px; }
-.dark { background:#121212; color:#eee; }
-.dark header { background:#1b1b1b; color:#eee; }
-.dark .summary-cards .card { background:#1e1e1e; color:#eee; }
-.dark #formSection,#dark #historySection,#dark #chartSection { background:#1b1b1b; color:#eee; }
-@media(max-width:600px){ .summary-cards { flex-direction:column; } #historyTable{ font-size:12px; } }
+body{margin:0;padding:0;font-family:Arial,sans-serif;transition:0.3s}
+header{background:#2d7d2d;color:#fff;padding:10px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:20px}
+.top-menu button{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;margin-left:5px}
+.summary-cards{display:flex;justify-content:space-around;padding:10px;flex-wrap:wrap}
+.card{background:#f0f0f0;padding:15px;border-radius:8px;min-width:100px;text-align:center;margin:5px}
+.btn-main{background:#2d7d2d;color:#fff;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;font-size:16px;margin:10px}
+.hidden{display:none}
+#formSection,#historySection,#chartSection{padding:15px;background:#fff;transition:0.3s}
+#transactionForm{display:flex;flex-direction:column;gap:10px}
+#transactionForm input,#transactionForm select{padding:8px}
+.member-actions{display:flex;gap:5px;margin-top:5px}
+.form-buttons{display:flex;gap:10px;margin-top:10px}
+#historyTable{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+#historyTable th,#historyTable td{border:1px solid #ccc;padding:5px;text-align:left}
+#historyTable th{background:#eee}
+.history-actions{margin-top:10px;display:flex;gap:5px;align-items:center}
+.export-dropdown{position:relative}
+.export-dropdown div{position:absolute;top:30px;left:0;background:#fff;border:1px solid #ccc;display:flex;flex-direction:column}
+.export-dropdown div button{border:none;background:none;padding:5px;cursor:pointer;text-align:left;width:100%}
+#sidebar{position:fixed;top:0;right:0;width:250px;height:100%;background:#fff;box-shadow:-2px 0 5px rgba(0,0,0,0.2);padding:15px;z-index:200;transition:0.3s}
+#sidebar.hidden{display:none}
+.sidebar-header{display:flex;justify-content:space-between;align-items:center}
+.sidebar-header button{font-size:20px}
+button:hover{opacity:0.8}
+.dark{background:#222;color:#ddd}
+.dark .card{background:#333;color:#fff}
+.dark table{color:#ddd}
+@media(max-width:600px){.summary-cards{flex-direction:column}.card{width:90%;margin:auto}}
