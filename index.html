@@ -17,10 +17,27 @@
 
   main { padding:20px; max-width:600px; margin:0 auto; }
   h2 { color:#333; }
-  .transaction { margin-bottom:10px; padding:10px; border-radius:5px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); transition: all 0.3s; }
-  .transaction:hover { background:#f0f0f0; transform:translateX(5px); }
+
+  .transaction { margin-bottom:10px; padding:10px; border-radius:5px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); transition: all 0.3s; display:flex; justify-content:space-between; flex-direction:column; }
+  .transaction:hover { background:#f0f0f0; }
+  .transaction-header { display:flex; justify-content:space-between; align-items:center; }
+  .transaction .actions { display:flex; gap:5px; }
+  .transaction .delete { cursor:pointer; color:red; }
+  .transaction .edit { cursor:pointer; color:blue; }
+
+  .history { margin-top:5px; font-size:0.9em; color:#555; border-top:1px dashed #ccc; padding-top:5px; }
+
   button { padding:10px 15px; background:#2196F3; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:10px; transition: background 0.3s; }
   button:hover { background:#1976D2; }
+
+  /* Modal */
+  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:2000; }
+  .modal-content { background:white; padding:20px; border-radius:5px; width:90%; max-width:400px; animation:slideDown 0.3s; }
+  @keyframes slideDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+  .modal-content input, .modal-content select { width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px; }
+  .modal-content button { width:100%; }
+
+  canvas { margin-top:20px; }
 </style>
 </head>
 <body>
@@ -39,40 +56,167 @@
   <h2>Catatan Transaksi</h2>
   <div id="transactions"></div>
   <button id="addTransactionBtn">Tambah Transaksi</button>
+
+  <h2>Grafik Transaksi</h2>
+  <canvas id="transactionChart" width="400" height="200"></canvas>
 </main>
+
+<!-- Modal Input -->
+<div class="modal" id="transactionModal">
+  <div class="modal-content">
+    <h3 id="modalTitle">Tambah Transaksi</h3>
+    <select id="type">
+      <option value="">Pilih Jenis</option>
+      <option value="Pemasukan">Pemasukan</option>
+      <option value="Pengeluaran">Pengeluaran</option>
+    </select>
+    <input type="number" id="amount" placeholder="Jumlah" />
+    <input type="text" id="note" placeholder="Keterangan (opsional)" />
+    <button id="saveTransactionBtn">Simpan</button>
+  </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
   // Toggle menu mobile
   const menuToggle = document.getElementById('menuToggle');
   const navMenu = document.getElementById('navMenu');
-  menuToggle.addEventListener('click', () => {
-    navMenu.classList.toggle('show');
-  });
+  menuToggle.addEventListener('click', () => navMenu.classList.toggle('show'));
 
-  // Contoh transaksi
-  const transactions = [];
-  const transactionsDiv = document.getElementById('transactions');
+  // Modal
+  const modal = document.getElementById('transactionModal');
   const addBtn = document.getElementById('addTransactionBtn');
+  const saveBtn = document.getElementById('saveTransactionBtn');
+  const typeInput = document.getElementById('type');
+  const amountInput = document.getElementById('amount');
+  const noteInput = document.getElementById('note');
+  const modalTitle = document.getElementById('modalTitle');
+
+  addBtn.addEventListener('click', ()=>{
+    openModal();
+  });
+  modal.addEventListener('click', e => { if(e.target===modal) modal.style.display='none'; });
+
+  // Transactions array with localStorage
+  let transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+  let editingIndex = null;
+
+  function formatNumber(num) {
+    return Number(num).toLocaleString('id-ID');
+  }
 
   function renderTransactions() {
-    transactionsDiv.innerHTML = '';
-    transactions.forEach((t, i) => {
-      const div = document.createElement('div');
-      div.className = 'transaction';
-      div.textContent = `${t.type}: ${t.amount} - ${t.note}`;
-      transactionsDiv.appendChild(div);
+    const div = document.getElementById('transactions');
+    div.innerHTML = '';
+    transactions.forEach((t,i)=>{
+      const tDiv = document.createElement('div');
+      tDiv.className='transaction';
+      const header = document.createElement('div');
+      header.className = 'transaction-header';
+      const span = document.createElement('span');
+      span.textContent = `${t.type}: Rp ${formatNumber(t.amount)} - ${t.note}`;
+      const actions = document.createElement('div');
+      actions.className='actions';
+      const editBtn = document.createElement('span');
+      editBtn.className='edit';
+      editBtn.textContent='✎';
+      editBtn.addEventListener('click',()=>openModal(i));
+      const delBtn = document.createElement('span');
+      delBtn.className='delete';
+      delBtn.textContent='×';
+      delBtn.addEventListener('click',()=>{
+        transactions.splice(i,1);
+        localStorage.setItem('transactions', JSON.stringify(transactions));
+        renderTransactions();
+        updateChart();
+      });
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      header.appendChild(span);
+      header.appendChild(actions);
+      tDiv.appendChild(header);
+
+      // History
+      if(t.history && t.history.length>0){
+        const hDiv = document.createElement('div');
+        hDiv.className='history';
+        hDiv.innerHTML = t.history.map(h=>`[${h.date}] ${h.type}: Rp ${formatNumber(h.amount)} - ${h.note}`).join('<br>');
+        tDiv.appendChild(hDiv);
+      }
+
+      div.appendChild(tDiv);
     });
   }
 
-  addBtn.addEventListener('click', () => {
-    const type = prompt('Jenis (Pemasukan/Pengeluaran):');
-    if(!type) return;
-    const amount = prompt('Jumlah:');
-    if(!amount) return;
-    const note = prompt('Keterangan:') || '';
-    transactions.push({type, amount, note});
+  function openModal(index=null){
+    modal.style.display='flex';
+    if(index!==null){
+      editingIndex=index;
+      modalTitle.textContent='Edit Transaksi';
+      const t=transactions[index];
+      typeInput.value=t.type;
+      amountInput.value=t.amount;
+      noteInput.value=t.note;
+    } else {
+      editingIndex=null;
+      modalTitle.textContent='Tambah Transaksi';
+      typeInput.value=''; amountInput.value=''; noteInput.value='';
+    }
+  }
+
+  saveBtn.addEventListener('click', () => {
+    const type = typeInput.value;
+    const amount = amountInput.value;
+    const note = noteInput.value;
+    if(!type || !amount) return alert('Jenis dan jumlah wajib diisi!');
+    const now = new Date().toLocaleString('id-ID');
+    if(editingIndex!==null){
+      // Add to history
+      if(!transactions[editingIndex].history) transactions[editingIndex].history=[];
+      transactions[editingIndex].history.push({
+        type: transactions[editingIndex].type,
+        amount: transactions[editingIndex].amount,
+        note: transactions[editingIndex].note,
+        date: now
+      });
+      // Update transaction
+      transactions[editingIndex].type=type;
+      transactions[editingIndex].amount=amount;
+      transactions[editingIndex].note=note;
+    } else {
+      transactions.push({type, amount, note, history:[]});
+    }
+    localStorage.setItem('transactions', JSON.stringify(transactions));
     renderTransactions();
+    updateChart();
+    modal.style.display='none';
   });
+
+  // Chart
+  const ctx = document.getElementById('transactionChart').getContext('2d');
+  let chart;
+
+  function updateChart() {
+    const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
+    const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
+
+    const data = {
+      labels:['Pemasukan','Pengeluaran'],
+      datasets:[{
+        label:'Jumlah (Rp)',
+        data:[pemasukan,pengeluaran],
+        backgroundColor:['#4CAF50','#F44336']
+      }]
+    };
+
+    if(chart) chart.destroy();
+    chart = new Chart(ctx,{ type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{ display:false }, title:{ display:true, text:'Grafik Transaksi' } } } });
+  }
+
+  renderTransactions();
+  updateChart();
 </script>
 
 </body>
