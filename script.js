@@ -11,15 +11,15 @@ const memberSelect = document.getElementById("memberSelect");
 const tooltipDiv = document.getElementById("editTooltip");
 const saveBtn = document.getElementById("saveBtn");
 
-// =====================
-// FORMAT & PARSE RUPIAH
-// =====================
+/* ===================== */
+/* FORMAT & PARSE RUPIAH */
+/* ===================== */
 function formatRupiah(angka){ return "Rp "+angka.toLocaleString("id-ID"); }
 function parseRupiah(str){ return Number(str.replace(/[^0-9]/g,""))||0; }
 
-// =====================
-// RENDER MEMBERS
-// =====================
+/* ===================== */
+/* RENDER MEMBERS         */
+/* ===================== */
 function renderMembers(){
   memberSelect.innerHTML = '<option value="" disabled selected>Pilih anggota</option>';
   members.forEach(m=>memberSelect.innerHTML+=`<option value="${m}">${m}</option>`);
@@ -41,12 +41,13 @@ function memberOptionChange(){
   }
 }
 
-// =====================
-// OPEN / CLOSE FORM MODAL
-// =====================
+/* ===================== */
+/* OPEN / CLOSE FORM MODAL */
+/* ===================== */
 function openForm(index=null){
   const modal = document.getElementById("formModal");
   modal.style.display="block";
+  modal.classList.add("show");
   saveBtn.onclick = ()=>saveTransaction(index);
   if(index!==null){
     const t = transactions[index];
@@ -67,11 +68,15 @@ function openForm(index=null){
     document.getElementById("typeInput").value = "pemasukan";
   }
 }
-function closeForm(){ document.getElementById("formModal").style.display="none"; }
+function closeForm(){ 
+  const modal = document.getElementById("formModal");
+  modal.style.display="none";
+  modal.classList.remove("show");
+}
 
-// =====================
-// TAMBAH / EDIT TRANSAKSI
-// =====================
+/* ===================== */
+/* TAMBAH / EDIT TRANSAKSI */
+/* ===================== */
 function saveTransaction(index=null){
   const date = dateInput.value;
   const desc = document.getElementById("descInput").value.trim();
@@ -101,15 +106,13 @@ function saveTransaction(index=null){
   saveData(); updateHomeSummary(); renderTable(); closeForm();
 }
 
-// =====================
-// SAVE & BACKUP
-// =====================
+/* ===================== */
+/* SAVE & BACKUP          */
+/* ===================== */
 function saveData(){
   localStorage.setItem("transactions", JSON.stringify(transactions));
   localStorage.setItem("members", JSON.stringify(members));
 }
-
-// Backup harian otomatis
 function backupDaily(){
   const today = new Date().toISOString().slice(0,10);
   const backupKey = `backup_${today}`;
@@ -119,17 +122,20 @@ function backupDaily(){
 backupDaily();
 setInterval(backupDaily,24*60*60*1000);
 
-// =====================
-// RESTORE BACKUP
-// =====================
+/* ===================== */
+/* RESTORE BACKUP         */
 function showRestore(){
-  document.getElementById("restoreContainer").style.display="block";
+  const container = document.getElementById("restoreContainer");
+  container.style.display="block"; container.classList.add("show");
   const select = document.getElementById("backupSelect"); select.innerHTML="";
   for(let key in localStorage){
     if(key.startsWith("backup_")) select.innerHTML+=`<option value="${key}">${key.replace("backup_","")}</option>`;
   }
 }
-function closeRestore(){ document.getElementById("restoreContainer").style.display="none"; }
+function closeRestore(){
+  const container = document.getElementById("restoreContainer");
+  container.style.display="none"; container.classList.remove("show");
+}
 function restoreBackupUI(){
   const key=document.getElementById("backupSelect").value;
   if(!key){ alert("Pilih backup!"); return; }
@@ -141,17 +147,19 @@ function restoreBackupUI(){
   }
 }
 
-// =====================
-// SIDE MENU
-// =====================
+/* ===================== */
+/* SIDE MENU              */
 function toggleMenu(){
   const menu=document.getElementById("sideMenu");
   menu.style.left=(menu.style.left==="0px")?"-250px":"0px";
 }
+function showHistory(){ document.getElementById("historyContainer").classList.add("show"); }
+function closeHistory(){ document.getElementById("historyContainer").classList.remove("show"); }
+function showChart(){ document.getElementById("chartContainer").classList.add("show"); }
+function closeChart(){ document.getElementById("chartContainer").classList.remove("show"); }
 
-// =====================
-// RENDER HOME SUMMARY
-// =====================
+/* ===================== */
+/* HOME SUMMARY & CHART  */
 function updateHomeSummary(){
   const income=transactions.filter(t=>t.type==="pemasukan").reduce((a,b)=>a+b.amount,0);
   const expense=transactions.filter(t=>t.type==="pengeluaran").reduce((a,b)=>a+b.amount,0);
@@ -160,10 +168,16 @@ function updateHomeSummary(){
   document.getElementById("homeBalance").innerText=formatRupiah(income-expense);
   updateChart();
 }
+function updateChart(){
+  const income=transactions.filter(t=>t.type==='pemasukan').reduce((a,b)=>a+b.amount,0);
+  const expense=transactions.filter(t=>t.type==='pengeluaran').reduce((a,b)=>a+b.amount,0);
+  const total=income+expense||1;
+  document.querySelector(".incomeBar").style.width=(income/total*100)+"%";
+  document.querySelector(".expenseBar").style.width=(expense/total*100)+"%";
+}
 
-// =====================
-// HISTORY TABLE
-// =====================
+/* ===================== */
+/* HISTORY TABLE          */
 function renderTable(){
   const table=document.getElementById("transactionTable");
   table.innerHTML="";
@@ -183,9 +197,8 @@ function renderTable(){
   });
 }
 
-// =====================
-// TOOLTIP
-// =====================
+/* ===================== */
+/* TOOLTIP                */
 function showTooltip(e,index){
   const t=transactions[index];
   if(!t.editHistory||t.editHistory.length===0) return;
@@ -199,20 +212,8 @@ function showTooltip(e,index){
 }
 function hideTooltip(){ tooltipDiv.style.opacity="0"; setTimeout(()=>tooltipDiv.style.display="none",300); }
 
-// =====================
-// CHART
-// =====================
-function updateChart(){
-  const income=transactions.filter(t=>t.type==='pemasukan').reduce((a,b)=>a+b.amount,0);
-  const expense=transactions.filter(t=>t.type==='pengeluaran').reduce((a,b)=>a+b.amount,0);
-  const total=income+expense||1;
-  document.querySelector(".incomeBar").style.width=(income/total*100)+"%";
-  document.querySelector(".expenseBar").style.width=(expense/total*100)+"%";
-}
-
-// =====================
-// EXPORT CSV
-// =====================
+/* ===================== */
+/* EXPORT CSV             */
 function exportCSV(){
   let csv="Tanggal,Deskripsi,Anggota,Sumber Dana,Pemasukan,Pengeluaran\n";
   transactions.forEach(t=>{
@@ -224,9 +225,8 @@ function exportCSV(){
   a.href=url; a.download="laporan_keuangan.csv"; a.click();
 }
 
-// =====================
-// INIT
-// =====================
+/* ===================== */
+/* INIT                   */
 renderMembers();
 updateHomeSummary();
 renderTable();
