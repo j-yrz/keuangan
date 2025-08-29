@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== Init Members Dropdown =====
   function renderMembersDropdown() {
+    if (!memberEl || !filterMember) return;
     memberEl.innerHTML = "";
     filterMember.innerHTML = '<option value="">Semua Anggota</option>';
     members.forEach(m => {
@@ -51,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== Render History =====
   function renderHistory(){
     const tbody = document.querySelector("#historyTable tbody");
+    if(!tbody) return;
     tbody.innerHTML="";
     transactions.forEach((t,i)=>{
       const tr=document.createElement("tr");
@@ -151,20 +153,36 @@ document.addEventListener("DOMContentLoaded", () => {
   exportBtn?.addEventListener("click",()=>exportOptions.classList.toggle("hidden"));
   exportOptions?.querySelectorAll("button").forEach(btn=>btn.addEventListener("click",()=>{
     const type=btn.dataset.type; let data, blob, url, a;
-    if(type==="json"){ data=JSON.stringify(transactions,null,2); blob=new Blob([data],{type:"application/json"}); url=URL.createObjectURL(blob); a=document.createElement("a"); a.href=url; a.download="transactions.json"; a.click();}
-    else if(type==="csv"){ const header=["Tanggal","Jenis","Anggota","Keterangan","Jumlah","Status"]; const rows=transactions.map(t=>[t.date,t.type,t.member,t.desc,t.amount,t.status]); const csv=[header,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\\n"); blob=new Blob([csv],{type:"text/csv"}); url=URL.createObjectURL(blob); a=document.createElement("a"); a.href=url; a.download="transactions.csv"; a.click();}
-    else if(type==="xlsx"){ alert("Export Excel masih placeholder, gunakan CSV/JSON"); }
+    try {
+      if(type==="json"){ data=JSON.stringify(transactions,null,2); blob=new Blob([data],{type:"application/json"}); url=URL.createObjectURL(blob); a=document.createElement("a"); a.href=url; a.download="transactions.json"; a.click();}
+      else if(type==="csv"){ const header=["Tanggal","Jenis","Anggota","Keterangan","Jumlah","Status"]; const rows=transactions.map(t=>[t.date,t.type,t.member,t.desc,t.amount,t.status]); const csv=[header,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n"); blob=new Blob([csv],{type:"text/csv"}); url=URL.createObjectURL(blob); a=document.createElement("a"); a.href=url; a.download="transactions.csv"; a.click();}
+      else if(type==="xlsx"){ alert("Export Excel masih placeholder, gunakan CSV/JSON"); }
+    } catch(e){console.error("Export error:",e);}
     exportOptions.classList.add("hidden");
   }));
 
   // ===== Dark Mode =====
   themeToggle?.addEventListener("click",()=>document.body.classList.toggle("dark"));
 
-  // ===== Sidebar & Menu =====
-  menuBtn?.addEventListener("click",()=>sidebar.classList.add("show"));
+  // ===== Sidebar & Menu Fix =====
+  menuBtn?.addEventListener("click",()=>{
+    sidebar.classList.toggle("show");
+    historySection.classList.add("hidden");
+    chartSection.classList.add("hidden");
+  });
   closeMenu?.addEventListener("click",()=>sidebar.classList.remove("show"));
-  openHistoryBtn?.addEventListener("click",()=>{historySection.classList.remove("hidden"); homeSection.classList.add("hidden"); chartSection.classList.add("hidden"); sidebar.classList.remove("show");});
-  openChartSidebar?.addEventListener("click",()=>{chartSection.classList.remove("hidden"); homeSection.classList.add("hidden"); historySection.classList.add("hidden"); sidebar.classList.remove("show");});
+  openHistoryBtn?.addEventListener("click",()=>{
+    historySection.classList.remove("hidden");
+    homeSection.classList.add("hidden");
+    chartSection.classList.add("hidden");
+    sidebar.classList.remove("show");
+  });
+  openChartSidebar?.addEventListener("click",()=>{
+    chartSection.classList.remove("hidden");
+    homeSection.classList.add("hidden");
+    historySection.classList.add("hidden");
+    sidebar.classList.remove("show");
+  });
   el("closeHistory")?.addEventListener("click",()=>{historySection.classList.add("hidden"); homeSection.classList.remove("hidden");});
   el("closeChart")?.addEventListener("click",()=>{chartSection.classList.add("hidden"); homeSection.classList.remove("hidden");});
 
@@ -181,10 +199,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!pieCtx || !lineCtx) return;
     const incomeSum=transactions.filter(t=>t.type==="pemasukan").reduce((a,b)=>a+Number(b.amount),0);
     const expenseSum=transactions.filter(t=>t.type==="pengeluaran").reduce((a,b)=>a+Number(b.amount),0);
-    if(pieChart) pieChart.destroy(); pieChart=new Chart(pieCtx,{type:"pie",data:{labels:["Pemasukan","Pengeluaran"],datasets:[{data:[incomeSum,expenseSum],backgroundColor:["#2d7d2d","#d12d2d"]}]},options:{responsive:true}});
+    if(pieChart) pieChart.destroy();
+    pieChart=new Chart(pieCtx,{type:"pie",data:{labels:["Pemasukan","Pengeluaran"],datasets:[{data:[incomeSum,expenseSum],backgroundColor:["#2d7d2d","#d12d2d"]}]},options:{responsive:true}});
     const labels=[...new Set(transactions.map(t=>t.date.split(" ")[0]))];
     const balanceArr=[]; let bal=0; labels.forEach(l=>{ const tDay=transactions.filter(t=>t.date.startsWith(l)); tDay.forEach(tt=>bal+=tt.type==="pemasukan"?Number(tt.amount):-Number(tt.amount)); balanceArr.push(bal);});
-    if(lineChart) lineChart.destroy(); lineChart=new Chart(lineCtx,{type:"line",data:{labels:labels,datasets:[{label:"Saldo",data:balanceArr,borderColor:"#2d7d2d",fill:false}]},options:{responsive:true}});
+    if(lineChart) lineChart.destroy();
+    lineChart=new Chart(lineCtx,{type:"line",data:{labels:labels,datasets:[{label:"Saldo",data:balanceArr,borderColor:"#2d7d2d",fill:false}]},options:{responsive:true}});
   }
 
   // ===== Init =====
