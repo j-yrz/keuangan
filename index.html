@@ -34,7 +34,6 @@
   <button id="addBtn" class="btn-main">+ Tambah Catatan</button>
 </main>
 
-<!-- Form Transaksi -->
 <section id="formSection" class="hidden">
   <h2 id="formTitle">Tambah Transaksi</h2>
   <form id="transactionForm">
@@ -46,9 +45,11 @@
     </label>
     <label>Anggota:
       <select id="memberSelect"></select>
-      <button type="button" id="addMember">➕</button>
-      <button type="button" id="removeMember">❌</button>
     </label>
+    <div class="member-actions">
+      <button type="button" id="addMember">➕ Tambah Anggota</button>
+      <button type="button" id="removeMember">❌ Hapus Anggota</button>
+    </div>
     <label>Keterangan:
       <input type="text" id="desc" required>
     </label>
@@ -60,7 +61,6 @@
   </form>
 </section>
 
-<!-- History -->
 <section id="historySection" class="hidden">
   <h2>History Transaksi</h2>
   <div class="filter-section">
@@ -100,7 +100,6 @@
   </div>
 </section>
 
-<!-- Grafik -->
 <section id="chartSection" class="hidden">
   <h2>Grafik Keuangan</h2>
   <canvas id="pieChart"></canvas>
@@ -108,7 +107,6 @@
   <button id="closeChart">Tutup</button>
 </section>
 
-<!-- Sidebar -->
 <aside id="sidebar" class="hidden">
   <div class="sidebar-header">
     <h2>Menu</h2>
