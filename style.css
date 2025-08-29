@@ -1,0 +1,20 @@
+body { font-family: Arial, sans-serif; margin:0; padding:0; }
+header { background:#2d7d2d; color:#fff; padding:10px; display:flex; justify-content:space-between; align-items:center; }
+header h1 { margin:0; font-size:20px; }
+header button { background:none; border:none; color:#fff; font-size:24px; cursor:pointer; }
+.summary { display:flex; justify-content:space-around; padding:10px; background:#f0f0f0; }
+button { margin:5px; padding:10px; border:none; border-radius:5px; cursor:pointer; }
+#addBtn { background:#2d7d2d; color:white; font-size:16px; }
+.hidden { display:none; }
+#formSection, #historySection { padding:15px; background:white; }
+#transactionForm { display:flex; flex-direction:column; gap:10px; }
+#transactionForm input, #transactionForm select { padding:8px; }
+#historyTable { width:100%; border-collapse:collapse; margin-top:10px; font-size:14px; }
+#historyTable th, #historyTable td { border:1px solid #ccc; padding:5px; text-align:left; }
+#historyTable th { background:#eee; }
+#sidebar { position:fixed; top:0; right:0; width:250px; height:100%; background:white; box-shadow:-2px 0 5px rgba(0,0,0,0.2); padding:15px; z-index:200; }
+#sidebar.hidden { display:none; }
+.sidebar-header { display:flex; justify-content:space-between; align-items:center; }
+.sidebar-header button { font-size:20px; }
+.history-actions { margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; }
+@media(max-width:600px){ #historyTable{ font-size:12px; } }
