@@ -19,8 +19,10 @@
   <div class="card balance small">🏦<strong>Saldo</strong><span id="homeBalance">Rp 0</span></div>
 </section>
 
+<!-- Floating Button -->
 <button class="btn-floating" onclick="openForm()">➕</button>
 
+<!-- Side Menu -->
 <nav id="sideMenu" class="side-menu">
   <ul>
     <li onclick="showHistory()">📋 History Transaksi</li>
@@ -42,11 +44,12 @@
       <option value="pemasukan">Pemasukan</option>
       <option value="pengeluaran">Pengeluaran</option>
     </select>
-    <button class="btn-add" id="saveBtn">Simpan</button>
+    <button class="btn-add" id="saveBtn" onclick="addTransaction()">Simpan</button>
     <button class="btn-cancel" onclick="closeForm()">Batal</button>
   </div>
 </div>
 
+<!-- History Container -->
 <div id="historyContainer" class="history-container animate-slide">
   <button class="btn-close" onclick="closeHistory()">❌ Tutup</button>
   <h3>History Transaksi</h3>
@@ -71,6 +74,7 @@
   <button class="btn-exp" onclick="exportCSV()">Export CSV</button>
 </div>
 
+<!-- Chart Container -->
 <div id="chartContainer" class="chart-container animate-slide">
   <button class="btn-close" onclick="closeChart()">❌ Tutup</button>
   <h3>Diagram Pemasukan & Pengeluaran</h3>
@@ -78,6 +82,7 @@
   <div class="bar expenseBar" style="width:50%"></div>
 </div>
 
+<!-- Restore Backup -->
 <div id="restoreContainer" class="restore-container animate-slide">
   <button class="btn-close" onclick="closeRestore()">❌ Tutup</button>
   <h3>Restore Backup Harian</h3>
@@ -85,6 +90,7 @@
   <button onclick="restoreBackupUI()">Restore</button>
 </div>
 
+<!-- Tooltip -->
 <div id="editTooltip"></div>
 
 <script src="script.js"></script>
