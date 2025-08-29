@@ -8,7 +8,7 @@ nav a { padding:10px; color:white; text-decoration:none; border-bottom:1px solid
 nav a:hover { background: rgba(255,255,255,0.2); }
 @keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
 
-main { padding:20px; max-width:600px; margin:0 auto; }
+main { padding:20px; max-width:800px; margin:0 auto; }
 section { margin-bottom:40px; }
 h2 { color:#333; }
 
@@ -28,12 +28,11 @@ form button:hover { background:#1976D2; }
 #filterContainer button { background:#2196F3; color:white; border:none; cursor:pointer; transition:0.3s; }
 #filterContainer button:hover { background:#1976D2; }
 
-/* Transactions */
-.transaction { margin-bottom:10px; padding:10px; border-radius:5px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); display:flex; justify-content:space-between; flex-direction:column; }
-.transaction-header { display:flex; justify-content:space-between; align-items:center; }
-.transaction .actions { display:flex; gap:10px; }
-.transaction .edit { cursor:pointer; color:blue; }
-.transaction .status-btn { padding:2px 5px; font-size:0.8em; cursor:pointer; background:#eee; border:none; border-radius:3px; }
+/* Transactions Table */
+table { width:100%; border-collapse: collapse; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+th, td { padding:10px; border:1px solid #ddd; text-align:left; }
+th { background:#2196F3; color:white; }
+td button { padding:2px 5px; margin-right:3px; cursor:pointer; }
 
 /* Export Options */
 #exportOptions.hidden { display:none; }
