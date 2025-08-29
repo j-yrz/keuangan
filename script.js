@@ -5,8 +5,12 @@ menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
 document.querySelectorAll('nav a').forEach(link=>{
   link.addEventListener('click', e=>{
     e.preventDefault();
-    document.querySelector(link.getAttribute('href')).scrollIntoView({behavior:'smooth'});
+    const target = document.querySelector(link.getAttribute('href'));
+    document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
+    if(target) target.style.display='block';
+    target.scrollIntoView({behavior:'smooth'});
     navMenu.classList.remove('show');
+    if(link.getAttribute('href') === '#grafik') updateChart();
   });
 });
 
@@ -29,7 +33,7 @@ const cardSaldo = document.getElementById('card-saldo');
 const cardPemasukan = document.getElementById('card-pemasukan');
 const cardPengeluaran = document.getElementById('card-pengeluaran');
 
-// Anggota
+const transactionAnggota = document.getElementById('transactionAnggota');
 const anggotaForm = document.getElementById('anggotaForm');
 const anggotaList = document.getElementById('anggotaList');
 const anggotaName = document.getElementById('anggotaName');
@@ -61,7 +65,8 @@ function renderTransactions(){
 
     const tDiv = document.createElement('div'); tDiv.className='transaction';
     const header = document.createElement('div'); header.className='transaction-header';
-    const span = document.createElement('span'); span.textContent = `${i+1}. ${t.type}: Rp ${formatNumber(t.amount)} - ${t.note} (${t.date})`;
+    const span = document.createElement('span'); 
+    span.textContent = `${i+1}. ${t.type}: Rp ${formatNumber(t.amount)} - ${t.note} [${t.anggota}] (${t.date}) - ${t.deskripsi} - Sumber: ${t.sumberDana}`;
 
     const actions = document.createElement('div'); actions.className='actions';
     const editBtn = document.createElement('span'); editBtn.className='edit'; editBtn.textContent='✎';
@@ -70,9 +75,12 @@ function renderTransactions(){
       document.getElementById('type').value = t.type;
       document.getElementById('amount').value = t.amount;
       document.getElementById('note').value = t.note;
+      document.getElementById('transactionDate').value = t.date.split(',')[0];
+      document.getElementById('deskripsi').value = t.deskripsi;
+      document.getElementById('sumberDana').value = t.sumberDana;
+      transactionAnggota.value = t.anggota;
     });
 
-    // Status edit button
     const statusBtn = document.createElement('button'); statusBtn.className='status-btn';
     statusBtn.textContent='Status';
     statusBtn.addEventListener('click', ()=>{
@@ -83,12 +91,9 @@ function renderTransactions(){
       }
     });
 
-    actions.appendChild(editBtn);
-    actions.appendChild(statusBtn);
-
+    actions.appendChild(editBtn); actions.appendChild(statusBtn);
     header.appendChild(span); header.appendChild(actions);
     tDiv.appendChild(header);
-
     transactionsDiv.appendChild(tDiv);
   });
   updateSummary();
@@ -100,15 +105,19 @@ form.addEventListener('submit', e=>{
   const type = document.getElementById('type').value;
   const amount = document.getElementById('amount').value;
   const note = document.getElementById('note').value;
+  const date = document.getElementById('transactionDate').value;
+  const deskripsi = document.getElementById('deskripsi').value;
+  const sumberDana = document.getElementById('sumberDana').value;
+  const anggotaSelected = transactionAnggota.value;
   const now = new Date().toLocaleString('id-ID');
 
   if(editingIndex!==null){
     if(!transactions[editingIndex].history) transactions[editingIndex].history=[];
     transactions[editingIndex].history.push({...transactions[editingIndex]});
-    transactions[editingIndex] = {type, amount, note, date: now, history: transactions[editingIndex].history};
+    transactions[editingIndex] = {type, amount, note, date, deskripsi, sumberDana, anggota: anggotaSelected, history: transactions[editingIndex].history};
     editingIndex=null;
   } else {
-    transactions.push({type, amount, note, date: now, history: []});
+    transactions.push({type, amount, note, date, deskripsi, sumberDana, anggota: anggotaSelected, history: []});
   }
 
   localStorage.setItem('transactions', JSON.stringify(transactions));
@@ -125,8 +134,8 @@ exportBtn.addEventListener('click', ()=> exportOptions.classList.toggle('hidden'
 exportOptions.querySelectorAll('button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const type = btn.dataset.type;
-    let csv = "Jenis,Jumlah,Keterangan,Tanggal\n";
-    transactions.forEach(t=> csv+=`${t.type},${t.amount},"${t.note}",${t.date}\n`);
+    let csv = "Jenis,Jumlah,Keterangan,Anggota,Tanggal,Deskripsi,Sumber Dana\n";
+    transactions.forEach(t=> csv+=`${t.type},${t.amount},"${t.note}","${t.anggota}",${t.date},"${t.deskripsi}","${t.sumberDana}"\n`);
     const blob = new Blob([csv], {type:'text/csv'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href=url; a.download=`transaksi.${type}`; a.click();
@@ -138,17 +147,19 @@ exportOptions.querySelectorAll('button').forEach(btn=>{
 // Anggota
 function renderAnggota(){
   anggotaList.innerHTML='';
+  transactionAnggota.innerHTML = '<option value="">Pilih Anggota</option>';
   anggota.forEach((a,i)=>{
-    const li = document.createElement('li');
-    li.textContent = a;
+    // dropdown
+    const opt = document.createElement('option'); opt.value = a; opt.textContent=a; transactionAnggota.appendChild(opt);
+    // list anggota
+    const li = document.createElement('li'); li.textContent = a;
     const delBtn = document.createElement('button'); delBtn.textContent='×';
     delBtn.addEventListener('click', ()=>{
       anggota.splice(i,1);
       localStorage.setItem('anggota', JSON.stringify(anggota));
       renderAnggota();
     });
-    li.appendChild(delBtn);
-    anggotaList.appendChild(li);
+    li.appendChild(delBtn); anggotaList.appendChild(li);
   });
 }
 
@@ -170,6 +181,8 @@ function updateChart(){
 }
 
 // Init
+document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
+document.getElementById('home').style.display='block';
 renderTransactions();
 renderAnggota();
 updateChart();
