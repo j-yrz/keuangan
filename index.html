@@ -15,32 +15,32 @@
     <a href="#home">Home</a>
     <a href="#catatan">Catatan</a>
     <a href="#grafik">Grafik</a>
+    <a href="#anggota">Anggota</a>
   </nav>
 </header>
 
 <main>
+  <!-- Home -->
   <section id="home">
     <h2>Home</h2>
-    <p>Selamat datang di aplikasi keuangan pribadi. Gunakan menu di atas untuk menambahkan transaksi, melihat riwayat, filter, dan grafik keuangan.</p>
+    <div class="summary-cards">
+      <div class="card" id="card-saldo">Saldo: Rp 0</div>
+      <div class="card" id="card-pemasukan">Pemasukan: Rp 0</div>
+      <div class="card" id="card-pengeluaran">Pengeluaran: Rp 0</div>
+    </div>
   </section>
 
+  <!-- Catatan Transaksi -->
   <section id="catatan">
-    <h2>Catatan Transaksi</h2>
+    <h2>History Transaksi</h2>
 
     <div id="filterContainer">
+      <input type="text" id="searchNote" placeholder="Cari keterangan..." />
       <input type="date" id="startDate" />
       <span>s/d</span>
       <input type="date" id="endDate" />
-      <select id="filterType">
-        <option value="">Semua Jenis</option>
-        <option value="Pemasukan">Pemasukan</option>
-        <option value="Pengeluaran">Pengeluaran</option>
-      </select>
       <button id="applyFilter">Terapkan Filter</button>
-      <button id="exportCSV">Ekspor CSV</button>
     </div>
-
-    <div id="saldo">Saldo: Rp 0</div>
 
     <form id="transactionForm">
       <select id="type" required>
@@ -49,13 +49,29 @@
         <option value="Pengeluaran">Pengeluaran</option>
       </select>
       <input type="number" id="amount" placeholder="Jumlah" required />
-      <input type="text" id="note" placeholder="Keterangan (opsional)" />
+      <input type="text" id="note" placeholder="Keterangan" />
       <button type="submit">Simpan Transaksi</button>
     </form>
 
     <div id="transactions"></div>
+    <button id="exportBtn">Export</button>
+    <div id="exportOptions" class="hidden">
+      <button data-type="csv">CSV</button>
+      <button data-type="pdf">PDF</button>
+    </div>
   </section>
 
+  <!-- Anggota -->
+  <section id="anggota">
+    <h2>Anggota</h2>
+    <form id="anggotaForm">
+      <input type="text" id="anggotaName" placeholder="Nama anggota" required/>
+      <button type="submit">Tambah Anggota</button>
+    </form>
+    <ul id="anggotaList"></ul>
+  </section>
+
+  <!-- Grafik -->
   <section id="grafik">
     <h2>Grafik Transaksi</h2>
     <canvas id="transactionChart"></canvas>
