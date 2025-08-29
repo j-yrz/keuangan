@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const incomeEl = el("income"), expenseEl = el("expense"), balanceEl = el("balance");
   const formSection = el("formSection"), homeSection = el("home"), historySection = el("historySection"), chartSection = el("chartSection");
   const form = el("transactionForm"), typeEl = el("type"), memberEl = el("memberSelect"), descEl = el("desc"), amountEl = el("amount"), formTitle = el("formTitle");
-  const filterMember = el("filterMember"), filterType = el("filterType"), searchKeyword = el("searchKeyword");
+  const searchKeyword = el("searchKeyword"), filterMember = el("filterMember"), filterType = el("filterType");
   const applyFilter = el("applyFilter"), resetFilter = el("resetFilter");
   const selectAllEl = el("selectAll"), deleteSelectedBtn = el("deleteSelected");
   const exportBtn = el("exportBtn"), exportOptions = el("exportOptions");
@@ -74,12 +74,22 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${t.member}</td>
         <td>${t.desc}</td>
         <td>${formatRupiah(t.amount)}</td>
-        <td><button class="status-btn" title="Klik untuk detail">${t.status||'-'}</button></td>
+        <td><button class="status-btn" title="Klik untuk detail" data-status="${t.status}">${t.status || '-'}</button></td>
         <td><button class="btn-edit" data-id="${t.id}">✏️</button></td>
       `;
       tbody.appendChild(tr);
     });
     bindRowChecks();
+    // Bind edit buttons
+    tbody.querySelectorAll(".btn-edit").forEach(btn=>{
+      btn.addEventListener("click", ()=> editTransaction(btn.dataset.id));
+    });
+    // Bind status button
+    tbody.querySelectorAll(".status-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        alert(btn.dataset.status || "Tidak ada info edit");
+      });
+    });
   }
 
   // ===== Charts =====
@@ -95,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(lineChart) lineChart.destroy();
     let balance=0, labels=[], balances=[];
-    transactions.forEach(t=>{ t.type==="pemasukan"? balance+=Number(t.amount) : balance-=Number(t.amount); labels.push(t.date); balances.push(balance); });
+    transactions.forEach(t=>{ t.type==="pemasukan"? balance+=Number(t.amount): balance-=Number(t.amount); labels.push(t.date); balances.push(balance); });
     lineChart = new Chart(lineChartEl,{ type:'line', data:{ labels:labels, datasets:[{label:'Saldo', data:balances, borderColor:'#2d7d2d', fill:false}] } });
   }
 
@@ -111,9 +121,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function editTransaction(id){
     const t=transactions.find(tr=>tr.id===id); if(!t) return;
     editId=id; formTitle.textContent="Edit Transaksi"; typeEl.value=t.type; memberEl.value=t.member; descEl.value=t.desc; amountEl.value=Number(t.amount).toLocaleString("id-ID");
-    formSection.classList.remove("hidden"); homeSection.classList.add("hidden");
+    formSection.classList.remove("hidden"); homeSection.classList.add("hidden"); historySection.classList.add("hidden"); chartSection.classList.add("hidden");
   }
 
+  // ===== Checkbox & Delete =====
   function bindRowChecks(){
     const rowChecks = document.querySelectorAll(".rowCheck");
     deleteSelectedBtn.classList.add("hidden");
@@ -138,14 +149,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== Filters =====
   function applyFilters(){
     let data = [...transactions];
-    if(searchKeyword.value) data=data.filter(t=>t.desc.toLowerCase().includes(searchKeyword.value.toLowerCase()));
+    const keyword = searchKeyword.value.toLowerCase();
+    if(keyword) data=data.filter(t=>[t.date,t.type,t.member,t.desc,t.amount].some(v=>String(v).toLowerCase().includes(keyword)));
     if(filterMember.value) data=data.filter(t=>t.member===filterMember.value);
     if(filterType.value) data=data.filter(t=>t.type===filterType.value);
     renderHistory(data);
   }
   applyFilter.addEventListener("click",applyFilters);
   resetFilter.addEventListener("click",()=>{
-    searchKeyword.value=""; filterMember.value=""; filterType.value=""; renderHistory();
+    searchKeyword.value=""; filterMember.value=""; filterType.value="";
+    renderHistory();
   });
 
   // ===== Export =====
@@ -170,20 +183,37 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ===== Navigation Buttons =====
+  // ===== Navigation =====
+  const closeAllMenus = ()=>{
+    historySection.classList.add("hidden");
+    chartSection.classList.add("hidden");
+    formSection.classList.add("hidden");
+    el("sidebar")?.classList.remove("show");
+  }
+
   el("addBtn").addEventListener("click",()=>{ form.reset(); editId=null; formTitle.textContent="Tambah Transaksi"; homeSection.classList.add("hidden"); formSection.classList.remove("hidden"); });
   el("cancelForm").addEventListener("click",()=>{ form.reset(); formSection.classList.add("hidden"); homeSection.classList.remove("hidden"); });
-  el("openHistory").addEventListener("click",()=>{ historySection.classList.remove("hidden"); homeSection.classList.add("hidden"); el("sidebar")?.classList.add("hidden"); });
-  el("closeHistory").addEventListener("click",()=>{ historySection.classList.add("hidden"); homeSection.classList.remove("hidden"); });
-  el("openChart").addEventListener("click",()=>{ chartSection.classList.remove("hidden"); homeSection.classList.add("hidden"); renderCharts(); });
-  el("closeChart").addEventListener("click",()=>{ chartSection.classList.add("hidden"); homeSection.classList.remove("hidden"); });
-  el("menuBtn").addEventListener("click",()=>el("sidebar")?.classList.remove("hidden"));
-  el("closeMenu").addEventListener("click",()=>el("sidebar")?.classList.add("hidden"));
-  el("openAddForm").addEventListener("click",()=>{ form.reset(); editId=null; formTitle.textContent="Tambah Transaksi"; homeSection.classList.add("hidden"); formSection.classList.remove("hidden"); el("sidebar")?.classList.add("hidden"); });
-  el("openChartSidebar").addEventListener("click",()=>{ chartSection.classList.remove("hidden"); homeSection.classList.add("hidden"); renderCharts(); el("sidebar")?.classList.add("hidden"); });
 
-  // ===== Dark Mode =====
-  el("themeToggle").addEventListener("click",()=>{
+  el("menuBtn").addEventListener("click", ()=>{
+    const sidebar = el("sidebar");
+    sidebar.classList.toggle("show");
+  });
+
+  el("closeMenu").addEventListener("click", ()=> el("sidebar")?.classList.remove("show"));
+
+  el("openHistory").addEventListener("click", ()=>{
+    closeAllMenus(); historySection.classList.remove("hidden"); el("sidebar")?.classList.remove("show");
+  });
+
+  el("closeHistory").addEventListener("click", ()=>{ historySection.classList.add("hidden"); homeSection.classList.remove("hidden"); });
+
+  el("openChartSidebar").addEventListener("click", ()=>{
+    closeAllMenus(); chartSection.classList.remove("hidden"); el("sidebar")?.classList.remove("show"); renderCharts();
+  });
+
+  el("closeChart").addEventListener("click", ()=>{ chartSection.classList.add("hidden"); homeSection.classList.remove("hidden"); });
+
+  el("themeToggle").addEventListener("click", ()=>{
     document.body.classList.toggle("dark");
     el("themeToggle").textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
   });
