@@ -3,117 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catatan Keuangan Final</title>
+  <title>Catatan Keuangan</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Catatan Keuangan</h1>
-    <div class="top-menu">
-      <button id="themeToggle">🌙</button>
-      <button id="menuBtn">☰</button>
-    </div>
-  </header>
 
-  <main id="home">
-    <div class="summary-cards">
-      <div class="card">Pemasukan<br><span id="income">Rp 0</span></div>
-      <div class="card">Pengeluaran<br><span id="expense">Rp 0</span></div>
-      <div class="card">Saldo<br><span id="balance">Rp 0</span></div>
-    </div>
-    <button id="addBtn" class="btn-main">+ Tambah Catatan</button>
-  </main>
+<header>
+  <h1>Catatan Keuangan</h1>
+  <div class="top-menu">
+    <button id="themeToggle" title="Mode Gelap">🌓</button>
+    <button id="menuBtn" title="Menu">☰</button>
+  </div>
+</header>
 
-  <section id="formSection" class="hidden">
-    <h2 id="formTitle">Tambah Transaksi</h2>
-    <form id="transactionForm">
-      <label>Jenis:
-        <select id="type">
-          <option value="pemasukan">Pemasukan</option>
-          <option value="pengeluaran">Pengeluaran</option>
-        </select>
-      </label>
-      <label>Anggota:
-        <select id="memberSelect"></select>
-        <div class="member-actions">
-          <button type="button" id="addMember">Tambah</button>
-          <button type="button" id="removeMember">Hapus</button>
-        </div>
-      </label>
-      <label>Keterangan:
-        <input type="text" id="desc" required>
-      </label>
-      <label>Jumlah:
-        <input type="text" id="amount" required>
-      </label>
-      <div class="form-buttons">
-        <button type="submit">Simpan</button>
-        <button type="button" id="cancelForm">Batal</button>
-      </div>
-    </form>
-  </section>
+<main id="home">
+  <div class="summary-cards">
+    <div class="card">Pemasukan<br><span id="income">Rp 0</span></div>
+    <div class="card">Pengeluaran<br><span id="expense">Rp 0</span></div>
+    <div class="card">Saldo<br><span id="balance">Rp 0</span></div>
+  </div>
+  <button id="addBtn" class="btn-main">+ Tambah Catatan</button>
+</main>
 
-  <section id="historySection" class="hidden">
-    <h2>History Transaksi</h2>
-    <div class="filters">
-      <input type="text" id="searchKeyword" placeholder="Cari...">
-      <select id="filterMember"></select>
-      <select id="filterType">
-        <option value="">Semua Jenis</option>
+<section id="formSection" class="hidden">
+  <h2 id="formTitle">Tambah Transaksi</h2>
+  <form id="transactionForm">
+    <label>Jenis:
+      <select id="type">
         <option value="pemasukan">Pemasukan</option>
         <option value="pengeluaran">Pengeluaran</option>
       </select>
-      <button id="applyFilter">Terapkan</button>
-      <button id="resetFilter">Reset</button>
-    </div>
-    <table id="historyTable">
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="selectAll"></th>
-          <th>No</th>
-          <th>Tanggal</th>
-          <th>Jenis</th>
-          <th>Anggota</th>
-          <th>Keterangan</th>
-          <th>Jumlah</th>
-          <th>Status</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div class="history-actions">
-      <button id="deleteSelected" class="hidden">Hapus Terpilih</button>
-      <div class="export-dropdown">
-        <button id="exportBtn">Export</button>
-        <div id="exportOptions" class="hidden">
-          <button data-type="json">JSON</button>
-          <button data-type="csv">CSV</button>
-          <button data-type="xlsx">Excel</button>
-        </div>
+    </label>
+    <label>Anggota:
+      <select id="memberSelect"></select>
+      <div class="member-actions">
+        <button type="button" id="addMember">+ Tambah</button>
+        <button type="button" id="removeMember">- Hapus</button>
       </div>
-      <button id="closeHistory">Tutup</button>
+    </label>
+    <label>Keterangan:
+      <input type="text" id="desc" required>
+    </label>
+    <label>Jumlah:
+      <input type="text" id="amount" required>
+    </label>
+    <div class="form-buttons">
+      <button type="submit">Simpan</button>
+      <button type="button" id="cancelForm">Batal</button>
     </div>
-  </section>
+  </form>
+</section>
 
-  <section id="chartSection" class="hidden">
-    <h2>Grafik Transaksi</h2>
-    <canvas id="pieChart"></canvas>
-    <canvas id="lineChart"></canvas>
-  </section>
-
-  <aside id="sidebar" class="hidden">
-    <div class="sidebar-header">
-      <h2>Menu</h2>
-      <button id="closeMenu">×</button>
+<section id="historySection" class="hidden">
+  <h2>History Transaksi</h2>
+  <div class="history-actions">
+    <input type="text" id="searchKeyword" placeholder="Cari...">
+    <select id="filterMember"></select>
+    <select id="filterType">
+      <option value="">Semua Jenis</option>
+      <option value="pemasukan">Pemasukan</option>
+      <option value="pengeluaran">Pengeluaran</option>
+    </select>
+    <button id="applyFilter">Filter</button>
+    <button id="resetFilter">Reset</button>
+    <div class="export-dropdown">
+      <button id="exportBtn">Export</button>
+      <div id="exportOptions" class="hidden">
+        <button data-type="json">Export JSON</button>
+        <button data-type="csv">Export CSV</button>
+      </div>
     </div>
-    <ul>
-      <li><button id="openHistory">📜 History Transaksi</button></li>
-      <li><button id="openChartSidebar">📊 Grafik</button></li>
-    </ul>
-  </aside>
+    <button id="deleteSelected" class="hidden">Hapus Terpilih</button>
+  </div>
+  <table id="historyTable">
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="selectAll"></th>
+        <th>No</th>
+        <th>Tanggal</th>
+        <th>Jenis</th>
+        <th>Anggota</th>
+        <th>Keterangan</th>
+        <th>Jumlah</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
 
-  <script src="script.js"></script>
+<section id="chartSection" class="hidden">
+  <h2>Grafik Keuangan</h2>
+  <canvas id="pieChart"></canvas>
+  <canvas id="lineChart"></canvas>
+</section>
+
+<aside id="sidebar" class="hidden">
+  <div class="sidebar-header">
+    <h2>Menu</h2>
+    <button id="closeMenu">×</button>
+  </div>
+  <ul>
+    <li><button id="openHistory">📜 History Transaksi</button></li>
+    <li><button id="openChartSidebar">📊 Grafik</button></li>
+  </ul>
+</aside>
+
+<script src="app.js"></script>
+<script src="ui.js"></script>
+<script src="chart.js"></script>
 </body>
 </html>
