@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   // ===== Helper =====
   const el = id => document.getElementById(id);
   function formatRupiah(angka){ return "Rp " + Number(angka||0).toLocaleString("id-ID"); }
@@ -80,11 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
       tbody.appendChild(tr);
     });
     bindRowChecks();
-    // Bind edit buttons
     tbody.querySelectorAll(".btn-edit").forEach(btn=>{
       btn.addEventListener("click", ()=> editTransaction(btn.dataset.id));
     });
-    // Bind status button
     tbody.querySelectorAll(".status-btn").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         alert(btn.dataset.status || "Tidak ada info edit");
@@ -183,34 +180,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ===== Navigation =====
-  const closeAllMenus = ()=>{
-    historySection.classList.add("hidden");
-    chartSection.classList.add("hidden");
-    formSection.classList.add("hidden");
-    el("sidebar")?.classList.remove("show");
-  }
+  // ===== Navigation & Dark Mode =====
+  const closeAllMenus = ()=>{ historySection.classList.add("hidden"); chartSection.classList.add("hidden"); formSection.classList.add("hidden"); el("sidebar")?.classList.remove("show"); }
 
   el("addBtn").addEventListener("click",()=>{ form.reset(); editId=null; formTitle.textContent="Tambah Transaksi"; homeSection.classList.add("hidden"); formSection.classList.remove("hidden"); });
   el("cancelForm").addEventListener("click",()=>{ form.reset(); formSection.classList.add("hidden"); homeSection.classList.remove("hidden"); });
 
-  el("menuBtn").addEventListener("click", ()=>{
-    const sidebar = el("sidebar");
-    sidebar.classList.toggle("show");
-  });
-
+  el("menuBtn").addEventListener("click", ()=>{ el("sidebar").classList.toggle("show"); });
   el("closeMenu").addEventListener("click", ()=> el("sidebar")?.classList.remove("show"));
 
-  el("openHistory").addEventListener("click", ()=>{
-    closeAllMenus(); historySection.classList.remove("hidden"); el("sidebar")?.classList.remove("show");
-  });
-
+  el("openHistory").addEventListener("click", ()=>{ closeAllMenus(); historySection.classList.remove("hidden"); el("sidebar")?.classList.remove("show"); });
   el("closeHistory").addEventListener("click", ()=>{ historySection.classList.add("hidden"); homeSection.classList.remove("hidden"); });
 
-  el("openChartSidebar").addEventListener("click", ()=>{
-    closeAllMenus(); chartSection.classList.remove("hidden"); el("sidebar")?.classList.remove("show"); renderCharts();
-  });
-
+  el("openChartSidebar").addEventListener("click", ()=>{ closeAllMenus(); chartSection.classList.remove("hidden"); el("sidebar")?.classList.remove("show"); renderCharts(); });
   el("closeChart").addEventListener("click", ()=>{ chartSection.classList.add("hidden"); homeSection.classList.remove("hidden"); });
 
   el("themeToggle").addEventListener("click", ()=>{
@@ -218,11 +200,17 @@ document.addEventListener("DOMContentLoaded", () => {
     el("themeToggle").textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
   });
 
-  // ===== Save & Init =====
-  function saveData(){
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-    updateSummary(); renderHistory(); renderCharts();
-  }
-  saveData();
+  // ===== Auto-format Rupiah =====
+  amountEl.addEventListener("input", (e)=>{
+    let cursorPos = e.target.selectionStart;
+    let originalLength = e.target.value.length;
+    let val = e.target.value.replace(/\D/g,'');
+    if(val===''){ e.target.value=''; return; }
+    e.target.value = Number(val).toLocaleString("id-ID");
+    e.target.selectionEnd = cursorPos + (e.target.value.length - originalLength);
+  });
 
+  // ===== Save & Init =====
+  function saveData(){ localStorage.setItem("transactions",JSON.stringify(transactions)); updateSummary(); renderHistory(); renderCharts(); }
+  saveData();
 });
