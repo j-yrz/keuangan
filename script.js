@@ -21,7 +21,7 @@ let editingIndex = null;
 
 // Elements
 const form = document.getElementById('transactionForm');
-const transactionsDiv = document.getElementById('transactions');
+const transactionsTableBody = document.querySelector('#transactionsTable tbody');
 const searchNote = document.getElementById('searchNote');
 const startDateInput = document.getElementById('startDate');
 const endDateInput = document.getElementById('endDate');
@@ -41,7 +41,7 @@ const anggotaName = document.getElementById('anggotaName');
 // Format number
 const formatNumber = n=>Number(n).toLocaleString('id-ID');
 
-// Render Functions
+// Render summary
 function updateSummary(){
   const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
@@ -51,8 +51,9 @@ function updateSummary(){
   cardPengeluaran.textContent = `Pengeluaran: Rp ${formatNumber(pengeluaran)}`;
 }
 
-function renderTransactions(){
-  transactionsDiv.innerHTML='';
+// Render Transactions Table
+function renderTransactionsTable(){
+  transactionsTableBody.innerHTML='';
   const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
   const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
   const search = searchNote.value.toLowerCase();
@@ -63,15 +64,25 @@ function renderTransactions(){
     if(endDate && tDate>endDate) return;
     if(search && !t.note.toLowerCase().includes(search)) return;
 
-    const tDiv = document.createElement('div'); tDiv.className='transaction';
-    const header = document.createElement('div'); header.className='transaction-header';
-    const span = document.createElement('span'); 
-    span.textContent = `${i+1}. ${t.type}: Rp ${formatNumber(t.amount)} - ${t.note} [${t.anggota}] (${t.date}) - ${t.deskripsi} - Sumber: ${t.sumberDana}`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${t.date}</td>
+      <td>${t.type}</td>
+      <td>Rp ${formatNumber(t.amount)}</td>
+      <td>${t.note}</td>
+      <td>${t.deskripsi}</td>
+      <td>${t.sumberDana}</td>
+      <td>${t.anggota}</td>
+      <td>
+        <button class="editBtn">✎</button>
+        <button class="statusBtn">Status</button>
+      </td>
+    `;
+    transactionsTableBody.appendChild(tr);
 
-    const actions = document.createElement('div'); actions.className='actions';
-    const editBtn = document.createElement('span'); editBtn.className='edit'; editBtn.textContent='✎';
-    editBtn.addEventListener('click', ()=>{
-      editingIndex=i;
+    tr.querySelector('.editBtn').addEventListener('click', ()=>{
+      editingIndex = i;
       document.getElementById('type').value = t.type;
       document.getElementById('amount').value = t.amount;
       document.getElementById('note').value = t.note;
@@ -79,22 +90,14 @@ function renderTransactions(){
       document.getElementById('deskripsi').value = t.deskripsi;
       document.getElementById('sumberDana').value = t.sumberDana;
       transactionAnggota.value = t.anggota;
+      window.scrollTo({top:0, behavior:'smooth'});
     });
 
-    const statusBtn = document.createElement('button'); statusBtn.className='status-btn';
-    statusBtn.textContent='Status';
-    statusBtn.addEventListener('click', ()=>{
+    tr.querySelector('.statusBtn').addEventListener('click', ()=>{
       if(t.history && t.history.length>0){
         alert(t.history.map(h=>`[${h.date}] ${h.type}: Rp ${formatNumber(h.amount)} - ${h.note}`).join('\n'));
-      } else {
-        alert('Belum diedit.');
-      }
+      } else alert('Belum diedit.');
     });
-
-    actions.appendChild(editBtn); actions.appendChild(statusBtn);
-    header.appendChild(span); header.appendChild(actions);
-    tDiv.appendChild(header);
-    transactionsDiv.appendChild(tDiv);
   });
   updateSummary();
 }
@@ -122,12 +125,12 @@ form.addEventListener('submit', e=>{
 
   localStorage.setItem('transactions', JSON.stringify(transactions));
   form.reset();
-  renderTransactions();
+  renderTransactionsTable();
   updateChart();
 });
 
 // Filter
-applyFilterBtn.addEventListener('click', renderTransactions);
+applyFilterBtn.addEventListener('click', renderTransactionsTable);
 
 // Export
 exportBtn.addEventListener('click', ()=> exportOptions.classList.toggle('hidden'));
@@ -149,9 +152,7 @@ function renderAnggota(){
   anggotaList.innerHTML='';
   transactionAnggota.innerHTML = '<option value="">Pilih Anggota</option>';
   anggota.forEach((a,i)=>{
-    // dropdown
     const opt = document.createElement('option'); opt.value = a; opt.textContent=a; transactionAnggota.appendChild(opt);
-    // list anggota
     const li = document.createElement('li'); li.textContent = a;
     const delBtn = document.createElement('button'); delBtn.textContent='×';
     delBtn.addEventListener('click', ()=>{
@@ -183,6 +184,6 @@ function updateChart(){
 // Init
 document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
 document.getElementById('home').style.display='block';
-renderTransactions();
+renderTransactionsTable();
 renderAnggota();
 updateChart();
