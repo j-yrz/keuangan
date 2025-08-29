@@ -52,7 +52,7 @@ header button { font-size:20px; background:none; color:#fff; }
 
 /* ===== Export Dropdown ===== */
 .export-dropdown { position:relative; display:inline-block; }
-#exportOptions { position:absolute; top:35px; left:0; background:#fff; border:1px solid #ccc; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.15); }
+#exportOptions { position:absolute; top:35px; left:0; background:#fff; border:1px solid #ccc; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.15); z-index:1001; }
 #exportOptions button { display:block; width:100%; padding:8px 10px; text-align:left; background:none; border:none; }
 
 /* ===== Dark Mode ===== */
@@ -63,8 +63,11 @@ body.dark #formSection, body.dark #historySection, body.dark #chartSection { bac
 body.dark #sidebar { background:#222; color:#fff; }
 body.dark #historyTable th, body.dark #historyTable td { border-color:#444; }
 
-/* ===== Responsive ===== */
+/* ===== Mobile Adjustments ===== */
 @media(max-width:600px){
   .summary-cards { flex-direction:column; }
   #historyTable { font-size:12px; }
+  header .top-menu { gap:5px; }
+  #sidebar { width:200px; }
+  #exportOptions { left:auto; right:0; }
 }
