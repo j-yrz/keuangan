@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== Elements =====
   const incomeEl = el("income"), expenseEl = el("expense"), balanceEl = el("balance");
-  const formSection = el("formSection"), homeSection = el("home"), historySection = el("historySection"), chartSection = el("chartSection");
+  const formSection = el("formSection"), homeSection = el("home"), historySection = el("historySection");
   const form = el("transactionForm"), typeEl = el("type"), memberEl = el("memberSelect"), descEl = el("desc"), amountEl = el("amount"), formTitle = el("formTitle");
   const addBtn = el("addBtn"), cancelForm = el("cancelForm");
   const selectAllEl = el("selectAll"), deleteSelectedBtn = el("deleteSelected");
@@ -24,8 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const sidebar = el("sidebar"), openHistoryBtn = el("openHistory"), openChartSidebar = el("openChartSidebar");
   const pieCtx = document.getElementById('pieChart'), lineCtx = document.getElementById('lineChart');
   const addMemberBtn = el("addMember"), removeMemberBtn = el("removeMember");
+  let pieChart, lineChart;
 
-  // ===== Init Members Dropdown =====
+  // ===== Members Dropdown =====
   function renderMembersDropdown() {
     if (!memberEl || !filterMember) return;
     memberEl.innerHTML = "";
@@ -83,6 +84,10 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", e=>{
     e.preventDefault();
     const amt = Number(String(amountEl.value).replace(/[^0-9]/g,'')) || 0;
+    if(!typeEl.value || !memberEl.value || !descEl.value || amt<=0){
+      alert("Semua field harus diisi dengan benar!");
+      return;
+    }
     const data = {
       id: editId || Date.now().toString(),
       date: getNow(),
@@ -107,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formSection.classList.remove("hidden"); homeSection.classList.add("hidden");
   }
 
-  // ===== Delete Selected =====
+  // ===== Row Check/Delete Selected =====
   function bindRowChecks(){
     const rowChecks=document.querySelectorAll(".rowCheck");
     rowChecks.forEach(c=>c.addEventListener("change",()=>{
@@ -167,14 +172,14 @@ document.addEventListener("DOMContentLoaded", () => {
   menuBtn?.addEventListener("click",()=>sidebar.classList.toggle("show"));
   closeMenu?.addEventListener("click",()=>sidebar.classList.remove("show"));
   openHistoryBtn?.addEventListener("click",()=>{
-    historySection.classList.remove("hidden"); homeSection.classList.add("hidden"); chartSection.classList.add("hidden"); sidebar.classList.remove("show");
+    historySection.classList.remove("hidden"); homeSection.classList.add("hidden"); sidebar.classList.remove("show");
   });
+
   openChartSidebar?.addEventListener("click",()=>{
     chartSection.classList.remove("hidden"); homeSection.classList.add("hidden"); historySection.classList.add("hidden"); sidebar.classList.remove("show");
   });
 
   // ===== Charts =====
-  let pieChart,lineChart;
   function renderCharts(){
     if(!pieCtx||!lineCtx) return;
     const incomeSum=transactions.filter(t=>t.type==="pemasukan").reduce((a,b)=>a+Number(b.amount),0);
@@ -189,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== Tambah/Hapus Anggota =====
   addMemberBtn?.addEventListener("click",()=>{ const name=prompt("Nama anggota baru:"); if(name){ members.push(name); saveData(); }});
-  removeMemberBtn?.addEventListener("click",()=>{ const name=memberEl.value; if(name&&confirm("Hapus anggota "+name+"?")){ members=members.filter(m=>m!==name); saveData(); }});
+  removeMemberBtn?.addEventListener("click",()=>{ const name=memberEl.value; if(name&&confirm("Hapus anggota "+name+"?")){ transactions=transactions.filter(t=>t.member!==name); members=members.filter(m=>m!==name); saveData(); }});
 
   // ===== Format Rupiah saat mengetik =====
   amountEl?.addEventListener("input",e=>{ const pos=e.target.selectionStart; e.target.value=formatRupiah(e.target.value); e.target.selectionEnd=pos; });
