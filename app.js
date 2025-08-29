@@ -1,60 +1,155 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const el = id => document.getElementById(id);
-  const formatRupiah = num => { num=Number(String(num).replace(/[^0-9]/g,''))||0; return 'Rp '+num.toLocaleString('id-ID'); };
-  const getNow = () => new Date().toLocaleString('id-ID');
 
-  let transactions = JSON.parse(localStorage.getItem('transactions'))||[];
-  let members = JSON.parse(localStorage.getItem('members'))||["Jeri","Andi","Sinta","Budi"];
+  // ===== Helper =====
+  function formatRupiah(angka) {
+    if (isNaN(angka) || angka === null) angka = 0;
+    return "Rp " + Number(angka).toLocaleString("id-ID");
+  }
+  function getNow() {
+    const now = new Date();
+    return now.toLocaleDateString("id-ID") + " " + now.toLocaleTimeString("id-ID");
+  }
+
+  // ===== Data =====
+  let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+  let members = JSON.parse(localStorage.getItem("members")) || ["Jeri", "Andi", "Sinta", "Budi"];
   let editId = null;
 
-  const incomeEl = el("income"), expenseEl = el("expense"), balanceEl = el("balance");
-  const formSection = el("formSection"), homeSection = el("home"), historySection = el("historySection");
-  const form = el("transactionForm"), typeEl = el("type"), memberEl = el("memberSelect"), descEl = el("desc"), amountEl = el("amount"), formTitle = el("formTitle");
-  const addBtn = el("addBtn"), cancelForm = el("cancelForm");
+  // ===== Elements =====
+  const el = id => document.getElementById(id);
+  const incomeEl = el("income");
+  const expenseEl = el("expense");
+  const balanceEl = el("balance");
+  const formSection = el("formSection");
+  const homeSection = el("home");
+  const historySection = el("historySection");
+  const chartSection = el("chartSection");
+  const form = el("transactionForm");
+  const typeEl = el("type");
+  const memberEl = el("memberSelect");
+  const descEl = el("desc");
+  const amountEl = el("amount");
+  const formTitle = el("formTitle");
 
-  function renderMembersDropdown(){
-    if(!memberEl) return;
-    memberEl.innerHTML="";
+  // ===== Members Dropdown =====
+  function renderMembers() {
+    memberEl.innerHTML = "";
     members.forEach(m => {
-      const opt = document.createElement('option'); opt.value = m; opt.textContent = m;
+      const opt = document.createElement("option");
+      opt.value = m; opt.textContent = m;
       memberEl.appendChild(opt);
     });
+    const filterMember = el("filterMember");
+    if(filterMember){
+      filterMember.innerHTML = `<option value="">Semua Anggota</option>`;
+      members.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m; opt.textContent = m;
+        filterMember.appendChild(opt);
+      });
+    }
   }
-  renderMembersDropdown();
+  renderMembers();
 
-  function updateSummary(){
+  el("addMember").addEventListener("click", () => {
+    const name = prompt("Nama anggota baru:");
+    if(name) { members.push(name); renderMembers(); localStorage.setItem("members", JSON.stringify(members)); }
+  });
+  el("removeMember").addEventListener("click", () => {
+    const name = memberEl.value;
+    if(name && confirm(`Hapus anggota "${name}"?`)){
+      members = members.filter(m => m!==name); renderMembers(); localStorage.setItem("members", JSON.stringify(members));
+    }
+  });
+
+  // ===== CRUD Functions =====
+  function saveData() {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    updateSummary(); renderHistory();
+  }
+
+  function updateSummary() {
     let income=0, expense=0;
-    transactions.forEach(t => t.type==="pemasukan"?income+=Number(t.amount):expense+=Number(t.amount));
-    if(incomeEl) incomeEl.textContent=formatRupiah(income);
-    if(expenseEl) expenseEl.textContent=formatRupiah(expense);
-    if(balanceEl) balanceEl.textContent=formatRupiah(income-expense);
+    transactions.forEach(t => { if(t.type==="pemasukan") income+=Number(t.amount)||0; else expense+=Number(t.amount)||0; });
+    incomeEl.textContent = formatRupiah(income);
+    expenseEl.textContent = formatRupiah(expense);
+    balanceEl.textContent = formatRupiah(income-expense);
   }
 
-  function saveData(){
-    localStorage.setItem('transactions', JSON.stringify(transactions));
-    localStorage.setItem('members', JSON.stringify(members));
-    updateSummary();
+  function renderHistory(filtered=transactions) {
+    const tbody = document.querySelector("#historyTable tbody"); if(!tbody) return;
+    tbody.innerHTML = "";
+    filtered.forEach((t,i)=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+      <td><input type="checkbox" class="rowCheck" data-id="${t.id}"></td>
+      <td>${i+1}</td>
+      <td>${t.date}</td>
+      <td>${t.type}</td>
+      <td>${t.member}</td>
+      <td>${t.desc}</td>
+      <td>${formatRupiah(t.amount)}</td>
+      <td><button class="statusBtn" data-id="${t.id}">${t.status||'-'}</button></td>
+      <td><button class="btn-edit" data-id="${t.id}">✏️ Edit</button></td>`;
+      tbody.appendChild(tr);
+    });
+    bindRowChecks();
+    tbody.querySelectorAll(".btn-edit").forEach(b=>b.addEventListener("click",()=>editTransaction(b.dataset.id)));
+    tbody.querySelectorAll(".statusBtn").forEach(b=>b.addEventListener("click",()=>showStatus(b.dataset.id)));
   }
 
-  addBtn?.addEventListener("click", () => {
-    form.reset(); editId=null; formTitle.textContent="Tambah Transaksi";
-    homeSection.classList.add("hidden"); formSection.classList.remove("hidden");
-  });
+  function editTransaction(id){
+    const t = transactions.find(tr=>tr.id===id); if(!t) return;
+    editId=id; formTitle.textContent="Edit Transaksi";
+    typeEl.value=t.type; memberEl.value=t.member; descEl.value=t.desc; amountEl.value=t.amount;
+    formSection.classList.remove("hidden"); homeSection.classList.add("hidden");
+  }
 
-  cancelForm?.addEventListener("click", () => {
-    form.reset(); formSection.classList.add("hidden"); homeSection.classList.remove("hidden");
-  });
+  function showStatus(id){
+    const t = transactions.find(tr=>tr.id===id); if(!t) return;
+    alert(t.status || "Baru");
+  }
 
-  form?.addEventListener("submit", e => {
+  form.addEventListener("submit", e=>{
     e.preventDefault();
-    const amt = Number(String(amountEl.value).replace(/[^0-9]/g,''))||0;
-    if(!typeEl.value||!memberEl.value||!descEl.value||amt<=0){ alert("Semua field harus diisi!"); return; }
-    const data = { id: editId||Date.now().toString(), date: getNow(), type: typeEl.value, member: memberEl.value, desc: descEl.value, amount: amt, status: editId?`Diedit (${getNow()})`:null };
-    if(editId){ const idx = transactions.findIndex(t=>t.id===editId); if(idx!==-1) transactions[idx]=data; editId=null; }
-    else transactions.push(data);
-    form.reset(); formSection.classList.add("hidden"); homeSection.classList.remove("hidden");
-    saveData();
+    const amt = Number(amountEl.value.replace(/\D/g,'')) || 0;
+    const data = {
+      id:editId||Date.now().toString(),
+      date:getNow(),
+      type:typeEl.value,
+      member:memberEl.value,
+      desc:descEl.value,
+      amount:amt,
+      status: editId ? `Diedit (${getNow()})`:"Baru"
+    };
+    if(editId){
+      const idx = transactions.findIndex(t=>t.id===editId); if(idx!==-1) transactions[idx]=data; editId=null;
+    }else transactions.push(data);
+    saveData(); form.reset(); formSection.classList.add("hidden"); homeSection.classList.remove("hidden");
   });
 
-  window.appData = { transactions, members, renderMembersDropdown, saveData };
+  // ===== Row Checkbox =====
+  const deleteSelectedBtn = el("deleteSelected");
+  function bindRowChecks(){
+    const rowChecks = document.querySelectorAll(".rowCheck");
+    rowChecks.forEach(chk=>{
+      chk.addEventListener("change", ()=>{
+        const anyChecked = [...rowChecks].some(c=>c.checked);
+        deleteSelectedBtn.classList.toggle("hidden",!anyChecked);
+      });
+    });
+  }
+  el("selectAll")?.addEventListener("change",()=>{
+    document.querySelectorAll(".rowCheck").forEach(c=>c.checked=el("selectAll").checked);
+    deleteSelectedBtn.classList.toggle("hidden",!el("selectAll").checked);
+  });
+  deleteSelectedBtn?.addEventListener("click",()=>{
+    const selected=[...document.querySelectorAll(".rowCheck:checked")].map(c=>c.dataset.id);
+    transactions = transactions.filter(t=>!selected.includes(t.id));
+    saveData(); deleteSelectedBtn.classList.add("hidden");
+  });
+
+  // ===== Init =====
+  saveData();
+
 });
