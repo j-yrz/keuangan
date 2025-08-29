@@ -1,118 +1,79 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catatan Keuangan</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keuangan</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f9f9f9; }
+  header { display:flex; justify-content: space-between; align-items:center; padding:10px 20px; background:#2196F3; color:white; position:relative; }
+  .logo { font-size: 1.2em; font-weight:bold; }
+  .menu-toggle { font-size:1.5em; cursor:pointer; }
+  nav { display:none; flex-direction: column; background:#1976D2; position:absolute; top:50px; right:0; width:200px; border-radius:5px; overflow:hidden; transition: all 0.3s ease; z-index:1000; }
+  nav.show { display:flex; animation:fadeIn 0.3s forwards; }
+  nav a { padding:10px; color:white; text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.2); }
+  nav a:hover { background: rgba(255,255,255,0.2); }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+
+  main { padding:20px; max-width:600px; margin:0 auto; }
+  h2 { color:#333; }
+  .transaction { margin-bottom:10px; padding:10px; border-radius:5px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); transition: all 0.3s; }
+  .transaction:hover { background:#f0f0f0; transform:translateX(5px); }
+  button { padding:10px 15px; background:#2196F3; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:10px; transition: background 0.3s; }
+  button:hover { background:#1976D2; }
+</style>
 </head>
 <body>
 
 <header>
-  <h1>Catatan Keuangan</h1>
-  <div class="top-menu">
-    <button id="themeToggle" title="Mode Gelap">🌓</button>
-    <button id="menuBtn" title="Menu">☰</button>
-  </div>
+  <div class="logo">Keuangan</div>
+  <div class="menu-toggle" id="menuToggle">☰</div>
+  <nav id="navMenu">
+    <a href="#home">Home</a>
+    <a href="#catatan">Catatan</a>
+    <a href="#grafik">Grafik</a>
+  </nav>
 </header>
 
-<main id="home">
-  <div class="summary-cards">
-    <div class="card">Pemasukan<br><span id="income">Rp 0</span></div>
-    <div class="card">Pengeluaran<br><span id="expense">Rp 0</span></div>
-    <div class="card">Saldo<br><span id="balance">Rp 0</span></div>
-  </div>
-  <button id="addBtn" class="btn-main">+ Tambah Catatan</button>
+<main>
+  <h2>Catatan Transaksi</h2>
+  <div id="transactions"></div>
+  <button id="addTransactionBtn">Tambah Transaksi</button>
 </main>
 
-<section id="formSection" class="hidden">
-  <h2 id="formTitle">Tambah Transaksi</h2>
-  <form id="transactionForm">
-    <label>Jenis:
-      <select id="type">
-        <option value="pemasukan">Pemasukan</option>
-        <option value="pengeluaran">Pengeluaran</option>
-      </select>
-    </label>
-    <label>Anggota:
-      <select id="memberSelect"></select>
-      <div class="member-actions">
-        <button type="button" id="addMember">+ Tambah</button>
-        <button type="button" id="removeMember">- Hapus</button>
-      </div>
-    </label>
-    <label>Keterangan:
-      <input type="text" id="desc" required>
-    </label>
-    <label>Jumlah:
-      <input type="text" id="amount" required>
-    </label>
-    <div class="form-buttons">
-      <button type="submit">Simpan</button>
-      <button type="button" id="cancelForm">Batal</button>
-    </div>
-  </form>
-</section>
+<script>
+  // Toggle menu mobile
+  const menuToggle = document.getElementById('menuToggle');
+  const navMenu = document.getElementById('navMenu');
+  menuToggle.addEventListener('click', () => {
+    navMenu.classList.toggle('show');
+  });
 
-<section id="historySection" class="hidden">
-  <h2>History Transaksi</h2>
-  <div class="history-actions">
-    <input type="text" id="searchKeyword" placeholder="Cari...">
-    <select id="filterMember"></select>
-    <select id="filterType">
-      <option value="">Semua Jenis</option>
-      <option value="pemasukan">Pemasukan</option>
-      <option value="pengeluaran">Pengeluaran</option>
-    </select>
-    <button id="applyFilter">Filter</button>
-    <button id="resetFilter">Reset</button>
-    <div class="export-dropdown">
-      <button id="exportBtn">Export</button>
-      <div id="exportOptions" class="hidden">
-        <button data-type="json">Export JSON</button>
-        <button data-type="csv">Export CSV</button>
-      </div>
-    </div>
-    <button id="deleteSelected" class="hidden">Hapus Terpilih</button>
-  </div>
-  <table id="historyTable">
-    <thead>
-      <tr>
-        <th><input type="checkbox" id="selectAll"></th>
-        <th>No</th>
-        <th>Tanggal</th>
-        <th>Jenis</th>
-        <th>Anggota</th>
-        <th>Keterangan</th>
-        <th>Jumlah</th>
-        <th>Status</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</section>
+  // Contoh transaksi
+  const transactions = [];
+  const transactionsDiv = document.getElementById('transactions');
+  const addBtn = document.getElementById('addTransactionBtn');
 
-<section id="chartSection" class="hidden">
-  <h2>Grafik Keuangan</h2>
-  <canvas id="pieChart"></canvas>
-  <canvas id="lineChart"></canvas>
-</section>
+  function renderTransactions() {
+    transactionsDiv.innerHTML = '';
+    transactions.forEach((t, i) => {
+      const div = document.createElement('div');
+      div.className = 'transaction';
+      div.textContent = `${t.type}: ${t.amount} - ${t.note}`;
+      transactionsDiv.appendChild(div);
+    });
+  }
 
-<aside id="sidebar" class="hidden">
-  <div class="sidebar-header">
-    <h2>Menu</h2>
-    <button id="closeMenu">×</button>
-  </div>
-  <ul>
-    <li><button id="openHistory">📜 History Transaksi</button></li>
-    <li><button id="openChartSidebar">📊 Grafik</button></li>
-  </ul>
-</aside>
+  addBtn.addEventListener('click', () => {
+    const type = prompt('Jenis (Pemasukan/Pengeluaran):');
+    if(!type) return;
+    const amount = prompt('Jumlah:');
+    if(!amount) return;
+    const note = prompt('Keterangan:') || '';
+    transactions.push({type, amount, note});
+    renderTransactions();
+  });
+</script>
 
-<script src="app.js"></script>
-<script src="ui.js"></script>
-<script src="chart.js"></script>
 </body>
 </html>
