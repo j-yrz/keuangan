@@ -1,3 +1,4 @@
+// Menu toggle
 const menuToggle = document.getElementById('menuToggle');
 const navMenu = document.getElementById('navMenu');
 menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
@@ -9,47 +10,61 @@ document.querySelectorAll('nav a').forEach(link=>{
   });
 });
 
-const form = document.getElementById('transactionForm');
-const transactionsDiv = document.getElementById('transactions');
-const startDateInput = document.getElementById('startDate');
-const endDateInput = document.getElementById('endDate');
-const filterType = document.getElementById('filterType');
-const applyFilterBtn = document.getElementById('applyFilter');
-const exportBtn = document.getElementById('exportCSV');
-const saldoDiv = document.getElementById('saldo');
-let transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+// Data
+let transactions = JSON.parse(localStorage.getItem('transactions')||'[]');
+let anggota = JSON.parse(localStorage.getItem('anggota')||'[]');
 let editingIndex = null;
 
-function formatNumber(num){ return Number(num).toLocaleString('id-ID'); }
+// Elements
+const form = document.getElementById('transactionForm');
+const transactionsDiv = document.getElementById('transactions');
+const searchNote = document.getElementById('searchNote');
+const startDateInput = document.getElementById('startDate');
+const endDateInput = document.getElementById('endDate');
+const applyFilterBtn = document.getElementById('applyFilter');
+const exportBtn = document.getElementById('exportBtn');
+const exportOptions = document.getElementById('exportOptions');
 
-function updateSaldo(){
-  let saldo = transactions.reduce((acc,t)=> t.type==='Pemasukan'? acc+Number(t.amount) : acc-Number(t.amount),0);
-  saldoDiv.textContent = `Saldo: Rp ${formatNumber(saldo)}`;
+const cardSaldo = document.getElementById('card-saldo');
+const cardPemasukan = document.getElementById('card-pemasukan');
+const cardPengeluaran = document.getElementById('card-pengeluaran');
+
+// Anggota
+const anggotaForm = document.getElementById('anggotaForm');
+const anggotaList = document.getElementById('anggotaList');
+const anggotaName = document.getElementById('anggotaName');
+
+// Format number
+const formatNumber = n=>Number(n).toLocaleString('id-ID');
+
+// Render Functions
+function updateSummary(){
+  const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
+  const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
+  const saldo = pemasukan - pengeluaran;
+  cardSaldo.textContent = `Saldo: Rp ${formatNumber(saldo)}`;
+  cardPemasukan.textContent = `Pemasukan: Rp ${formatNumber(pemasukan)}`;
+  cardPengeluaran.textContent = `Pengeluaran: Rp ${formatNumber(pengeluaran)}`;
 }
 
 function renderTransactions(){
   transactionsDiv.innerHTML='';
   const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
   const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
-  const typeFilterVal = filterType.value;
+  const search = searchNote.value.toLowerCase();
 
   transactions.forEach((t,i)=>{
     const tDate = new Date(t.date);
-    if(startDate && tDate < startDate) return;
-    if(endDate && tDate > endDate) return;
-    if(typeFilterVal && t.type !== typeFilterVal) return;
+    if(startDate && tDate<startDate) return;
+    if(endDate && tDate>endDate) return;
+    if(search && !t.note.toLowerCase().includes(search)) return;
 
     const tDiv = document.createElement('div'); tDiv.className='transaction';
-    if(Number(t.amount) > 5000000) tDiv.classList.add('highlight');
-
     const header = document.createElement('div'); header.className='transaction-header';
-    const span = document.createElement('span');
-    span.textContent = `${t.type}: Rp ${formatNumber(t.amount)} - ${t.note} (${t.date})`;
+    const span = document.createElement('span'); span.textContent = `${i+1}. ${t.type}: Rp ${formatNumber(t.amount)} - ${t.note} (${t.date})`;
 
     const actions = document.createElement('div'); actions.className='actions';
     const editBtn = document.createElement('span'); editBtn.className='edit'; editBtn.textContent='✎';
-    const delBtn = document.createElement('span'); delBtn.className='delete'; delBtn.textContent='×';
-
     editBtn.addEventListener('click', ()=>{
       editingIndex=i;
       document.getElementById('type').value = t.type;
@@ -57,28 +72,29 @@ function renderTransactions(){
       document.getElementById('note').value = t.note;
     });
 
-    delBtn.addEventListener('click', ()=>{
-      transactions.splice(i,1);
-      localStorage.setItem('transactions', JSON.stringify(transactions));
-      renderTransactions();
-      updateChart();
-      updateSaldo();
+    // Status edit button
+    const statusBtn = document.createElement('button'); statusBtn.className='status-btn';
+    statusBtn.textContent='Status';
+    statusBtn.addEventListener('click', ()=>{
+      if(t.history && t.history.length>0){
+        alert(t.history.map(h=>`[${h.date}] ${h.type}: Rp ${formatNumber(h.amount)} - ${h.note}`).join('\n'));
+      } else {
+        alert('Belum diedit.');
+      }
     });
 
-    actions.appendChild(editBtn); actions.appendChild(delBtn);
+    actions.appendChild(editBtn);
+    actions.appendChild(statusBtn);
+
     header.appendChild(span); header.appendChild(actions);
     tDiv.appendChild(header);
 
-    if(t.history && t.history.length>0){
-      const hDiv = document.createElement('div'); hDiv.className='history';
-      hDiv.innerHTML = t.history.map(h=>`[${h.date}] ${h.type}: Rp ${formatNumber(h.amount)} - ${h.note}`).join('<br>');
-      tDiv.appendChild(hDiv);
-    }
-
     transactionsDiv.appendChild(tDiv);
   });
+  updateSummary();
 }
 
+// Form Submit
 form.addEventListener('submit', e=>{
   e.preventDefault();
   const type = document.getElementById('type').value;
@@ -88,16 +104,9 @@ form.addEventListener('submit', e=>{
 
   if(editingIndex!==null){
     if(!transactions[editingIndex].history) transactions[editingIndex].history=[];
-    transactions[editingIndex].history.push({
-      type: transactions[editingIndex].type,
-      amount: transactions[editingIndex].amount,
-      note: transactions[editingIndex].note,
-      date: transactions[editingIndex].date
-    });
-    transactions[editingIndex].type = type;
-    transactions[editingIndex].amount = amount;
-    transactions[editingIndex].note = note;
-    editingIndex = null;
+    transactions[editingIndex].history.push({...transactions[editingIndex]});
+    transactions[editingIndex] = {type, amount, note, date: now, history: transactions[editingIndex].history};
+    editingIndex=null;
   } else {
     transactions.push({type, amount, note, date: now, history: []});
   }
@@ -106,21 +115,47 @@ form.addEventListener('submit', e=>{
   form.reset();
   renderTransactions();
   updateChart();
-  updateSaldo();
 });
 
+// Filter
 applyFilterBtn.addEventListener('click', renderTransactions);
 
-exportBtn.addEventListener('click', ()=>{
-  let csv = "Jenis, Jumlah, Keterangan, Tanggal\n";
-  transactions.forEach(t=>{
-    csv += `${t.type},${t.amount},"${t.note}",${t.date}\n`;
+// Export
+exportBtn.addEventListener('click', ()=> exportOptions.classList.toggle('hidden'));
+exportOptions.querySelectorAll('button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const type = btn.dataset.type;
+    let csv = "Jenis,Jumlah,Keterangan,Tanggal\n";
+    transactions.forEach(t=> csv+=`${t.type},${t.amount},"${t.note}",${t.date}\n`);
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=`transaksi.${type}`; a.click();
+    URL.revokeObjectURL(url);
+    exportOptions.classList.add('hidden');
   });
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download='transaksi.csv'; a.click();
-  URL.revokeObjectURL(url);
+});
+
+// Anggota
+function renderAnggota(){
+  anggotaList.innerHTML='';
+  anggota.forEach((a,i)=>{
+    const li = document.createElement('li');
+    li.textContent = a;
+    const delBtn = document.createElement('button'); delBtn.textContent='×';
+    delBtn.addEventListener('click', ()=>{
+      anggota.splice(i,1);
+      localStorage.setItem('anggota', JSON.stringify(anggota));
+      renderAnggota();
+    });
+    li.appendChild(delBtn);
+    anggotaList.appendChild(li);
+  });
+}
+
+anggotaForm.addEventListener('submit', e=>{
+  e.preventDefault();
+  const name = anggotaName.value.trim();
+  if(name){ anggota.push(name); localStorage.setItem('anggota', JSON.stringify(anggota)); anggotaName.value=''; renderAnggota(); }
 });
 
 // Chart.js
@@ -129,11 +164,12 @@ let chart;
 function updateChart(){
   const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  const data = { labels:['Pemasukan','Pengeluaran'], datasets:[{ label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336'] }] };
+  const data = { labels:['Pemasukan','Pengeluaran'], datasets:[{label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336']}] };
   if(chart) chart.destroy();
-  chart = new Chart(ctx,{ type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{ display:false }, title:{ display:true, text:'Grafik Transaksi' } } } });
+  chart = new Chart(ctx, { type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true, text:'Grafik Transaksi'} } } });
 }
 
+// Init
 renderTransactions();
-updateSaldo();
+renderAnggota();
 updateChart();
