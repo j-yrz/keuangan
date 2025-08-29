@@ -3,40 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catatan Transaksi</title>
+  <title>Aplikasi Catatan Keuangan</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- Header -->
   <header class="home-header">
-    <h1>Catatan Transaksi</h1>
+    <h1>Catatan Keuangan</h1>
     <div class="menu-icon" onclick="toggleMenu()">☰</div>
   </header>
 
   <!-- Dashboard -->
   <section class="home-dashboard">
-    <div class="card income"><strong>Pemasukan</strong><span id="income">Rp 0</span></div>
-    <div class="card expense"><strong>Pengeluaran</strong><span id="expense">Rp 0</span></div>
-    <div class="card balance"><strong>Saldo</strong><span id="balance">Rp 0</span></div>
+    <div class="card income">
+      <strong>Pemasukan</strong>
+      <span id="totalIncome">Rp 0</span>
+    </div>
+    <div class="card expense">
+      <strong>Pengeluaran</strong>
+      <span id="totalExpense">Rp 0</span>
+    </div>
+    <div class="card balance">
+      <strong>Saldo</strong>
+      <span id="balance">Rp 0</span>
+    </div>
   </section>
 
-  <!-- Tombol tambah catatan -->
-  <button class="btn-floating" id="btnCatatan" onclick="openModal()">+ Catatan</button>
+  <!-- Tombol Tambah Catatan -->
+  <button class="btn-floating" id="addBtn" onclick="openModal()">+ Tambah</button>
 
   <!-- Side Menu -->
   <nav class="side-menu" id="sideMenu">
     <ul>
       <li onclick="openHistory()">📜 History Transaksi</li>
-      <li onclick="openChart()">📊 Grafik</li>
-      <li onclick="openRestore()">🔄 Backup & Restore</li>
-      <li onclick="closeMenu()">❌ Tutup</li>
+      <li onclick="openChart()">📊 Statistik</li>
+      <li onclick="openRestore()">⏪ Backup & Restore</li>
+      <li onclick="closeMenu()">❌ Tutup Menu</li>
     </ul>
   </nav>
 
-  <!-- Modal Tambah/Edit -->
-  <div class="modal" id="transactionModal">
+  <!-- Modal Tambah Transaksi -->
+  <div id="transactionModal" class="modal">
     <div class="modal-content">
-      <h3 id="modalTitle">Tambah Transaksi</h3>
+      <h3>Tambah Transaksi</h3>
       <input type="text" id="descInput" placeholder="Deskripsi">
       <input type="number" id="amountInput" placeholder="Jumlah">
       <select id="typeSelect">
@@ -44,57 +53,60 @@
         <option value="expense">Pengeluaran</option>
       </select>
       <select id="memberSelect"></select>
-      <button class="btn-add" onclick="saveTransaction()">Simpan</button>
+      <button class="btn-add" onclick="addTransaction()">Simpan</button>
       <button class="btn-cancel" onclick="closeModal()">Batal</button>
     </div>
   </div>
 
-  <!-- History -->
-  <div class="history-container" id="historyContainer">
-    <div class="modal-content animate-slide">
-      <h3>History Transaksi</h3>
+  <!-- History Transaksi -->
+  <div id="historyModal" class="history-container">
+    <div class="modal-content">
       <button class="btn-close" onclick="closeHistory()">Tutup</button>
       <div class="table-container">
-        <table id="historyTable">
+        <table>
           <thead>
             <tr>
-              <th><input type="checkbox" id="checkAll" onclick="toggleAll(this)"></th>
-              <th>Tanggal</th>
+              <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
               <th>Deskripsi</th>
               <th>Jumlah</th>
               <th>Jenis</th>
               <th>Anggota</th>
+              <th>Tanggal</th>
               <th>Status</th>
               <th>Aksi</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody id="transactionTable"></tbody>
         </table>
       </div>
-      <button id="deleteSelectedBtn" class="btn-exp" style="display:none;" onclick="deleteSelected()">Hapus Terpilih</button>
+      <button id="deleteSelectedBtn" class="btn-cancel" style="display:none;" onclick="deleteSelected()">Hapus Terpilih</button>
     </div>
   </div>
 
-  <!-- Chart -->
-  <div class="chart-container" id="chartContainer">
-    <div class="modal-content animate-slide">
-      <h3>Grafik</h3>
+  <!-- Statistik -->
+  <div id="chartModal" class="chart-container">
+    <div class="modal-content">
       <button class="btn-close" onclick="closeChart()">Tutup</button>
-      <div id="chartArea"></div>
+      <h3>Statistik Keuangan</h3>
+      <div class="bar incomeBar" id="incomeBar"></div>
+      <div class="bar expenseBar" id="expenseBar"></div>
     </div>
   </div>
 
-  <!-- Restore -->
-  <div class="restore-container" id="restoreContainer">
-    <div class="modal-content animate-slide">
-      <h3>Backup & Restore</h3>
+  <!-- Backup & Restore -->
+  <div id="restoreModal" class="restore-container">
+    <div class="modal-content">
       <button class="btn-close" onclick="closeRestore()">Tutup</button>
+      <h3>Backup & Restore</h3>
       <button class="btn-exp" onclick="exportData()">Export Data</button>
-      <input type="file" id="importFile" accept="application/json" onchange="importData(event)">
+      <input type="file" id="importFile" onchange="importData(event)">
+      <button class="btn-cancel" onclick="deleteAll()">Hapus Semua</button>
     </div>
   </div>
 
+  <!-- Tooltip Edit -->
   <div id="editTooltip"></div>
+
   <script src="script.js"></script>
 </body>
 </html>
