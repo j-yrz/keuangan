@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== Elements =====
   const incomeEl = el("income"), expenseEl = el("expense"), balanceEl = el("balance");
-  const formSection = el("formSection"), homeSection = el("home"), historySection = el("historySection");
+  const formSection = el("formSection"), homeSection = el("home"), historySection = el("historySection"), chartSection = el("chartSection");
   const form = el("transactionForm"), typeEl = el("type"), memberEl = el("memberSelect"), descEl = el("desc"), amountEl = el("amount"), formTitle = el("formTitle");
   const addBtn = el("addBtn"), cancelForm = el("cancelForm");
   const selectAllEl = el("selectAll"), deleteSelectedBtn = el("deleteSelected");
@@ -50,11 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===== Render History =====
-  function renderHistory(){
+  function renderHistory(filteredList){
+    const list = filteredList || transactions;
     const tbody = document.querySelector("#historyTable tbody");
     if(!tbody) return;
     tbody.innerHTML="";
-    transactions.forEach((t,i)=>{
+    list.forEach((t,i)=>{
       const tr=document.createElement("tr");
       tr.innerHTML=`
         <td><input type="checkbox" class="rowCheck" data-id="${t.id}"></td>
@@ -131,25 +132,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const keyword=searchKeyword.value.toLowerCase();
     const mem=filterMember.value;
     const typ=filterType.value;
-    const tbody=document.querySelector("#historyTable tbody"); tbody.innerHTML="";
-    transactions.forEach((t,i)=>{
-      if((!mem||t.member===mem)&&(!typ||t.type===typ)&&(!keyword||(t.desc.toLowerCase().includes(keyword)||t.member.toLowerCase().includes(keyword)||t.date.toLowerCase().includes(keyword)||t.amount.toString().includes(keyword)))){
-        const tr=document.createElement("tr");
-        tr.innerHTML=`
-          <td><input type="checkbox" class="rowCheck" data-id="${t.id}"></td>
-          <td>${i+1}</td>
-          <td>${t.date}</td>
-          <td>${t.type}</td>
-          <td>${t.member}</td>
-          <td>${t.desc}</td>
-          <td>${formatRupiah(t.amount)}</td>
-          <td>${t.status?'<button class="status-btn" title="'+t.status+'">Diedit</button>':'Baru'}</td>
-          <td><button class="btn-edit" data-id="${t.id}">✏️ Edit</button></td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
-    bindRowChecks();
+    const filtered = transactions.filter(t=>
+      (!mem||t.member===mem)&&(!typ||t.type===typ)&&(!keyword||(t.desc.toLowerCase().includes(keyword)||t.member.toLowerCase().includes(keyword)||t.date.toLowerCase().includes(keyword)||t.amount.toString().includes(keyword)))
+    );
+    renderHistory(filtered);
   });
   resetFilter?.addEventListener("click",()=>{searchKeyword.value=""; filterMember.value=""; filterType.value=""; renderHistory();});
 
@@ -172,9 +158,8 @@ document.addEventListener("DOMContentLoaded", () => {
   menuBtn?.addEventListener("click",()=>sidebar.classList.toggle("show"));
   closeMenu?.addEventListener("click",()=>sidebar.classList.remove("show"));
   openHistoryBtn?.addEventListener("click",()=>{
-    historySection.classList.remove("hidden"); homeSection.classList.add("hidden"); sidebar.classList.remove("show");
+    historySection.classList.remove("hidden"); homeSection.classList.add("hidden"); chartSection.classList.add("hidden"); sidebar.classList.remove("show");
   });
-
   openChartSidebar?.addEventListener("click",()=>{
     chartSection.classList.remove("hidden"); homeSection.classList.add("hidden"); historySection.classList.add("hidden"); sidebar.classList.remove("show");
   });
