@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catatan Keuangan</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catatan Keuangan Final</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <header>
     <h1>Catatan Keuangan</h1>
-    <div class="header-buttons">
+    <div class="top-menu">
       <button id="themeToggle">🌙</button>
       <button id="menuBtn">☰</button>
     </div>
@@ -22,7 +22,7 @@
       <div class="card">Pengeluaran<br><span id="expense">Rp 0</span></div>
       <div class="card">Saldo<br><span id="balance">Rp 0</span></div>
     </div>
-    <button id="addBtn" class="primary-btn">+ Tambah Catatan</button>
+    <button id="addBtn" class="btn-main">+ Tambah Catatan</button>
   </main>
 
   <section id="formSection" class="hidden">
@@ -36,19 +36,19 @@
       </label>
       <label>Anggota:
         <select id="memberSelect"></select>
+        <div class="member-actions">
+          <button type="button" id="addMember">Tambah</button>
+          <button type="button" id="removeMember">Hapus</button>
+        </div>
       </label>
-      <div class="member-buttons">
-        <button type="button" id="addMember">+ Tambah Anggota</button>
-        <button type="button" id="removeMember">- Hapus Anggota</button>
-      </div>
       <label>Keterangan:
         <input type="text" id="desc" required>
       </label>
       <label>Jumlah:
-        <input type="text" id="amount" required placeholder="Rp 0">
+        <input type="text" id="amount" required>
       </label>
-      <div class="form-actions">
-        <button type="submit" class="primary-btn">Simpan</button>
+      <div class="form-buttons">
+        <button type="submit">Simpan</button>
         <button type="button" id="cancelForm">Batal</button>
       </div>
     </form>
@@ -56,7 +56,7 @@
 
   <section id="historySection" class="hidden">
     <h2>History Transaksi</h2>
-    <div class="history-filters">
+    <div class="filters">
       <input type="text" id="searchKeyword" placeholder="Cari...">
       <select id="filterMember"></select>
       <select id="filterType">
@@ -64,7 +64,7 @@
         <option value="pemasukan">Pemasukan</option>
         <option value="pengeluaran">Pengeluaran</option>
       </select>
-      <button id="applyFilter">Filter</button>
+      <button id="applyFilter">Terapkan</button>
       <button id="resetFilter">Reset</button>
     </div>
     <table id="historyTable">
@@ -101,7 +101,6 @@
     <h2>Grafik Transaksi</h2>
     <canvas id="pieChart"></canvas>
     <canvas id="lineChart"></canvas>
-    <button id="closeChart">Tutup</button>
   </section>
 
   <aside id="sidebar" class="hidden">
