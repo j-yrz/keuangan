@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catatan Keuangan - Final Update</title>
+<title>Catatan Keuangan - Final</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
 <header>
   <h1>Catatan Keuangan</h1>
   <div class="header-actions">
@@ -66,7 +67,11 @@
   <div class="filter-section">
     <input type="text" id="searchKeyword" placeholder="Cari...">
     <select id="filterMember"><option value="">Semua Anggota</option></select>
-    <select id="filterType"><option value="">Semua Jenis</option><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select>
+    <select id="filterType">
+      <option value="">Semua Jenis</option>
+      <option value="pemasukan">Pemasukan</option>
+      <option value="pengeluaran">Pengeluaran</option>
+    </select>
     <button id="applyFilter">Terapkan Filter</button>
     <button id="resetFilter">Reset</button>
   </div>
