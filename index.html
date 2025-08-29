@@ -13,7 +13,7 @@
   <div class="menu-toggle" id="menuToggle">☰</div>
   <nav id="navMenu">
     <a href="#home">Home</a>
-    <a href="#catatan">Catatan</a>
+    <a href="#catatan">History</a>
     <a href="#grafik">Grafik</a>
     <a href="#anggota">Anggota</a>
   </nav>
@@ -30,7 +30,7 @@
     </div>
   </section>
 
-  <!-- Catatan Transaksi -->
+  <!-- History Transaksi -->
   <section id="catatan">
     <h2>History Transaksi</h2>
 
@@ -48,8 +48,16 @@
         <option value="Pemasukan">Pemasukan</option>
         <option value="Pengeluaran">Pengeluaran</option>
       </select>
+
       <input type="number" id="amount" placeholder="Jumlah" required />
       <input type="text" id="note" placeholder="Keterangan" />
+      <input type="date" id="transactionDate" required />
+      <input type="text" id="deskripsi" placeholder="Deskripsi (opsional)" />
+      <input type="text" id="sumberDana" placeholder="Sumber Dana" />
+      <select id="transactionAnggota" required>
+        <option value="">Pilih Anggota</option>
+      </select>
+
       <button type="submit">Simpan Transaksi</button>
     </form>
 
@@ -72,7 +80,7 @@
   </section>
 
   <!-- Grafik -->
-  <section id="grafik">
+  <section id="grafik" style="display:none;">
     <h2>Grafik Transaksi</h2>
     <canvas id="transactionChart"></canvas>
   </section>
