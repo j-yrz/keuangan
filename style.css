@@ -1,73 +1,42 @@
-/* ===== Global ===== */
-body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f8f8f8; transition: background 0.3s; }
-.hidden { display:none; }
-button { cursor:pointer; border:none; border-radius:5px; padding:8px 12px; transition: 0.2s; }
-button:hover { opacity:0.85; }
-input, select { padding:6px; border:1px solid #ccc; border-radius:4px; }
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f9f9f9; }
+header { display:flex; justify-content: space-between; align-items:center; padding:10px 20px; background:#2196F3; color:white; position:relative; }
+.logo { font-size: 1.2em; font-weight:bold; }
+.menu-toggle { font-size:1.5em; cursor:pointer; }
+nav { display:none; flex-direction: column; background:#1976D2; position:absolute; top:50px; right:0; width:200px; border-radius:5px; overflow:hidden; transition: all 0.3s ease; z-index:1000; }
+nav.show { display:flex; animation:fadeIn 0.3s forwards; }
+nav a { padding:10px; color:white; text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.2); }
+nav a:hover { background: rgba(255,255,255,0.2); }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
 
-/* ===== Header ===== */
-header { background:#2d7d2d; color:#fff; padding:10px 15px; display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1000; }
-header h1 { margin:0; font-size:20px; }
-header .top-menu { display:flex; gap:10px; }
-header button { font-size:20px; background:none; color:#fff; }
+main { padding:20px; max-width:600px; margin:0 auto; }
+section { margin-bottom:40px; }
+h2 { color:#333; }
 
-/* ===== Summary Cards ===== */
-.summary-cards { display:flex; justify-content:space-around; flex-wrap:wrap; padding:15px; gap:10px; }
-.summary-cards .card { flex:1; min-width:100px; background:#fff; padding:15px; border-radius:8px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); transition:0.2s; }
-.summary-cards .card:hover { box-shadow:0 4px 10px rgba(0,0,0,0.15); }
-.summary-cards .card span { font-weight:bold; font-size:18px; display:block; margin-top:5px; }
+/* Form Tambah Transaksi */
+form { display:flex; flex-direction:column; gap:10px; margin-bottom:10px; background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+form input, form select { padding:10px; border-radius:5px; border:1px solid #ccc; font-size:1em; }
+form button { padding:12px; border:none; border-radius:5px; background:#2196F3; color:white; font-size:1em; cursor:pointer; transition: background 0.3s; }
+form button:hover { background:#1976D2; }
 
-/* ===== Main Button ===== */
-.btn-main { display:block; margin:15px auto; background:#2d7d2d; color:#fff; font-size:16px; padding:10px 20px; }
+/* Filter */
+#filterContainer { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px; }
+#filterContainer input, #filterContainer select, #filterContainer button { padding:8px; border-radius:5px; border:1px solid #ccc; }
+#filterContainer button { background:#2196F3; color:white; border:none; cursor:pointer; transition:0.3s; }
+#filterContainer button:hover { background:#1976D2; }
 
-/* ===== Form Section ===== */
-#formSection { background:#fff; padding:15px; margin:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-#transactionForm { display:flex; flex-direction:column; gap:12px; }
-#transactionForm label { display:flex; flex-direction:column; font-size:14px; }
-.member-actions { display:flex; gap:5px; margin-top:5px; }
-.form-buttons { display:flex; gap:10px; }
+/* Saldo */
+#saldo { font-weight:bold; margin-bottom:10px; font-size:1.1em; }
 
-/* ===== History Section ===== */
-#historySection { background:#fff; margin:15px; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-.history-actions { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; align-items:center; }
-#historyTable { width:100%; border-collapse:collapse; font-size:14px; }
-#historyTable th, #historyTable td { border:1px solid #ccc; padding:6px; text-align:left; }
-#historyTable th { background:#eee; }
-#historyTable tr:nth-child(even) { background:#f9f9f9; }
-#historyTable tr:hover { background:#f1f1f1; }
-#historyTable td button { padding:4px 6px; font-size:12px; }
+/* Transaction List */
+.transaction { margin-bottom:10px; padding:10px; border-radius:5px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); transition: all 0.3s; display:flex; justify-content:space-between; flex-direction:column; }
+.transaction:hover { background:#f0f0f0; }
+.transaction.highlight { background:#FFF3CD; border-left:5px solid #FFC107; }
+.transaction-header { display:flex; justify-content:space-between; align-items:center; }
+.transaction .actions { display:flex; gap:10px; }
+.transaction .delete { cursor:pointer; color:red; }
+.transaction .edit { cursor:pointer; color:blue; }
 
-/* ===== Chart Section ===== */
-#chartSection { background:#fff; margin:15px; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-#chartSection canvas { max-width:100%; margin-bottom:15px; }
+/* History */
+.history { margin-top:5px; font-size:0.85em; color:#555; border-top:1px dashed #ccc; padding-top:5px; }
 
-/* ===== Sidebar ===== */
-#sidebar { position:fixed; top:0; right:-260px; width:250px; height:100%; background:#fff; box-shadow:-2px 0 5px rgba(0,0,0,0.2); padding:15px; transition:0.3s; z-index:900; }
-#sidebar.show { right:0; }
-.sidebar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-.sidebar-header button { font-size:20px; background:none; }
-#sidebar ul { list-style:none; padding:0; }
-#sidebar ul li { margin-bottom:10px; }
-#sidebar ul li button { width:100%; text-align:left; background:#f0f0f0; padding:8px 10px; }
-
-/* ===== Export Dropdown ===== */
-.export-dropdown { position:relative; display:inline-block; }
-#exportOptions { position:absolute; top:35px; left:0; background:#fff; border:1px solid #ccc; border-radius:5px; box-shadow:0 2px 5px rgba(0,0,0,0.15); z-index:1001; }
-#exportOptions button { display:block; width:100%; padding:8px 10px; text-align:left; background:none; border:none; }
-
-/* ===== Dark Mode ===== */
-body.dark { background:#1c1c1c; color:#eee; }
-body.dark header { background:#111; }
-body.dark .card { background:#222; color:#fff; }
-body.dark #formSection, body.dark #historySection, body.dark #chartSection { background:#222; color:#fff; }
-body.dark #sidebar { background:#222; color:#fff; }
-body.dark #historyTable th, body.dark #historyTable td { border-color:#444; }
-
-/* ===== Mobile Adjustments ===== */
-@media(max-width:600px){
-  .summary-cards { flex-direction:column; }
-  #historyTable { font-size:12px; }
-  header .top-menu { gap:5px; }
-  #sidebar { width:200px; }
-  #exportOptions { left:auto; right:0; }
-}
+canvas { margin-top:20px; max-width:100%; }
