@@ -4,39 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Keuangan</title>
-<style>
-  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f9f9f9; }
-  header { display:flex; justify-content: space-between; align-items:center; padding:10px 20px; background:#2196F3; color:white; position:relative; }
-  .logo { font-size: 1.2em; font-weight:bold; }
-  .menu-toggle { font-size:1.5em; cursor:pointer; }
-  nav { display:none; flex-direction: column; background:#1976D2; position:absolute; top:50px; right:0; width:200px; border-radius:5px; overflow:hidden; transition: all 0.3s ease; z-index:1000; }
-  nav.show { display:flex; animation:fadeIn 0.3s forwards; }
-  nav a { padding:10px; color:white; text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.2); }
-  nav a:hover { background: rgba(255,255,255,0.2); }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-
-  main { padding:20px; max-width:600px; margin:0 auto; }
-  section { margin-bottom:40px; }
-  h2 { color:#333; }
-
-  /* Form */
-  form { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
-  form input, form select { padding:8px; border-radius:5px; border:1px solid #ccc; }
-  form button { padding:10px; border:none; border-radius:5px; background:#2196F3; color:white; cursor:pointer; }
-  form button:hover { background:#1976D2; }
-
-  /* Transaction List */
-  .transaction { margin-bottom:10px; padding:10px; border-radius:5px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); transition: all 0.3s; display:flex; justify-content:space-between; flex-direction:column; }
-  .transaction:hover { background:#f0f0f0; }
-  .transaction-header { display:flex; justify-content:space-between; align-items:center; }
-  .transaction .actions { display:flex; gap:5px; }
-  .transaction .delete { cursor:pointer; color:red; }
-  .transaction .edit { cursor:pointer; color:blue; }
-
-  .history { margin-top:5px; font-size:0.9em; color:#555; border-top:1px dashed #ccc; padding-top:5px; }
-
-  canvas { margin-top:20px; max-width:100%; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -53,11 +21,27 @@
 <main>
   <section id="home">
     <h2>Home</h2>
-    <p>Selamat datang di aplikasi keuangan pribadi. Gunakan menu di atas untuk menambahkan transaksi dan melihat grafik.</p>
+    <p>Selamat datang di aplikasi keuangan pribadi. Gunakan menu di atas untuk menambahkan transaksi, melihat riwayat, filter, dan grafik keuangan.</p>
   </section>
 
   <section id="catatan">
     <h2>Catatan Transaksi</h2>
+
+    <div id="filterContainer">
+      <input type="date" id="startDate" />
+      <span>s/d</span>
+      <input type="date" id="endDate" />
+      <select id="filterType">
+        <option value="">Semua Jenis</option>
+        <option value="Pemasukan">Pemasukan</option>
+        <option value="Pengeluaran">Pengeluaran</option>
+      </select>
+      <button id="applyFilter">Terapkan Filter</button>
+      <button id="exportCSV">Ekspor CSV</button>
+    </div>
+
+    <div id="saldo">Saldo: Rp 0</div>
+
     <form id="transactionForm">
       <select id="type" required>
         <option value="">Pilih Jenis</option>
@@ -68,6 +52,7 @@
       <input type="text" id="note" placeholder="Keterangan (opsional)" />
       <button type="submit">Simpan Transaksi</button>
     </form>
+
     <div id="transactions"></div>
   </section>
 
@@ -77,125 +62,7 @@
   </section>
 </main>
 
-<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-  // Toggle menu mobile
-  const menuToggle = document.getElementById('menuToggle');
-  const navMenu = document.getElementById('navMenu');
-  menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
-
-  // Smooth scroll untuk menu
-  document.querySelectorAll('nav a').forEach(link=>{
-    link.addEventListener('click', e=>{
-      e.preventDefault();
-      const target = document.querySelector(link.getAttribute('href'));
-      target.scrollIntoView({behavior:'smooth'});
-      navMenu.classList.remove('show'); // tutup menu
-    });
-  });
-
-  // Transactions
-  const form = document.getElementById('transactionForm');
-  const transactionsDiv = document.getElementById('transactions');
-  let transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-  let editingIndex = null;
-
-  function formatNumber(num) { return Number(num).toLocaleString('id-ID'); }
-
-  function renderTransactions(){
-    transactionsDiv.innerHTML='';
-    transactions.forEach((t,i)=>{
-      const tDiv = document.createElement('div');
-      tDiv.className='transaction';
-      const header = document.createElement('div');
-      header.className='transaction-header';
-      const span = document.createElement('span');
-      span.textContent = `${t.type}: Rp ${formatNumber(t.amount)} - ${t.note}`;
-      const actions = document.createElement('div'); actions.className='actions';
-      const editBtn = document.createElement('span'); editBtn.className='edit'; editBtn.textContent='✎';
-      const delBtn = document.createElement('span'); delBtn.className='delete'; delBtn.textContent='×';
-
-      editBtn.addEventListener('click', ()=>{
-        editingIndex=i;
-        document.getElementById('type').value = t.type;
-        document.getElementById('amount').value = t.amount;
-        document.getElementById('note').value = t.note;
-      });
-
-      delBtn.addEventListener('click', ()=>{
-        transactions.splice(i,1);
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-        renderTransactions();
-        updateChart();
-      });
-
-      actions.appendChild(editBtn); actions.appendChild(delBtn);
-      header.appendChild(span); header.appendChild(actions);
-      tDiv.appendChild(header);
-
-      // Riwayat edit
-      if(t.history && t.history.length>0){
-        const hDiv = document.createElement('div'); hDiv.className='history';
-        hDiv.innerHTML = t.history.map(h=>`[${h.date}] ${h.type}: Rp ${formatNumber(h.amount)} - ${h.note}`).join('<br>');
-        tDiv.appendChild(hDiv);
-      }
-
-      transactionsDiv.appendChild(tDiv);
-    });
-  }
-
-  form.addEventListener('submit', e=>{
-    e.preventDefault();
-    const type = document.getElementById('type').value;
-    const amount = document.getElementById('amount').value;
-    const note = document.getElementById('note').value;
-    const now = new Date().toLocaleString('id-ID');
-
-    if(editingIndex!==null){
-      // Simpan riwayat edit
-      if(!transactions[editingIndex].history) transactions[editingIndex].history=[];
-      transactions[editingIndex].history.push({
-        type: transactions[editingIndex].type,
-        amount: transactions[editingIndex].amount,
-        note: transactions[editingIndex].note,
-        date: now
-      });
-      // Update transaksi
-      transactions[editingIndex].type = type;
-      transactions[editingIndex].amount = amount;
-      transactions[editingIndex].note = note;
-      editingIndex = null;
-    } else {
-      transactions.push({type, amount, note, history: []});
-    }
-
-    localStorage.setItem('transactions', JSON.stringify(transactions));
-    form.reset();
-    renderTransactions();
-    updateChart();
-  });
-
-  // Chart.js
-  const ctx = document.getElementById('transactionChart').getContext('2d');
-  let chart;
-  function updateChart(){
-    const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
-    const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-
-    const data = {
-      labels:['Pemasukan','Pengeluaran'],
-      datasets:[{ label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336'] }]
-    };
-
-    if(chart) chart.destroy();
-    chart = new Chart(ctx,{ type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{ display:false }, title:{ display:true, text:'Grafik Transaksi' } } } });
-  }
-
-  renderTransactions();
-  updateChart();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
