@@ -87,6 +87,12 @@ h2 {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   text-align: center;
   font-weight: bold;
+  margin: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Button Buat Catatan */
@@ -219,11 +225,12 @@ table {
   border-collapse: collapse;
   background: #fff;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
 }
 th, td {
-  padding: 10px;
-  border: 1px solid #ddd;
+  padding: 12px 15px;
   text-align: left;
+  border: 1px solid #ddd;
 }
 th {
   background: #2196F3;
@@ -247,13 +254,26 @@ td button {
 /* Canvas Grafik */
 canvas {
   margin-top: 20px;
+  width: 100%;
   max-width: 100%;
+  height: auto;
 }
 
 /* Responsive */
 @media (max-width: 600px) {
-  .summary-cards { flex-direction: column; }
-  nav { width: 100%; top: 50px; right: 0; }
-  #filterContainer { flex-direction: column; }
-  #typePopup { width: 80%; }
+  .summary-cards { 
+    flex-direction: column; 
+    margin: 0; 
+  }
+  nav { 
+    width: 100%; 
+    top: 50px; 
+    right: 0; 
+  }
+  #filterContainer { 
+    flex-direction: column; 
+  }
+  #typePopup { 
+    width: 80%; 
+  }
 }
