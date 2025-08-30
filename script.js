@@ -1,71 +1,59 @@
-// Menu toggle
-const menuToggle = document.getElementById('menuToggle');
-const navMenu = document.getElementById('navMenu');
-menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
-document.querySelectorAll('nav a').forEach(link=>{
-  link.addEventListener('click', e=>{
-    e.preventDefault();
-    const target = document.querySelector(link.getAttribute('href'));
-    document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
-    if(target) target.style.display='block';
-    target.scrollIntoView({behavior:'smooth'});
-    navMenu.classList.remove('show');
-    if(link.getAttribute('href') === '#grafik') updateChart();
-  });
-});
-
-// Data
-let transactions = JSON.parse(localStorage.getItem('transactions')||'[]');
-let anggota = JSON.parse(localStorage.getItem('anggota')||'[]');
+// Data transaksi & anggota
+let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+let anggota = JSON.parse(localStorage.getItem('anggota')) || [];
 let editingIndex = null;
 
-// Elements
+// DOM Elements
+const formModal = document.getElementById('formModal');
+const showFormBtn = document.getElementById('showFormBtn');
+const closeBtn = document.querySelector('.closeBtn');
 const form = document.getElementById('transactionForm');
+const transactionAnggota = document.getElementById('transactionAnggota');
+const newAnggotaInput = document.getElementById('newAnggota');
 const transactionsTableBody = document.querySelector('#transactionsTable tbody');
-const searchNote = document.getElementById('searchNote');
-const startDateInput = document.getElementById('startDate');
-const endDateInput = document.getElementById('endDate');
+const deleteSelectedBtn = document.getElementById('deleteSelected');
+const checkAll = document.getElementById('checkAll');
+const filterAnggota = document.getElementById('filterAnggota');
 const applyFilterBtn = document.getElementById('applyFilter');
 const exportBtn = document.getElementById('exportBtn');
 const exportOptions = document.getElementById('exportOptions');
-const cardSaldo = document.getElementById('card-saldo');
-const cardPemasukan = document.getElementById('card-pemasukan');
-const cardPengeluaran = document.getElementById('card-pengeluaran');
-const transactionAnggota = document.getElementById('transactionAnggota');
-const showFormBtn = document.getElementById('showFormBtn');
 const toggleSaldo = document.getElementById('toggleSaldo');
-const newAnggotaInput = document.getElementById('newAnggota');
-const checkAll = document.getElementById('checkAll');
-const deleteSelectedBtn = document.getElementById('deleteSelected');
-const filterAnggota = document.getElementById('filterAnggota');
-const filterSumberDana = document.getElementById('filterSumberDana');
-const filterType = document.getElementById('filterType');
 
-// Format number
-const formatNumber = n=>Number(n).toLocaleString('id-ID');
+const saldoCard = document.getElementById('card-saldo');
+const pemasukanCard = document.getElementById('card-pemasukan');
+const pengeluaranCard = document.getElementById('card-pengeluaran');
 
-// Toggle form
-showFormBtn.addEventListener('click', ()=>{
-  if(form.style.display==='none'){
-    form.style.display='flex';
-    form.scrollIntoView({behavior:'smooth'});
-  } else form.style.display='none';
-});
+// Toggle menu mobile
+const menuToggle = document.getElementById('menuToggle');
+const navMenu = document.getElementById('navMenu');
+menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
 
 // Toggle saldo
 let saldoVisible = true;
 toggleSaldo.addEventListener('click', ()=>{
   saldoVisible = !saldoVisible;
-  updateSummary();
+  saldoCard.textContent = saldoVisible ? `Saldo: Rp ${calculateSaldo()}` : 'Saldo: ****';
+  saldoCard.appendChild(toggleSaldo);
 });
+
+// Modal Form
+showFormBtn.addEventListener('click', ()=> formModal.style.display='flex');
+closeBtn.addEventListener('click', ()=> formModal.style.display='none');
+window.addEventListener('click', e=> { if(e.target===formModal) formModal.style.display='none'; });
+
+// Tanggal otomatis
+const transactionDate = document.getElementById('transactionDate');
+transactionDate.value = new Date().toISOString().split('T')[0];
 
 // Render anggota dropdown
 function renderAnggotaDropdown(){
   transactionAnggota.innerHTML = '<option value="">Pilih Anggota</option>';
-  anggota.forEach(a=>{
+  anggota.forEach((a, idx)=>{
     const opt = document.createElement('option'); opt.value=a; opt.textContent=a;
     transactionAnggota.appendChild(opt);
   });
+
+  // Filter dropdown
   filterAnggota.innerHTML = '<option value="">Semua Anggota</option>';
   anggota.forEach(a=>{
     const opt = document.createElement('option'); opt.value=a; opt.textContent=a;
@@ -73,35 +61,32 @@ function renderAnggotaDropdown(){
   });
 }
 
-// Update summary
+// Calculate Summary
+function calculateSaldo(){
+  let pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
+  let pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
+  return pemasukan - pengeluaran;
+}
 function updateSummary(){
   const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  const saldo = pemasukan - pengeluaran;
-  cardSaldo.textContent = saldoVisible ? `Saldo: Rp ${formatNumber(saldo)}` : 'Saldo: •••';
-  cardSaldo.appendChild(toggleSaldo);
-  cardPemasukan.textContent = `Pemasukan: Rp ${formatNumber(pemasukan)}`;
-  cardPengeluaran.textContent = `Pengeluaran: Rp ${formatNumber(pengeluaran)}`;
+  saldoCard.textContent = saldoVisible ? `Saldo: Rp ${calculateSaldo()}` : 'Saldo: ****';
+  saldoCard.appendChild(toggleSaldo);
+  pemasukanCard.textContent = `Pemasukan: Rp ${pemasukan}`;
+  pengeluaranCard.textContent = `Pengeluaran: Rp ${pengeluaran}`;
 }
 
-// Render transactions
+// Render table
 function renderTransactionsTable(){
-  transactionsTableBody.innerHTML='';
-  const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
-  const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
-  const search = searchNote.value.toLowerCase();
-  const filterAnggotaVal = filterAnggota.value;
-  const filterSumberDanaVal = filterSumberDana.value.toLowerCase();
-  const filterTypeVal = filterType.value;
+  transactionsTableBody.innerHTML = '';
+  const typeFilterVal = document.getElementById('filterType').value;
+  const anggotaFilterVal = filterAnggota.value;
+  const searchNoteVal = document.getElementById('searchNote').value.toLowerCase();
 
   transactions.forEach((t,i)=>{
-    const tDate = new Date(t.date);
-    if(startDate && tDate<startDate) return;
-    if(endDate && tDate>endDate) return;
-    if(search && !t.note.toLowerCase().includes(search)) return;
-    if(filterAnggotaVal && t.anggota!==filterAnggotaVal) return;
-    if(filterSumberDanaVal && !t.sumberDana.toLowerCase().includes(filterSumberDanaVal)) return;
-    if(filterTypeVal && t.type!==filterTypeVal) return;
+    if(typeFilterVal && t.type!==typeFilterVal) return;
+    if(anggotaFilterVal && t.anggota!==anggotaFilterVal) return;
+    if(searchNoteVal && !t.note.toLowerCase().includes(searchNoteVal)) return;
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -109,7 +94,7 @@ function renderTransactionsTable(){
       <td>${i+1}</td>
       <td>${t.date}</td>
       <td>${t.type}</td>
-      <td>Rp ${formatNumber(t.amount)}</td>
+      <td>Rp ${t.amount}</td>
       <td>${t.note}</td>
       <td>${t.deskripsi}</td>
       <td>${t.sumberDana}</td>
@@ -124,7 +109,7 @@ function renderTransactionsTable(){
     // Edit
     tr.querySelector('.editBtn').addEventListener('click', ()=>{
       editingIndex = i;
-      form.style.display='flex';
+      formModal.style.display='flex';
       document.getElementById('type').value = t.type;
       document.getElementById('amount').value = t.amount;
       document.getElementById('note').value = t.note;
@@ -132,7 +117,7 @@ function renderTransactionsTable(){
       document.getElementById('deskripsi').value = t.deskripsi;
       document.getElementById('sumberDana').value = t.sumberDana;
       transactionAnggota.value = t.anggota;
-      window.scrollTo({top:0, behavior:'smooth'});
+      newAnggotaInput.value='';
     });
   });
 
@@ -172,8 +157,10 @@ form.addEventListener('submit', e=>{
 
   localStorage.setItem('transactions', JSON.stringify(transactions));
   form.reset();
+  transactionDate.value = new Date().toISOString().split('T')[0];
   renderTransactionsTable();
   updateSummary();
+  formModal.style.display='none';
 });
 
 // Delete selected
@@ -193,17 +180,21 @@ applyFilterBtn.addEventListener('click', e=>{
   renderTransactionsTable();
 });
 
-// Export CSV
+// Export pop-up
 exportBtn.addEventListener('click', ()=> exportOptions.classList.toggle('hidden'));
-exportOptions.querySelector('button[data-type="csv"]').addEventListener('click', ()=>{
-  let csv = 'Tanggal,Jenis,Jumlah,Keterangan,Deskripsi,SumberDana,Anggota\n';
-  transactions.forEach(t=>{
-    csv += `${t.date},${t.type},${t.amount},${t.note},${t.deskripsi},${t.sumberDana},${t.anggota}\n`;
+exportOptions.querySelectorAll('button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const type = btn.dataset.type;
+    let csv = 'Tanggal,Jenis,Jumlah,Keterangan,Deskripsi,SumberDana,Anggota\n';
+    transactions.forEach(t=>{
+      csv += `${t.date},${t.type},${t.amount},${t.note},${t.deskripsi},${t.sumberDana},${t.anggota}\n`;
+    });
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=`transaksi.${type}`; a.click();
+    URL.revokeObjectURL(url);
+    exportOptions.classList.add('hidden');
   });
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='transaksi.csv'; a.click();
-  URL.revokeObjectURL(url);
 });
 
 // Chart.js
@@ -220,6 +211,7 @@ function updateChart(){
 // Init
 document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
 document.getElementById('home').style.display='block';
-renderTransactionsTable();
 renderAnggotaDropdown();
+renderTransactionsTable();
 updateSummary();
+updateChart();
