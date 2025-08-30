@@ -5,23 +5,30 @@ body {
   padding: 0;
   background: #f9f9f9;
 }
+
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 15px 20px;
   background: #2196F3;
   color: white;
   position: relative;
+  flex-wrap: wrap;
 }
+
 .logo {
-  font-size: 1.2em;
+  font-size: 1.4em;
   font-weight: bold;
+  flex: 1;
+  text-align: center;
 }
+
 .menu-toggle {
   font-size: 1.5em;
   cursor: pointer;
 }
+
 nav {
   display: none;
   flex-direction: column;
@@ -32,54 +39,55 @@ nav {
   width: 200px;
   border-radius: 5px;
   overflow: hidden;
-  z-index: 1000;
 }
+
 nav.show {
   display: flex;
-  animation: fadeIn 0.3s forwards;
+  animation: fadeIn 0.3s ease;
 }
+
 nav a {
   padding: 10px;
   color: white;
   text-decoration: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
+
 nav a:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Main */
 main {
   padding: 20px;
-  max-width: 800px;
+  max-width: 100%;
   margin: 0 auto;
 }
-section {
-  margin-bottom: 40px;
+
+.section {
+  display: none;
 }
-h2 {
-  color: #333;
+
+.section.show {
+  display: block;
 }
 
 /* Summary Cards */
 .summary-cards {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 15px;
   margin-bottom: 20px;
+  justify-content: center;
 }
+
 .card {
-  flex: 1;
+  flex: 1 1 100%;
   min-width: 150px;
   background: #fff;
   padding: 15px;
@@ -89,111 +97,20 @@ h2 {
   font-weight: bold;
 }
 
-/* Modal Pop-up Form */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-.modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 400px;
-  position: relative;
-  animation: slideDown 0.3s forwards;
-}
-@keyframes slideDown {
-  from { transform: translateY(-30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-.closeBtn {
-  position: absolute;
-  top: 10px; right: 15px;
-  font-size: 1.5em;
-  cursor: pointer;
-}
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-form input, form select {
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 1em;
-}
-form button {
+button {
   padding: 12px;
-  border: none;
   border-radius: 5px;
+  border: none;
   background: #2196F3;
   color: white;
   font-size: 1em;
   cursor: pointer;
   transition: background 0.3s;
 }
-form button:hover {
+
+button:hover {
   background: #1976D2;
-}
-
-/* Popup Pilih Jenis dan Anggota */
-.popup {
-  position: absolute;
-  background: white;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
-  z-index: 1001;
-  width: 100%;
-  display: none;
-}
-.popupItem {
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #ddd;
-}
-.popupItem:hover {
-  background: #f1f1f1;
-}
-
-/* Popup Anggota */
-#anggotaPopup {
-  width: 250px;
-  height: auto;
-}
-#transactionAnggotaInput {
-  padding: 10px;
-  cursor: pointer;
-}
-
-/* Filter */
-#filterContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-#filterContainer input, #filterContainer button, #filterContainer select {
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-#filterContainer button {
-  background: #2196F3;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-}
-#filterContainer button:hover {
-  background: #1976D2;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* Table */
@@ -201,34 +118,100 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  overflow-x: auto;
+  display: block;
 }
+
 th, td {
   padding: 10px;
   border: 1px solid #ddd;
   text-align: left;
 }
+
 th {
   background: #2196F3;
   color: white;
 }
+
 td button {
   padding: 2px 5px;
   margin-right: 3px;
   cursor: pointer;
 }
 
-/* Export Pop-up */
-#exportOptions.hidden { display: none; }
-#exportOptions {
-  display: flex;
-  gap: 10px;
-  margin-top: 5px;
-  animation: fadeIn 0.3s forwards;
+/* Modal Form */
+#formModal {
+  display: none; /* Form modal tersembunyi secara default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+  opacity: 0;
 }
 
-/* Canvas Grafik */
-canvas {
-  margin-top: 20px;
-  max-width: 100%;
+#formModal.show {
+  opacity: 1;
+}
+
+.modal-content {
+  background: white;
+  margin: 10% auto;
+  padding: 20px;
+  width: 400px;
+  border-radius: 5px;
+  transition: transform 0.3s ease;
+  transform: scale(0.9);
+}
+
+#formModal.show .modal-content {
+  transform: scale(1);
+}
+
+/* Tombol Batal */
+#cancelBtn {
+  background: #f44336;
+}
+
+#cancelBtn:hover {
+  background: #d32f2f;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  nav {
+    width: 100%;
+  }
+
+  .summary-cards {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .card {
+    flex: 1 1 100%;
+    margin: 10px 0;
+  }
+
+  table {
+    font-size: 14px;
+  }
+
+  #filterContainer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #filterContainer input, #filterContainer button, #filterContainer select {
+    width: 100%;
+  }
+
+  /* Mobile Modal */
+  .modal-content {
+    width: 90%; /* Modal lebih besar di ponsel */
+    padding: 15px;
+  }
 }
