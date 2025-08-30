@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keuangan</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header>
+  <button id="menuToggle">☰</button>
+  <nav id="navMenu">
+    <a href="#home" class="menuItem">Home</a>
+    <a href="#history" class="menuItem">History</a>
+    <a href="#chart" class="menuItem">Grafik</a>
+  </nav>
+</header>
+
+<main>
+  <section id="home">
+    <div class="cards">
+      <div class="card" id="card-saldo">Saldo: **** <span id="toggleSaldo">👁</span></div>
+      <div class="card" id="card-pemasukan">Pemasukan: Rp 0</div>
+      <div class="card" id="card-pengeluaran">Pengeluaran: Rp 0</div>
+    </div>
+    <button id="showFormBtn" class="center-btn">Buat Catatan</button>
+  </section>
+
+  <section id="formModal" class="modal">
+    <div class="modal-content">
+      <span class="closeBtn">&times;</span>
+      <form id="transactionForm">
+        <label for="transactionDate">Tanggal</label>
+        <input type="date" id="transactionDate" required>
+
+        <label for="type">Jenis</label>
+        <select id="type" required>
+          <option value="Pemasukan">Pemasukan</option>
+          <option value="Pengeluaran">Pengeluaran</option>
+        </select>
+
+        <label for="amount">Jumlah</label>
+        <input type="number" id="amount" required>
+
+        <label for="note">Keterangan</label>
+        <input type="text" id="note">
+
+        <label for="deskripsi">Deskripsi</label>
+        <input type="text" id="deskripsi">
+
+        <label for="sumberDana">Sumber Dana</label>
+        <input type="text" id="sumberDana">
+
+        <label for="anggota">Anggota</label>
+        <div class="custom-dropdown">
+          <button type="button" id="anggotaBtn">Pilih Anggota ▼</button>
+          <ul id="anggotaList" class="dropdown-content"></ul>
+          <div id="addAnggotaDiv">
+            <input type="text" id="newAnggotaInput" placeholder="Tambah anggota baru">
+            <button type="button" id="addAnggotaBtn">Tambah</button>
+          </div>
+        </div>
+
+        <button type="submit">Simpan</button>
+        <button type="button" id="cancelBtn">Batal</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="history">
+    <div class="filter">
+      <select id="filterType">
+        <option value="">Semua Jenis</option>
+        <option value="Pemasukan">Pemasukan</option>
+        <option value="Pengeluaran">Pengeluaran</option>
+      </select>
+      <select id="filterAnggota"></select>
+      <input type="text" id="searchNote" placeholder="Cari Keterangan...">
+      <button id="applyFilter">Filter</button>
+    </div>
+    <button id="deleteSelected" style="display:none;">Hapus Terpilih</button>
+    <button id="exportBtn">Export</button>
+    <div id="exportOptions" class="hidden">
+      <button data-type="csv">CSV</button>
+      <button data-type="xlsx">XLSX</button>
+      <button data-type="pdf">PDF</button>
+    </div>
+    <table id="transactionsTable">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="checkAll"></th>
+          <th>No</th>
+          <th>Tanggal</th>
+          <th>Jenis</th>
+          <th>Jumlah</th>
+          <th>Keterangan</th>
+          <th>Deskripsi</th>
+          <th>Sumber Dana</th>
+          <th>Anggota</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="chart">
+    <canvas id="transactionChart"></canvas>
+  </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
