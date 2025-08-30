@@ -27,127 +27,94 @@ const navMenu = document.getElementById('navMenu');
 const menuItems = document.querySelectorAll('.menuItem');
 const sections = document.querySelectorAll('main section');
 
-// ===== Helper: Format Rupiah =====
-function formatRupiah(number) { return Number(number).toLocaleString('id-ID'); }
+// ===== Helper =====
+function formatRupiah(number){ return Number(number).toLocaleString('id-ID'); }
 
-// ===== Menu Toggle Mobile =====
+// ===== Menu Mobile Toggle =====
 menuToggle.addEventListener('click', () => navMenu.classList.toggle('show'));
 
 // ===== Navigasi Antar Section =====
-menuItems.forEach(item => {
-  item.addEventListener('click', e => {
+menuItems.forEach(item=>{
+  item.addEventListener('click', e=>{
     e.preventDefault();
-    const targetId = item.getAttribute('href').replace('#', '');
-    sections.forEach(sec => sec.style.display = 'none');
-    document.getElementById(targetId).style.display = 'block';
+    const targetId = item.getAttribute('href').replace('#','');
+    sections.forEach(sec=>sec.style.display='none');
+    document.getElementById(targetId).style.display='block';
     navMenu.classList.remove('show');
   });
 });
 
 // ===== Toggle Saldo =====
-let saldoVisible = true;
-toggleSaldo.textContent = '👁';
-toggleSaldo.addEventListener('click', () => { saldoVisible = !saldoVisible; updateSummary(); });
+let saldoVisible=true;
+toggleSaldo.textContent='👁';
+toggleSaldo.addEventListener('click', ()=>{ saldoVisible=!saldoVisible; updateSummary(); });
 
 // ===== Update Summary =====
-function updateSummary() {
-  const pemasukan = transactions.filter(t => t.type === 'Pemasukan').reduce((a, b) => a + Number(b.amount), 0);
-  const pengeluaran = transactions.filter(t => t.type === 'Pengeluaran').reduce((a, b) => a + Number(b.amount), 0);
-  saldoCard.textContent = saldoVisible ? `Saldo: Rp ${formatRupiah(pemasukan - pengeluaran)}` : 'Saldo: ****';
+function updateSummary(){
+  const pemasukan=transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
+  const pengeluaran=transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
+  saldoCard.textContent = saldoVisible ? `Saldo: Rp ${formatRupiah(pemasukan-pengeluaran)}`:'Saldo: ****';
   saldoCard.appendChild(toggleSaldo);
-  pemasukanCard.textContent = `Pemasukan: Rp ${formatRupiah(pemasukan)}`;
-  pengeluaranCard.textContent = `Pengeluaran: Rp ${formatRupiah(pengeluaran)}`;
+  pemasukanCard.textContent=`Pemasukan: Rp ${formatRupiah(pemasukan)}`;
+  pengeluaranCard.textContent=`Pengeluaran: Rp ${formatRupiah(pengeluaran)}`;
 }
 
-// ===== Render Anggota Container Custom =====
-function renderAnggotaContainer(selectedAnggota = '') {
-  anggotaContainer.innerHTML = '';
-
-  // Daftar anggota interaktif
-  const listDiv = document.createElement('div');
-  listDiv.id = 'anggotaList';
-  anggota.forEach((a, idx) => {
-    const item = document.createElement('div');
-    item.className = 'anggotaItem';
-    item.style.display = 'flex';
-    item.style.alignItems = 'center';
-    item.style.justifyContent = 'space-between';
-    item.style.marginBottom = '3px';
-    
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = a;
-    nameSpan.style.cursor = 'pointer';
-    if(a === selectedAnggota) nameSpan.style.fontWeight = 'bold';
-    nameSpan.addEventListener('click', () => {
-      // pilih anggota
-      document.querySelectorAll('.anggotaItem span').forEach(s=>s.style.fontWeight='normal');
-      nameSpan.style.fontWeight='bold';
-      item.dataset.selected='true';
+// ===== Render Anggota Container =====
+function renderAnggotaContainer(selectedAnggota=''){
+  anggotaContainer.innerHTML='';
+  const listDiv = document.createElement('div'); listDiv.id='anggotaList';
+  anggota.forEach((a,idx)=>{
+    const item=document.createElement('div'); item.className='anggotaItem';
+    const nameSpan=document.createElement('span'); nameSpan.textContent=a;
+    if(a===selectedAnggota) nameSpan.classList.add('selected');
+    nameSpan.addEventListener('click', ()=>{
+      document.querySelectorAll('#anggotaList span').forEach(s=>s.classList.remove('selected'));
+      nameSpan.classList.add('selected');
     });
-
-    const delBtn = document.createElement('button');
-    delBtn.type = 'button';
-    delBtn.textContent = '❌';
-    delBtn.style.marginLeft = '5px';
-    delBtn.addEventListener('click', () => {
-      anggota.splice(idx, 1);
-      localStorage.setItem('anggota', JSON.stringify(anggota));
+    const delBtn=document.createElement('button'); delBtn.type='button'; delBtn.textContent='❌';
+    delBtn.addEventListener('click', ()=>{
+      anggota.splice(idx,1); localStorage.setItem('anggota',JSON.stringify(anggota));
       renderAnggotaContainer(selectedAnggota);
     });
-
-    item.appendChild(nameSpan);
-    item.appendChild(delBtn);
+    item.appendChild(nameSpan); item.appendChild(delBtn);
     listDiv.appendChild(item);
   });
   anggotaContainer.appendChild(listDiv);
 
   // Input tambah anggota
-  const addDiv = document.createElement('div');
-  addDiv.style.display = 'flex';
-  addDiv.style.marginTop = '5px';
-  const input = document.createElement('input');
-  input.type = 'text'; input.placeholder = 'Tambah anggota baru';
-  input.style.flex='1';
-  const addBtn = document.createElement('button');
-  addBtn.type = 'button'; addBtn.textContent = 'Tambah';
-  addBtn.style.marginLeft='5px';
+  const addDiv=document.createElement('div'); addDiv.style.display='flex'; addDiv.style.marginTop='5px';
+  const input=document.createElement('input'); input.type='text'; input.placeholder='Tambah anggota baru'; input.style.flex='1';
+  const addBtn=document.createElement('button'); addBtn.type='button'; addBtn.textContent='Tambah'; addBtn.style.marginLeft='5px';
   addBtn.addEventListener('click', ()=>{
-    const val = input.value.trim();
-    if(val && !anggota.includes(val)){
-      anggota.push(val);
-      localStorage.setItem('anggota', JSON.stringify(anggota));
-      input.value='';
-      renderAnggotaContainer();
-    }
+    const val=input.value.trim();
+    if(val && !anggota.includes(val)){ anggota.push(val); localStorage.setItem('anggota',JSON.stringify(anggota)); input.value=''; renderAnggotaContainer(); }
   });
-  addDiv.appendChild(input);
-  addDiv.appendChild(addBtn);
-  anggotaContainer.appendChild(addDiv);
+  addDiv.appendChild(input); addDiv.appendChild(addBtn); anggotaContainer.appendChild(addDiv);
 }
 
 // ===== Reset Form =====
-function resetForm() {
+function resetForm(){
   form.reset();
-  document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
-  editingIndex = null;
+  document.getElementById('transactionDate').value=new Date().toISOString().split('T')[0];
+  editingIndex=null;
   renderAnggotaContainer();
 }
 
 // ===== Modal Form =====
-showFormBtn.addEventListener('click', () => { resetForm(); formModal.style.display='flex'; });
-closeBtn.addEventListener('click', () => formModal.style.display='none');
-window.addEventListener('click', e => { if(e.target === formModal) formModal.style.display='none'; });
+showFormBtn.addEventListener('click', ()=>{ resetForm(); formModal.style.display='flex'; });
+closeBtn.addEventListener('click', ()=> formModal.style.display='none');
+window.addEventListener('click', e=>{ if(e.target===formModal) formModal.style.display='none'; });
 document.getElementById('cancelBtn').addEventListener('click', ()=> formModal.style.display='none');
 
-// ===== Ambil anggota terpilih =====
-function getSelectedAnggota() {
-  const selected = document.querySelector('#anggotaList .anggotaItem span[style*="bold"]');
+// ===== Get Selected Anggota =====
+function getSelectedAnggota(){
+  const selected = document.querySelector('#anggotaList span.selected');
   return selected ? selected.textContent : '';
 }
 
-// ===== Render Table Transaksi =====
-function renderTransactionsTable() {
-  transactionsTableBody.innerHTML = '';
+// ===== Render Transactions Table =====
+function renderTransactionsTable(){
+  transactionsTableBody.innerHTML='';
   const typeFilterVal = document.getElementById('filterType').value;
   const anggotaFilterVal = filterAnggota.value;
   const searchNoteVal = document.getElementById('searchNote').value.toLowerCase();
@@ -157,8 +124,8 @@ function renderTransactionsTable() {
     if(anggotaFilterVal && t.anggota!==anggotaFilterVal) return;
     if(searchNoteVal && !t.note.toLowerCase().includes(searchNoteVal)) return;
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
       <td><input type="checkbox" class="rowCheckbox" data-index="${i}"></td>
       <td>${i+1}</td>
       <td>${t.date}</td>
@@ -173,35 +140,32 @@ function renderTransactionsTable() {
     transactionsTableBody.appendChild(tr);
 
     tr.querySelector('.editBtn').addEventListener('click', ()=>{
-      editingIndex = i;
-      formModal.style.display='flex';
-      document.getElementById('type').value = t.type;
-      document.getElementById('amount').value = t.amount;
-      document.getElementById('note').value = t.note;
-      document.getElementById('transactionDate').value = t.date;
-      document.getElementById('deskripsi').value = t.deskripsi;
-      document.getElementById('sumberDana').value = t.sumberDana;
+      editingIndex=i; formModal.style.display='flex';
+      document.getElementById('type').value=t.type;
+      document.getElementById('amount').value=t.amount;
+      document.getElementById('note').value=t.note;
+      document.getElementById('transactionDate').value=t.date;
+      document.getElementById('deskripsi').value=t.deskripsi;
+      document.getElementById('sumberDana').value=t.sumberDana;
       renderAnggotaContainer(t.anggota);
     });
   });
 
-  // Checkbox logic
-  const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
+  const rowCheckboxes=document.querySelectorAll('.rowCheckbox');
   rowCheckboxes.forEach(cb=>{
-    cb.addEventListener('change', ()=> {
+    cb.addEventListener('change', ()=>{
       deleteSelectedBtn.style.display = document.querySelectorAll('.rowCheckbox:checked').length>0?'inline-block':'none';
       checkAll.checked = document.querySelectorAll('.rowCheckbox:checked').length === rowCheckboxes.length;
     });
   });
 }
 
-// ===== Checkbox "Check All" =====
+// ===== Checkbox Check All =====
 checkAll.addEventListener('change', ()=>{
   const checked = checkAll.checked;
-  document.querySelectorAll('.rowCheckbox').forEach(cb => cb.checked = checked);
-  deleteSelectedBtn.style.display = checked ? 'inline-block' : 'none';
+  document.querySelectorAll('.rowCheckbox').forEach(cb=>cb.checked=checked);
+  deleteSelectedBtn.style.display=checked?'inline-block':'none';
 });
-
 // ===== Submit Form =====
 form.addEventListener('submit', e=>{
   e.preventDefault();
@@ -216,29 +180,35 @@ form.addEventListener('submit', e=>{
   if(!anggotaVal){ alert('Pilih anggota!'); return; }
 
   const transaction = { type, amount, note, date, deskripsi, sumberDana, anggota: anggotaVal };
-  if(editingIndex!==null){ transactions[editingIndex] = transaction; editingIndex=null; }
+
+  if(editingIndex!==null){ transactions[editingIndex]=transaction; editingIndex=null; }
   else transactions.push(transaction);
 
   localStorage.setItem('transactions', JSON.stringify(transactions));
   resetForm();
   renderTransactionsTable();
   updateSummary();
+  updateChart();
   formModal.style.display='none';
-}
+});
 
-// ===== Delete Selected =====
+// ===== Delete Selected Transactions =====
 deleteSelectedBtn.addEventListener('click', ()=>{
   const checkedIndexes = Array.from(document.querySelectorAll('.rowCheckbox:checked')).map(cb=>parseInt(cb.dataset.index));
   transactions = transactions.filter((_,i)=>!checkedIndexes.includes(i));
   localStorage.setItem('transactions', JSON.stringify(transactions));
   renderTransactionsTable();
   updateSummary();
+  updateChart();
   deleteSelectedBtn.style.display='none';
   checkAll.checked=false;
 });
 
 // ===== Apply Filter =====
-applyFilterBtn.addEventListener('click', e=>{ e.preventDefault(); renderTransactionsTable(); });
+applyFilterBtn.addEventListener('click', e=>{
+  e.preventDefault();
+  renderTransactionsTable();
+});
 
 // ===== Export CSV / XLSX / PDF =====
 exportBtn.addEventListener('click', ()=> exportOptions.classList.toggle('hidden'));
@@ -250,9 +220,9 @@ exportOptions.querySelectorAll('button').forEach(btn=>{
       csv += `${t.date},${t.type},${t.amount},${t.note},${t.deskripsi},${t.sumberDana},${t.anggota}\n`;
     });
     const blob = new Blob([csv], { type:'text/csv' });
-    const a = document.createElement('a'); 
-    a.href = URL.createObjectURL(blob); 
-    a.download = `transaksi.${type}`; 
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `transaksi.${type}`;
     a.click();
     URL.revokeObjectURL(a.href);
     exportOptions.classList.add('hidden');
@@ -265,13 +235,26 @@ let chart;
 function updateChart(){
   const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  const data = { labels:['Pemasukan','Pengeluaran'], datasets:[{label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336']}] };
+  const data = {
+    labels:['Pemasukan','Pengeluaran'],
+    datasets:[{label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336']}]
+  };
   if(chart) chart.destroy();
-  chart = new Chart(ctx,{ type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true, text:'Grafik Transaksi'} } } });
+  chart = new Chart(ctx,{
+    type:'bar',
+    data:data,
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        title:{display:true, text:'Grafik Transaksi'}
+      }
+    }
+  });
 }
 
 // ===== Init =====
-sections.forEach(sec => sec.style.display='none');
+sections.forEach(sec=>sec.style.display='none');
 document.getElementById('home').style.display='block';
 resetForm();
 renderTransactionsTable();
