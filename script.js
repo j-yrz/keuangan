@@ -4,7 +4,7 @@ let anggota = JSON.parse(localStorage.getItem('anggota')) || [];
 let editingIndex = null;
 
 // DOM Elements
-const formModal = documentvsbsbsbsb.getElementById('formModal');
+const formModal = document.getElementById('formModal');
 const showFormBtn = document.getElementById('showFormBtn');
 const closeBtn = document.querySelector('.closeBtn');
 const form = document.getElementById('transactionForm');
