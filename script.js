@@ -12,7 +12,6 @@ const transactionAnggota = document.getElementById('transactionAnggotaInput');
 const anggotaPopup = document.getElementById('anggotaPopup');
 const typePopup = document.getElementById('typePopup');
 const typeSelect = document.getElementById('type');
-const newAnggotaInput = document.getElementById('newAnggota');
 const transactionsTableBody = document.querySelector('#transactionsTable tbody');
 const deleteSelectedBtn = document.getElementById('deleteSelected');
 const checkAll = document.getElementById('checkAll');
@@ -21,17 +20,12 @@ const applyFilterBtn = document.getElementById('applyFilter');
 const exportBtn = document.getElementById('exportBtn');
 const exportOptions = document.getElementById('exportOptions');
 const toggleSaldo = document.getElementById('toggleSaldo');
-
 const saldoCard = document.getElementById('card-saldo');
 const pemasukanCard = document.getElementById('card-pemasukan');
 const pengeluaranCard = document.getElementById('card-pengeluaran');
 
-// Toggle menu mobile
-const menuToggle = document.getElementById('menuToggle');
-const navMenu = document.getElementById('navMenu');
-menuToggle.addEventListener('click', () => navMenu.classList.toggle('show'));
-
-// Toggle saldo
+// Event Listeners
+// Toggle saldo visibility
 let saldoVisible = true;
 toggleSaldo.addEventListener('click', () => {
     saldoVisible = !saldoVisible;
@@ -39,17 +33,25 @@ toggleSaldo.addEventListener('click', () => {
     saldoCard.appendChild(toggleSaldo);
 });
 
-// Modal Form
-showFormBtn.addEventListener('click', () => formModal.style.display = 'flex');
-closeBtn.addEventListener('click', () => formModal.style.display = 'none');
-window.addEventListener('click', e => {
-    if (e.target === formModal) formModal.style.display = 'none';
+// Modal Form - menampilkan saat tombol "Buat Catatan" diklik
+showFormBtn.addEventListener('click', () => {
+    formModal.classList.add('show');  // Menambahkan kelas show untuk menampilkan modal
+});
+
+// Menutup modal saat klik close button atau area luar modal
+closeBtn.addEventListener('click', () => {
+    formModal.classList.remove('show');  // Menghapus kelas show untuk menyembunyikan modal
+});
+window.addEventListener('click', (e) => {
+    if (e.target === formModal) {
+        formModal.classList.remove('show');  // Menghapus kelas show jika klik di luar modal
+    }
 });
 
 // Tombol Batal
 const cancelBtn = document.getElementById('cancelBtn');
 cancelBtn.addEventListener('click', () => {
-    formModal.style.display = 'none';
+    formModal.classList.remove('show');
     form.reset();
     transactionDate.value = new Date().toISOString().split('T')[0]; // Reset tanggal
 });
@@ -80,11 +82,24 @@ document.querySelectorAll('#typePopup .popupItem').forEach(item => {
     });
 });
 
-// Render anggota dropdown
-function renderAnggotaDropdown() {
-    transactionAnggota.value = '';
+// Popup Pilih Anggota
+transactionAnggota.addEventListener('click', (e) => {
+    e.preventDefault();
+    const popup = document.getElementById('anggotaPopup');
+    popup.style.display = (popup.style.display === 'block') ? 'none' : 'block'; // Toggle visibility
+});
+
+// Menutup Popup Anggota jika klik di luar
+window.addEventListener('click', (e) => {
+    if (!e.target.closest('#anggotaPopup') && !e.target.closest('#transactionAnggotaInput')) {
+        document.getElementById('anggotaPopup').style.display = 'none';
+    }
+});
+
+// Render Anggota Popup
+function renderAnggotaPopup() {
     anggotaPopup.innerHTML = '';
-    anggota.forEach((a, idx) => {
+    anggota.forEach(a => {
         const div = document.createElement('div');
         div.classList.add('popupItem');
         div.textContent = a;
@@ -93,9 +108,10 @@ function renderAnggotaDropdown() {
             anggotaPopup.style.display = 'none';
         });
         anggotaPopup.appendChild(div);
-    });
+}
 
-    // Filter dropdown
+// Render anggota dropdown filter
+function renderAnggotaDropdown() {
     filterAnggota.innerHTML = '<option value="">Semua Anggota</option>';
     anggota.forEach(a => {
         const opt = document.createElement('option');
@@ -159,7 +175,7 @@ function renderTransactionsTable() {
         // Edit
         tr.querySelector('.editBtn').addEventListener('click', () => {
             editingIndex = i;
-            formModal.style.display = 'flex';
+            formModal.classList.add('show');
             document.getElementById('type').value = t.type;
             document.getElementById('amount').value = t.amount;
             document.getElementById('note').value = t.note;
@@ -167,7 +183,7 @@ function renderTransactionsTable() {
             document.getElementById('deskripsi').value = t.deskripsi;
             document.getElementById('sumberDana').value = t.sumberDana;
             transactionAnggota.value = t.anggota;
-            renderAnggotaDropdown();
+            renderAnggotaPopup();
         });
     });
 
@@ -204,7 +220,7 @@ form.addEventListener('submit', e => {
     transactionDate.value = new Date().toISOString().split('T')[0];
     renderTransactionsTable();
     updateSummary();
-    formModal.style.display = 'none';
+    formModal.classList.remove('show');
 });
 
 // Delete selected
@@ -255,7 +271,31 @@ function updateChart() {
 // Init
 document.querySelectorAll('main section').forEach(sec => sec.style.display = 'none');
 document.getElementById('home').style.display = 'block';
-renderAnggotaDropdown();
+renderAnggotaPopup();
 renderTransactionsTable();
 updateSummary();
 updateChart();
+
+// Menangani klik pada menu
+const homeLink = document.getElementById('homeLink');
+const historyLink = document.getElementById('historyLink');
+const grafikLink = document.getElementById('grafikLink');
+
+// Menampilkan section yang relevan
+homeLink.addEventListener('click', () => {
+    document.getElementById('home').style.display = 'block';
+    document.getElementById('catatan').style.display = 'none';
+    document.getElementById('grafik').style.display = 'none';
+});
+
+historyLink.addEventListener('click', () => {
+    document.getElementById('home').style.display = 'none';
+    document.getElementById('catatan').style.display = 'block';
+    document.getElementById('grafik').style.display = 'none';
+});
+
+grafikLink.addEventListener('click', () => {
+    document.getElementById('home').style.display = 'none';
+    document.getElementById('catatan').style.display = 'none';
+    document.getElementById('grafik').style.display = 'block';
+});
