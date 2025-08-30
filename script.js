@@ -1,4 +1,3 @@
-// Data transaksi & anggota
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 let anggota = JSON.parse(localStorage.getItem('anggota')) || [];
 let editingIndex = null;
