@@ -58,6 +58,24 @@ cancelBtn.addEventListener('click', () => {
 const transactionDate = document.getElementById('transactionDate');
 transactionDate.value = new Date().toISOString().split('T')[0];
 
+// Popup Pilih Jenis
+typeSelect.addEventListener('click', () => {
+    typePopup.style.display = 'block';
+});
+
+// Menambahkan pilihan pada popup Pilih Jenis
+typePopup.innerHTML = `
+    <div class="popupItem">Pemasukan</div>
+    <div class="popupItem">Pengeluaran</div>
+`;
+
+typePopup.querySelectorAll('.popupItem').forEach(item => {
+    item.addEventListener('click', () => {
+        typeSelect.value = item.textContent;
+        typePopup.style.display = 'none';
+    });
+});
+
 // Render anggota dropdown
 function renderAnggotaDropdown() {
     transactionAnggota.value = '';
@@ -203,37 +221,4 @@ applyFilterBtn.addEventListener('click', e => {
 });
 
 // Export pop-up
-exportBtn.addEventListener('click', () => exportOptions.classList.toggle('hidden'));
-exportOptions.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const type = btn.dataset.type;
-        let csv = 'Tanggal,Jenis,Jumlah,Keterangan,Deskripsi,SumberDana,Anggota\n';
-        transactions.forEach(t => {
-            csv += `${t.date},${t.type},${t.amount},${t.note},${t.deskripsi},${t.sumberDana},${t.anggota}\n`;
-        });
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `transaksi.${type}`; a.click();
-        URL.revokeObjectURL(url);
-        exportOptions.classList.add('hidden');
-    });
-});
-
-// Chart.js
-const ctx = document.getElementById('transactionChart').getContext('2d');
-let chart;
-function updateChart() {
-    const pemasukan = transactions.filter(t => t.type === 'Pemasukan').reduce((a, b) => a + Number(b.amount), 0);
-    const pengeluaran = transactions.filter(t => t.type === 'Pengeluaran').reduce((a, b) => a + Number(b.amount), 0);
-    const data = { labels: ['Pemasukan', 'Pengeluaran'], datasets: [{ label: 'Jumlah (Rp)', data: [pemasukan, pengeluaran], backgroundColor: ['#4CAF50', '#F44336'] }] };
-    if (chart) chart.destroy();
-    chart = new Chart(ctx, { type: 'bar', data: data, options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Grafik Transaksi' } } } });
-}
-
-// Init
-document.querySelectorAll('main section').forEach(sec => sec.style.display = 'none');
-document.getElementById('home').style.display = 'block';
-renderAnggotaDropdown();
-renderTransactionsTable();
-updateSummary();
-updateChart();
+exportBtn.addEventListener('click', ()
