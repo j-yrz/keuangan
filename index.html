@@ -15,7 +15,7 @@
     <a href="#home">Home</a>
     <a href="#catatan">History</a>
     <a href="#grafik">Grafik</a>
-    <a href="#backupRestore">Restore & Backup</a>
+    <a href="#" id="backupBtn">Restore & Backup</a>
   </nav>
 </header>
 
@@ -23,9 +23,11 @@
   <!-- Home -->
   <section id="home">
     <div class="summary-cards">
-      <div class="card" id="card-saldo">Saldo: Rp 0,00 <span id="toggleSaldo" style="cursor:pointer;">👁️</span></div>
-      <div class="card" id="card-pemasukan">Pemasukan: Rp 0,00</div>
-      <div class="card" id="card-pengeluaran">Pengeluaran: Rp 0,00</div>
+      <div class="card" id="card-saldo">
+        Saldo: Rp 0 <span id="toggleSaldo" style="cursor:pointer;">👁️</span>
+      </div>
+      <div class="card" id="card-pemasukan">Pemasukan: Rp 0</div>
+      <div class="card" id="card-pengeluaran">Pengeluaran: Rp 0</div>
     </div>
 
     <button id="showFormBtn">Buat Catatan</button>
@@ -41,14 +43,9 @@
             <option value="Pemasukan">Pemasukan</option>
             <option value="Pengeluaran">Pengeluaran</option>
           </select>
-          
-          <!-- Pilih Anggota -->
-          <div class="anggota-dropdown">
-            <input type="text" id="transactionAnggotaInput" readonly placeholder="Pilih Anggota" />
-            <div id="anggotaPopup" class="popup-anggota hidden"></div>
-          </div>
+          <input type="text" id="transactionAnggotaInput" placeholder="Pilih Anggota" readonly required />
+          <div id="anggotaPopup" class="popup-anggota hidden"></div>
           <input type="text" id="newAnggota" placeholder="Tambah anggota baru" />
-
           <input type="text" id="sumberDana" placeholder="Sumber Dana" />
           <input type="text" id="note" placeholder="Keterangan" />
           <input type="number" id="amount" placeholder="Jumlah" required />
@@ -61,7 +58,7 @@
   </section>
 
   <!-- History -->
-  <section id="catatan" style="display:none;">
+  <section id="catatan">
     <h2>History Transaksi</h2>
     <div id="filterContainer">
       <input type="text" id="searchNote" placeholder="Cari keterangan..." />
@@ -70,7 +67,7 @@
         <option value="Pemasukan">Pemasukan</option>
         <option value="Pengeluaran">Pengeluaran</option>
       </select>
-      <select id="filterAnggota"><option value="">Semua Anggota</option></select>
+      <select id="filterAnggota"></select>
       <button id="applyFilter">Terapkan Filter</button>
     </div>
 
@@ -99,15 +96,9 @@
     <h2>Grafik Transaksi</h2>
     <canvas id="transactionChart"></canvas>
   </section>
-
-  <!-- Backup & Restore -->
-  <section id="backupRestore" style="display:none;">
-    <h2>Restore & Backup</h2>
-    <button id="backupBtn">Backup</button>
-    <button id="restoreBtn">Restore</button>
-  </section>
-
 </main>
+
+<!-- Backup & Restore Popup HTML akan dikirim di file CSS/JS selanjutnya -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
