@@ -39,12 +39,10 @@
                         
                         <!-- Popup Pilih Jenis -->
                         <div class="popup" id="typePopup">
-                            <div class="popupItem">Pemasukan</div>
-                            <div class="popupItem">Pengeluaran</div>
+                            <div class="popupItem" data-type="Pemasukan">Pemasukan</div>
+                            <div class="popupItem" data-type="Pengeluaran">Pengeluaran</div>
                         </div>
-                        <select id="type" required>
-                            <option value="">Pilih Jenis</option>
-                        </select>
+                        <input type="text" id="type" placeholder="Pilih Jenis" readonly required />
 
                         <!-- Popup Pilih Anggota -->
                         <div class="popup" id="anggotaPopup"></div>
