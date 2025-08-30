@@ -1,9 +1,9 @@
-// Data transaksi & anggota
+// ===== Data Transaksi & Anggota =====
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 let anggota = JSON.parse(localStorage.getItem('anggota')) || [];
 let editingIndex = null;
 
-// DOM Elements
+// ===== DOM Elements =====
 const formModal = document.getElementById('formModal');
 const showFormBtn = document.getElementById('showFormBtn');
 const closeBtn = document.querySelector('.closeBtn');
@@ -23,60 +23,68 @@ const saldoCard = document.getElementById('card-saldo');
 const pemasukanCard = document.getElementById('card-pemasukan');
 const pengeluaranCard = document.getElementById('card-pengeluaran');
 
-// Toggle menu mobile
 const menuToggle = document.getElementById('menuToggle');
 const navMenu = document.getElementById('navMenu');
-menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
+const menuItems = document.querySelectorAll('.menuItem');
 
-// Toggle saldo
-let saldoVisible = true;
-toggleSaldo.addEventListener('click', ()=>{
-  saldoVisible = !saldoVisible;
-  saldoCard.textContent = saldoVisible ? `Saldo: Rp ${calculateSaldo()}` : 'Saldo: ****';
-  saldoCard.appendChild(toggleSaldo);
+const sections = document.querySelectorAll('main section');
+
+// ===== Menu Toggle Mobile =====
+menuToggle.addEventListener('click', () => navMenu.classList.toggle('show'));
+
+// ===== Navigasi Antar Section =====
+menuItems.forEach(item => {
+  item.addEventListener('click', e => {
+    e.preventDefault();
+    const targetId = item.getAttribute('href').replace('#','');
+    sections.forEach(sec => sec.style.display='none');
+    document.getElementById(targetId).style.display='block';
+    navMenu.classList.remove('show');
+  });
 });
 
-// Modal Form
-showFormBtn.addEventListener('click', ()=> formModal.style.display='flex');
-closeBtn.addEventListener('click', ()=> formModal.style.display='none');
-window.addEventListener('click', e=> { if(e.target===formModal) formModal.style.display='none'; });
-
-// Tanggal otomatis
-const transactionDate = document.getElementById('transactionDate');
-transactionDate.value = new Date().toISOString().split('T')[0];
-
-// Render anggota dropdown
-function renderAnggotaDropdown(){
-  transactionAnggota.innerHTML = '<option value="">Pilih Anggota</option>';
-  anggota.forEach((a, idx)=>{
-    const opt = document.createElement('option'); opt.value=a; opt.textContent=a;
-    transactionAnggota.appendChild(opt);
-  });
-
-  // Filter dropdown
-  filterAnggota.innerHTML = '<option value="">Semua Anggota</option>';
-  anggota.forEach(a=>{
-    const opt = document.createElement('option'); opt.value=a; opt.textContent=a;
-    filterAnggota.appendChild(opt);
-  });
-}
-
-// Calculate Summary
-function calculateSaldo(){
-  let pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
-  let pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  return pemasukan - pengeluaran;
-}
+// ===== Toggle Saldo =====
+let saldoVisible = true;
 function updateSummary(){
   const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  saldoCard.textContent = saldoVisible ? `Saldo: Rp ${calculateSaldo()}` : 'Saldo: ****';
+  saldoCard.textContent = saldoVisible ? `Saldo: Rp ${pemasukan - pengeluaran}` : 'Saldo: ****';
   saldoCard.appendChild(toggleSaldo);
   pemasukanCard.textContent = `Pemasukan: Rp ${pemasukan}`;
   pengeluaranCard.textContent = `Pengeluaran: Rp ${pengeluaran}`;
 }
+toggleSaldo.addEventListener('click', () => {
+  saldoVisible = !saldoVisible;
+  updateSummary();
+});
 
-// Render table
+// ===== Modal Form =====
+showFormBtn.addEventListener('click', () => formModal.style.display='flex');
+closeBtn.addEventListener('click', () => formModal.style.display='none');
+window.addEventListener('click', e => { if(e.target === formModal) formModal.style.display='none'; });
+
+// ===== Tanggal Otomatis =====
+const transactionDate = document.getElementById('transactionDate');
+transactionDate.value = new Date().toISOString().split('T')[0];
+
+// ===== Render Dropdown Anggota =====
+function renderAnggotaDropdown(){
+  transactionAnggota.innerHTML = '<option value="">Pilih Anggota</option>';
+  anggota.forEach(a=>{
+    const opt = document.createElement('option');
+    opt.value = a; opt.textContent = a;
+    transactionAnggota.appendChild(opt);
+  });
+
+  filterAnggota.innerHTML = '<option value="">Semua Anggota</option>';
+  anggota.forEach(a=>{
+    const opt = document.createElement('option');
+    opt.value = a; opt.textContent = a;
+    filterAnggota.appendChild(opt);
+  });
+}
+
+// ===== Render Tabel Transaksi =====
 function renderTransactionsTable(){
   transactionsTableBody.innerHTML = '';
   const typeFilterVal = document.getElementById('filterType').value;
@@ -119,18 +127,23 @@ function renderTransactionsTable(){
       transactionAnggota.value = t.anggota;
       newAnggotaInput.value='';
     });
+
+    // Status button dummy
+    tr.querySelector('.statusBtn').addEventListener('click', ()=>{
+      alert(`Transaksi: ${t.note} | Status tombol bisa di kembangkan`);
+    });
   });
 
   // Checkbox logic
   const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
   rowCheckboxes.forEach(cb=>{
-    cb.addEventListener('change', ()=> {
+    cb.addEventListener('change', ()=>{
       deleteSelectedBtn.style.display = document.querySelectorAll('.rowCheckbox:checked').length > 0 ? 'inline-block':'none';
     });
   });
 }
 
-// Submit form
+// ===== Submit Form =====
 form.addEventListener('submit', e=>{
   e.preventDefault();
   const type = document.getElementById('type').value;
@@ -160,10 +173,11 @@ form.addEventListener('submit', e=>{
   transactionDate.value = new Date().toISOString().split('T')[0];
   renderTransactionsTable();
   updateSummary();
+  updateChart();
   formModal.style.display='none';
 });
 
-// Delete selected
+// ===== Delete Selected =====
 deleteSelectedBtn.addEventListener('click', ()=>{
   const checkedIndexes = Array.from(document.querySelectorAll('.rowCheckbox:checked')).map(cb=>parseInt(cb.dataset.index));
   transactions = transactions.filter((_,i)=>!checkedIndexes.includes(i));
@@ -174,13 +188,13 @@ deleteSelectedBtn.addEventListener('click', ()=>{
   checkAll.checked=false;
 });
 
-// Apply filter
+// ===== Apply Filter =====
 applyFilterBtn.addEventListener('click', e=>{
   e.preventDefault();
   renderTransactionsTable();
 });
 
-// Export pop-up
+// ===== Export CSV =====
 exportBtn.addEventListener('click', ()=> exportOptions.classList.toggle('hidden'));
 exportOptions.querySelectorAll('button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -197,7 +211,7 @@ exportOptions.querySelectorAll('button').forEach(btn=>{
   });
 });
 
-// Chart.js
+// ===== Chart.js =====
 const ctx = document.getElementById('transactionChart').getContext('2d');
 let chart;
 function updateChart(){
@@ -208,8 +222,8 @@ function updateChart(){
   chart = new Chart(ctx, { type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true, text:'Grafik Transaksi'} } } });
 }
 
-// Init
-document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
+// ===== Init =====
+sections.forEach(sec=>sec.style.display='none');
 document.getElementById('home').style.display='block';
 renderAnggotaDropdown();
 renderTransactionsTable();
