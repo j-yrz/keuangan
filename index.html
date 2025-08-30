@@ -98,7 +98,44 @@
   </section>
 </main>
 
-<!-- Backup & Restore Popup HTML akan dikirim di file CSS/JS selanjutnya -->
+<!-- Backup Modal -->
+<div id="backupModal" class="modal">
+  <div class="modal-content">
+    <span class="closeBackup">&times;</span>
+    <h3>Backup</h3>
+    <label>Anggota:</label>
+    <select id="backupAnggota"></select>
+    <label>Rentang Waktu:</label>
+    <select id="backupRange">
+      <option value="minggu">Per Minggu</option>
+      <option value="bulan">Per Bulan</option>
+      <option value="tahun">Per Tahun</option>
+    </select>
+    <label>Format Export:</label>
+    <select id="backupFormat">
+      <option value="csv">CSV</option>
+      <option value="xlsx">XLSX</option>
+      <option value="pdf">PDF</option>
+    </select>
+    <button id="backupNow">Backup Sekarang</button>
+    <button id="backupCancel">Batal</button>
+  </div>
+</div>
+
+<!-- Restore Modal -->
+<div id="restoreModal" class="modal">
+  <div class="modal-content">
+    <span class="closeRestore">&times;</span>
+    <h3>Restore</h3>
+    <div id="restoreBox" style="border:2px dashed #ccc; padding:20px; text-align:center; cursor:pointer;">
+      <span style="font-size:2em;">＋</span><br>
+      Klik untuk upload file
+    </div>
+    <input type="file" id="restoreFile" style="display:none;">
+    <button id="restoreNow">Restore</button>
+    <button id="restoreCancel">Batal</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
