@@ -36,7 +36,8 @@ const exportOptions = document.getElementById('exportOptions');
 const menuToggle = document.getElementById('menuToggle');
 const navMenu = document.getElementById('navMenu');
 
-const anggotaDropdown = document.getElementById('anggotaDropdown');
+// Dropdown anggota custom
+const anggotaBtn = document.getElementById('anggotaBtn');
 const anggotaList = document.getElementById('anggotaList');
 const newAnggotaInput = document.getElementById('newAnggotaInput');
 const addAnggotaBtn = document.getElementById('addAnggotaBtn');
@@ -75,32 +76,34 @@ function renderAnggotaDropdown(selected='') {
   anggota.forEach((a, idx)=>{
     const div = document.createElement('div');
     div.className='dropdown-item';
+
     const span = document.createElement('span');
     span.textContent = a;
     if(a===selected) span.classList.add('selected');
     span.addEventListener('click', ()=>{
       document.querySelectorAll('#anggotaList span').forEach(s=>s.classList.remove('selected'));
       span.classList.add('selected');
+      anggotaBtn.textContent = a + ' ▼';
     });
+
     const delBtn = document.createElement('button');
     delBtn.type='button';
     delBtn.textContent='❌';
-    delBtn.addEventListener('click', ()=>{
+    delBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
       anggota.splice(idx,1);
       localStorage.setItem('anggota',JSON.stringify(anggota));
       renderAnggotaDropdown(selected);
     });
+
     div.appendChild(span);
     div.appendChild(delBtn);
     anggotaList.appendChild(div);
   });
 }
 
-// Ambil anggota yang dipilih
-function getSelectedAnggota() {
-  const sel = document.querySelector('#anggotaList span.selected');
-  return sel ? sel.textContent : '';
-}
+// Toggle dropdown anggota
+anggotaBtn.addEventListener('click', ()=> anggotaList.classList.toggle('show'));
 
 // Tambah anggota baru
 addAnggotaBtn.addEventListener('click', ()=>{
@@ -112,6 +115,12 @@ addAnggotaBtn.addEventListener('click', ()=>{
     renderAnggotaDropdown();
   }
 });
+
+// Ambil anggota yang dipilih
+function getSelectedAnggota() {
+  const sel = document.querySelector('#anggotaList span.selected');
+  return sel ? sel.textContent : '';
+}
 
 // ===== Summary =====
 function calculateSaldo(){
@@ -158,7 +167,7 @@ function renderTransactionsTable() {
 
     tr.querySelector('.editBtn').addEventListener('click', ()=>{
       editingIndex = i;
-      formModal.style.display='flex';
+      openForm();
       typeInput.value=t.type;
       amountInput.value=t.amount;
       noteInput.value=t.note;
@@ -166,6 +175,7 @@ function renderTransactionsTable() {
       deskripsiInput.value=t.deskripsi;
       sumberDanaInput.value=t.sumberDana;
       renderAnggotaDropdown(t.anggota);
+      anggotaBtn.textContent = t.anggota + ' ▼';
     });
   });
 
@@ -199,6 +209,7 @@ form.addEventListener('submit', e=>{
   localStorage.setItem('transactions',JSON.stringify(transactions));
   form.reset();
   transactionDate.value=new Date().toISOString().split('T')[0];
+  anggotaBtn.textContent = 'Pilih Anggota ▼';
   renderTransactionsTable();
   updateSummary();
   updateChart();
