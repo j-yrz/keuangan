@@ -32,25 +32,29 @@
 
     <button id="showFormBtn">Buat Catatan</button>
 
-    <form id="transactionForm" style="display:none;">
-      <select id="type" required>
-        <option value="">Pilih Jenis</option>
-        <option value="Pemasukan">Pemasukan</option>
-        <option value="Pengeluaran">Pengeluaran</option>
-      </select>
-      <input type="number" id="amount" placeholder="Jumlah" required />
-      <input type="text" id="note" placeholder="Keterangan" />
-      <input type="date" id="transactionDate" required />
-      <input type="text" id="deskripsi" placeholder="Deskripsi (opsional)" />
-      <input type="text" id="sumberDana" placeholder="Sumber Dana" />
+    <!-- Modal Pop-up Form -->
+    <div id="formModal" class="modal">
+      <div class="modal-content">
+        <span class="closeBtn">&times;</span>
+        <form id="transactionForm">
+          <input type="date" id="transactionDate" required />
+          <select id="type" required>
+            <option value="">Pilih Jenis</option>
+            <option value="Pemasukan">Pemasukan</option>
+            <option value="Pengeluaran">Pengeluaran</option>
+          </select>
+          <input type="number" id="amount" placeholder="Jumlah" required />
+          <input type="text" id="note" placeholder="Keterangan" />
+          <input type="text" id="deskripsi" placeholder="Deskripsi (opsional)" />
+          <input type="text" id="sumberDana" placeholder="Sumber Dana" />
 
-      <select id="transactionAnggota" required>
-        <option value="">Pilih Anggota</option>
-      </select>
-      <input type="text" id="newAnggota" placeholder="Tambah anggota baru" />
-      
-      <button type="submit">Simpan Catatan</button>
-    </form>
+          <select id="transactionAnggota" required></select>
+          <input type="text" id="newAnggota" placeholder="Tambah anggota baru" />
+
+          <button type="submit">Simpan Catatan</button>
+        </form>
+      </div>
+    </div>
   </section>
 
   <!-- History -->
@@ -94,11 +98,13 @@
       </thead>
       <tbody></tbody>
     </table>
-    <button id="deleteSelected" style="display:none;">Hapus Semua</button>
+    <button id="deleteSelected" style="display:none;">Hapus Terpilih</button>
 
     <button id="exportBtn">Export</button>
     <div id="exportOptions" class="hidden">
       <button data-type="csv">CSV</button>
+      <button data-type="xlsx">XLSX</button>
+      <button data-type="pdf">PDF</button>
     </div>
   </section>
 
