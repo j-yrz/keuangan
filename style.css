@@ -5,7 +5,6 @@ body {
   padding: 0;
   background: #f9f9f9;
 }
-
 header {
   display: flex;
   justify-content: space-between;
@@ -15,17 +14,14 @@ header {
   color: white;
   position: relative;
 }
-
 .logo {
   font-size: 1.2em;
   font-weight: bold;
 }
-
 .menu-toggle {
   font-size: 1.5em;
   cursor: pointer;
 }
-
 nav {
   display: none;
   flex-direction: column;
@@ -38,23 +34,19 @@ nav {
   overflow: hidden;
   z-index: 1000;
 }
-
 nav.show {
   display: flex;
   animation: fadeIn 0.3s forwards;
 }
-
 nav a {
   padding: 10px;
   color: white;
   text-decoration: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
-
 nav a:hover {
   background: rgba(255, 255, 255, 0.2);
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -72,11 +64,9 @@ main {
   max-width: 800px;
   margin: 0 auto;
 }
-
 section {
   margin-bottom: 40px;
 }
-
 h2 {
   color: #333;
 }
@@ -88,7 +78,6 @@ h2 {
   gap: 10px;
   margin-bottom: 20px;
 }
-
 .card {
   flex: 1;
   min-width: 150px;
@@ -113,7 +102,6 @@ h2 {
   cursor: pointer;
   transition: 0.3s;
 }
-
 #showFormBtn:hover {
   background: #45A049;
 }
@@ -129,7 +117,6 @@ h2 {
   align-items: center;
   z-index: 1000;
 }
-
 .modal-content {
   background: #fff;
   padding: 20px;
@@ -139,32 +126,27 @@ h2 {
   position: relative;
   animation: slideDown 0.3s forwards;
 }
-
 @keyframes slideDown {
   from { transform: translateY(-30px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
-
 .closeBtn {
   position: absolute;
   top: 10px; right: 15px;
   font-size: 1.5em;
   cursor: pointer;
 }
-
 form {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
 form input, form select {
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
   font-size: 1em;
 }
-
 form button {
   padding: 12px;
   border: none;
@@ -175,12 +157,11 @@ form button {
   cursor: pointer;
   transition: background 0.3s;
 }
-
 form button:hover {
   background: #1976D2;
 }
 
-/* Popup Pilih Jenis */
+/* Popup Pilih Jenis dan Anggota */
 .popup {
   position: absolute;
   background: white;
@@ -190,13 +171,11 @@ form button:hover {
   width: 100%;
   display: none;
 }
-
 .popupItem {
   padding: 10px;
   cursor: pointer;
   border-bottom: 1px solid #ddd;
 }
-
 .popupItem:hover {
   background: #f1f1f1;
 }
@@ -206,7 +185,6 @@ form button:hover {
   width: 250px;
   height: auto;
 }
-
 #transactionAnggotaInput {
   padding: 10px;
   cursor: pointer;
@@ -219,13 +197,11 @@ form button:hover {
   gap: 10px;
   margin-bottom: 15px;
 }
-
 #filterContainer input, #filterContainer button, #filterContainer select {
   padding: 8px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
-
 #filterContainer button {
   background: #2196F3;
   color: white;
@@ -233,7 +209,6 @@ form button:hover {
   cursor: pointer;
   transition: 0.3s;
 }
-
 #filterContainer button:hover {
   background: #1976D2;
 }
@@ -245,18 +220,15 @@ table {
   background: #fff;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-
 th, td {
   padding: 10px;
   border: 1px solid #ddd;
   text-align: left;
 }
-
 th {
   background: #2196F3;
   color: white;
 }
-
 td button {
   padding: 2px 5px;
   margin-right: 3px;
@@ -265,7 +237,6 @@ td button {
 
 /* Export Pop-up */
 #exportOptions.hidden { display: none; }
-
 #exportOptions {
   display: flex;
   gap: 10px;
