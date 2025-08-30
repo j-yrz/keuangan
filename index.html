@@ -55,16 +55,18 @@
         <label for="sumberDana">Sumber Dana</label>
         <input type="text" id="sumberDana">
 
-        <!-- Dropdown Anggota Interaktif -->
+        <!-- Dropdown Anggota Custom -->
         <label>Anggota</label>
-        <details id="anggotaDropdown">
-          <summary>Pilih Anggota</summary>
-          <div id="anggotaList"></div>
+        <div class="custom-dropdown" id="anggotaDropdown">
+          <button type="button" id="anggotaBtn">Pilih Anggota ▼</button>
+          <div class="dropdown-content" id="anggotaList">
+            <!-- Anggota akan dirender di sini -->
+          </div>
           <div id="addAnggotaDiv">
             <input type="text" id="newAnggotaInput" placeholder="Tambah anggota baru">
             <button type="button" id="addAnggotaBtn">Tambah</button>
           </div>
-        </details>
+        </div>
 
         <button type="submit">Simpan</button>
         <button type="button" id="cancelBtn">Batal</button>
