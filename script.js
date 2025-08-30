@@ -37,17 +37,17 @@ function formatRupiah(number){
   return "Rp " + Number(number).toLocaleString('id-ID', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
-// Toggle mobile menu
+// ===== Mobile menu toggle =====
 menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
 
-// Toggle saldo visibility
+// ===== Toggle saldo visibility =====
 let saldoVisible = true;
 toggleSaldo.addEventListener('click', ()=>{
   saldoVisible = !saldoVisible;
   updateSummary();
 });
 
-// Auto date
+// ===== Auto-set date =====
 transactionDate.value = new Date().toISOString().split('T')[0];
 
 // ===== Modal Form =====
@@ -60,15 +60,15 @@ window.addEventListener('click', e=>{
   if(e.target===formModal) closeForm();
 });
 
-// ===== Popup Anggota Minimalis =====
-transactionAnggotaInput.addEventListener('click', (e)=>{
+// ===== Popup Anggota Minimalis ala pilih jenis =====
+transactionAnggotaInput.addEventListener('click', e=>{
   e.stopPropagation();
   anggotaPopup.style.display = anggotaPopup.style.display==='block'?'none':'block';
   renderAnggotaPopup();
 });
 
 // Hide popup when clicking outside
-document.addEventListener('click', (e)=>{
+document.addEventListener('click', e=>{
   if(!anggotaPopup.contains(e.target) && e.target!==transactionAnggotaInput){
     anggotaPopup.style.display='none';
   }
@@ -79,6 +79,7 @@ function renderAnggotaPopup(){
   anggotaPopup.innerHTML='';
   anggota.forEach(a=>{
     const div = document.createElement('div');
+    div.className='popupItem';
     div.textContent = a;
     const removeBtn = document.createElement('span');
     removeBtn.textContent = '✖';
@@ -103,10 +104,11 @@ function renderAnggotaPopup(){
   addDiv.style.marginTop='5px';
   const input = document.createElement('input');
   input.placeholder='Tambah anggota baru';
+  input.style.flex='1';
   const addBtn = document.createElement('button');
   addBtn.type='button';
   addBtn.textContent='Tambah';
-  addBtn.onclick=()=>{
+  addBtn.onclick = ()=>{
     const val=input.value.trim();
     if(val && !anggota.includes(val)){
       anggota.push(val);
@@ -120,11 +122,11 @@ function renderAnggotaPopup(){
   anggotaPopup.appendChild(addDiv);
 }
 
-// ===== Dropdown Anggota Filter =====
+// ===== Render Anggota Dropdown Filter =====
 function renderAnggotaDropdown(){
   filterAnggota.innerHTML='<option value="">Semua Anggota</option>';
   anggota.forEach(a=>{
-    const opt = document.createElement('option');
+    const opt=document.createElement('option');
     opt.value=a; opt.textContent=a;
     filterAnggota.appendChild(opt);
   });
@@ -148,16 +150,16 @@ function updateSummary(){
 // ===== Render Transactions Table =====
 function renderTransactionsTable(){
   transactionsTableBody.innerHTML='';
-  const typeFilterVal = document.getElementById('filterType').value;
-  const anggotaFilterVal = filterAnggota.value;
-  const searchNoteVal = document.getElementById('searchNote').value.toLowerCase();
+  const typeFilterVal=document.getElementById('filterType').value;
+  const anggotaFilterVal=filterAnggota.value;
+  const searchNoteVal=document.getElementById('searchNote').value.toLowerCase();
 
   transactions.forEach((t,i)=>{
     if(typeFilterVal && t.type!==typeFilterVal) return;
     if(anggotaFilterVal && t.anggota!==anggotaFilterVal) return;
     if(searchNoteVal && !t.note.toLowerCase().includes(searchNoteVal)) return;
 
-    const tr = document.createElement('tr');
+    const tr=document.createElement('tr');
     tr.innerHTML=`
       <td><input type="checkbox" class="rowCheckbox" data-index="${i}"></td>
       <td>${i+1}</td>
@@ -197,7 +199,7 @@ function renderTransactionsTable(){
   // Checkbox logic
   document.querySelectorAll('.rowCheckbox').forEach(cb=>{
     cb.addEventListener('change', ()=>{
-      deleteSelectedBtn.style.display = document.querySelectorAll('.rowCheckbox:checked').length>0 ? 'inline-block':'none';
+      deleteSelectedBtn.style.display=document.querySelectorAll('.rowCheckbox:checked').length>0?'inline-block':'none';
     });
   });
 }
@@ -205,26 +207,26 @@ function renderTransactionsTable(){
 // ===== Form Submit =====
 form.addEventListener('submit', e=>{
   e.preventDefault();
-  const type = typeInput.value;
-  const date = transactionDate.value;
-  const anggotaVal = transactionAnggotaInput.value.trim();
-  const sumberDana = document.getElementById('sumberDana').value.trim();
-  const note = document.getElementById('note').value.trim();
-  const amount = document.getElementById('amount').value.trim();
-  const deskripsi = document.getElementById('deskripsi').value.trim();
+  const type=typeInput.value;
+  const date=transactionDate.value;
+  const anggotaVal=transactionAnggotaInput.value.trim();
+  const sumberDana=document.getElementById('sumberDana').value.trim();
+  const note=document.getElementById('note').value.trim();
+  const amount=document.getElementById('amount').value.trim();
+  const deskripsi=document.getElementById('deskripsi').value.trim();
 
   if(!type || !anggotaVal || !amount) return alert("Lengkapi form!");
 
-  const transaction = {type,date,anggota:anggotaVal,sumberDana,note,amount,deskripsi,edited:null};
+  const transaction={type,date,anggota:anggotaVal,sumberDana,note,amount,deskripsi,edited:null};
   if(editingIndex!==null){
-    transaction.edited = new Date().toLocaleString();
+    transaction.edited=new Date().toLocaleString();
     transactions[editingIndex]=transaction;
     editingIndex=null;
   } else transactions.push(transaction);
 
   localStorage.setItem('transactions',JSON.stringify(transactions));
   form.reset();
-  transactionDate.value = new Date().toISOString().split('T')[0];
+  transactionDate.value=new Date().toISOString().split('T')[0];
   closeForm();
   renderTransactionsTable();
   updateSummary();
@@ -233,11 +235,11 @@ form.addEventListener('submit', e=>{
 
 // ===== Chart =====
 function updateChart(){
-  const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
-  const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  const data = { labels:['Pemasukan','Pengeluaran'], datasets:[{label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336']}] };
+  const pemasukan=transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
+  const pengeluaran=transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
+  const data={labels:['Pemasukan','Pengeluaran'],datasets:[{label:'Jumlah (Rp)',data:[pemasukan,pengeluaran],backgroundColor:['#4CAF50','#F44336']}]};
   if(chart) chart.destroy();
-  chart = new Chart(ctx, { type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true, text:'Grafik Transaksi'} } } });
+  chart=new Chart(ctx,{type:'bar',data:data,options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Grafik Transaksi'}}}});
 }
 
 // ===== Filters =====
