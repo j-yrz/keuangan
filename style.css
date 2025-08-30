@@ -85,22 +85,22 @@ button.editBtn { padding:4px 8px; border:none; border-radius:4px; cursor:pointer
 #exportOptions { display:flex; gap:5px; margin-top:5px; }
 #exportOptions.hidden { display:none; }
 
-/* ===== Dropdown Anggota Custom ===== */
+/* ===== Dropdown Anggota Mengambang ===== */
 .custom-dropdown { position:relative; margin-top:5px; }
 #anggotaBtn {
   width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; background:#fff;
   text-align:left; cursor:pointer;
 }
 .dropdown-content {
-  display:none; position:absolute; background:#fff; min-width:100%; border:1px solid #ccc;
-  border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,0.2); max-height:150px; overflow-y:auto; z-index:1000;
+  display:none; position:absolute; background:#fff; width:100%; border:1px solid #ccc;
+  border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,0.2); max-height:200px; overflow-y:auto; z-index:1000;
 }
 .dropdown-content.show { display:block; }
 .dropdown-item { display:flex; justify-content:space-between; padding:6px 10px; cursor:pointer; }
 .dropdown-item:hover { background:#f0f0f0; }
 .dropdown-item span.selected { font-weight:bold; color:#2196F3; }
-#addAnggotaDiv { display:flex; margin-top:5px; gap:5px; }
-#addAnggotaDiv input { flex:1; }
+#addAnggotaDiv { display:flex; margin-top:5px; gap:5px; padding:5px; border-top:1px solid #ccc; background:#fafafa; }
+#addAnggotaDiv input { flex:1; padding:5px; border:1px solid #ccc; border-radius:4px; }
 #addAnggotaDiv button { flex:none; padding:6px 10px; background:#4CAF50; color:#fff; border:none; border-radius:4px; cursor:pointer; }
 #addAnggotaDiv button:hover { background:#45a049; }
 
@@ -112,5 +112,5 @@ button.editBtn { padding:4px 8px; border:none; border-radius:4px; cursor:pointer
 @media(max-width:600px){
   .cards{ flex-direction:column; }
   #navMenu { width:80%; }
-  .dropdown-content { max-height:120px; }
+  .dropdown-content { max-height:150px; }
 }
