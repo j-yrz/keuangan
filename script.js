@@ -8,9 +8,7 @@ const formModal = document.getElementById('formModal');
 const showFormBtn = document.getElementById('showFormBtn');
 const closeBtn = document.querySelector('.closeBtn');
 const form = document.getElementById('transactionForm');
-const transactionAnggota = document.getElementById('transactionAnggota');
-const newAnggotaInput = document.getElementById('newAnggotaInput');
-const addAnggotaBtn = document.getElementById('addAnggotaBtn');
+const anggotaContainer = document.getElementById('anggotaContainer');
 const transactionsTableBody = document.querySelector('#transactionsTable tbody');
 const deleteSelectedBtn = document.getElementById('deleteSelected');
 const checkAll = document.getElementById('checkAll');
@@ -30,9 +28,7 @@ const menuItems = document.querySelectorAll('.menuItem');
 const sections = document.querySelectorAll('main section');
 
 // ===== Helper: Format Rupiah =====
-function formatRupiah(number) {
-  return Number(number).toLocaleString('id-ID');
-}
+function formatRupiah(number) { return Number(number).toLocaleString('id-ID'); }
 
 // ===== Menu Toggle Mobile =====
 menuToggle.addEventListener('click', () => navMenu.classList.toggle('show'));
@@ -51,10 +47,7 @@ menuItems.forEach(item => {
 // ===== Toggle Saldo =====
 let saldoVisible = true;
 toggleSaldo.textContent = '👁';
-toggleSaldo.addEventListener('click', () => {
-  saldoVisible = !saldoVisible;
-  updateSummary();
-});
+toggleSaldo.addEventListener('click', () => { saldoVisible = !saldoVisible; updateSummary(); });
 
 // ===== Update Summary =====
 function updateSummary() {
@@ -66,20 +59,65 @@ function updateSummary() {
   pengeluaranCard.textContent = `Pengeluaran: Rp ${formatRupiah(pengeluaran)}`;
 }
 
-// ===== Render Anggota Dropdown dengan tombol hapus =====
-function renderAnggotaDropdown() {
-  transactionAnggota.innerHTML = '';
-  anggota.forEach(a => {
-    const option = document.createElement('option');
-    option.value = a;
-    option.textContent = a;
-    transactionAnggota.appendChild(option);
-  });
+// ===== Render Anggota Container =====
+function renderAnggotaContainer() {
+  anggotaContainer.innerHTML = '';
 
-  filterAnggota.innerHTML = '<option value="">Semua Anggota</option>';
+  // Dropdown anggota
+  const select = document.createElement('select');
+  select.id = 'transactionAnggota';
   anggota.forEach(a => {
     const opt = document.createElement('option');
     opt.value = a; opt.textContent = a;
+    select.appendChild(opt);
+  });
+  anggotaContainer.appendChild(select);
+
+  // Tombol ❌ di samping setiap nama anggota
+  const listDiv = document.createElement('div');
+  listDiv.id = 'anggotaList';
+  anggota.forEach((a, idx) => {
+    const item = document.createElement('div');
+    item.className = 'anggotaItem';
+    item.textContent = a;
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.textContent = '❌';
+    delBtn.style.marginLeft = '5px';
+    delBtn.addEventListener('click', () => {
+      anggota.splice(idx, 1);
+      localStorage.setItem('anggota', JSON.stringify(anggota));
+      renderAnggotaContainer();
+    });
+    item.appendChild(delBtn);
+    listDiv.appendChild(item);
+  });
+  anggotaContainer.appendChild(listDiv);
+
+  // Input + tombol tambah anggota
+  const addDiv = document.createElement('div');
+  addDiv.id = 'anggotaActions';
+  const input = document.createElement('input');
+  input.type = 'text'; input.id = 'newAnggotaInput'; input.placeholder = 'Tambah anggota baru';
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button'; addBtn.textContent = 'Tambah';
+  addBtn.addEventListener('click', ()=>{
+    const val = input.value.trim();
+    if(val && !anggota.includes(val)){
+      anggota.push(val);
+      localStorage.setItem('anggota', JSON.stringify(anggota));
+      input.value = '';
+      renderAnggotaContainer();
+    }
+  });
+  addDiv.appendChild(input);
+  addDiv.appendChild(addBtn);
+  anggotaContainer.appendChild(addDiv);
+
+  // Update filter dropdown
+  filterAnggota.innerHTML = '<option value="">Semua Anggota</option>';
+  anggota.forEach(a=>{
+    const opt = document.createElement('option'); opt.value=a; opt.textContent=a;
     filterAnggota.appendChild(opt);
   });
 }
@@ -88,27 +126,15 @@ function renderAnggotaDropdown() {
 function resetForm() {
   form.reset();
   document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
-  newAnggotaInput.value = '';
   editingIndex = null;
-  renderAnggotaDropdown();
+  renderAnggotaContainer();
 }
 
 // ===== Modal Form =====
-showFormBtn.addEventListener('click', () => { resetForm(); formModal.style.display = 'flex'; });
-closeBtn.addEventListener('click', () => formModal.style.display = 'none');
-window.addEventListener('click', e => { if(e.target === formModal) formModal.style.display = 'none'; });
-document.getElementById('cancelBtn').addEventListener('click', () => formModal.style.display = 'none');
-
-// ===== Tambah Anggota =====
-addAnggotaBtn.addEventListener('click', ()=>{
-  const newName = newAnggotaInput.value.trim();
-  if(newName && !anggota.includes(newName)){
-    anggota.push(newName);
-    localStorage.setItem('anggota', JSON.stringify(anggota));
-    renderAnggotaDropdown();
-    newAnggotaInput.value = '';
-  }
-});
+showFormBtn.addEventListener('click', () => { resetForm(); formModal.style.display='flex'; });
+closeBtn.addEventListener('click', () => formModal.style.display='none');
+window.addEventListener('click', e => { if(e.target === formModal) formModal.style.display='none'; });
+document.getElementById('cancelBtn').addEventListener('click', ()=> formModal.style.display='none');
 
 // ===== Render Transactions Table =====
 function renderTransactionsTable() {
@@ -137,7 +163,6 @@ function renderTransactionsTable() {
     `;
     transactionsTableBody.appendChild(tr);
 
-    // ===== Edit Transaction =====
     tr.querySelector('.editBtn').addEventListener('click', ()=>{
       editingIndex = i;
       formModal.style.display='flex';
@@ -147,7 +172,8 @@ function renderTransactionsTable() {
       document.getElementById('transactionDate').value = t.date;
       document.getElementById('deskripsi').value = t.deskripsi;
       document.getElementById('sumberDana').value = t.sumberDana;
-      transactionAnggota.value = t.anggota;
+      renderAnggotaContainer();
+      document.getElementById('transactionAnggota').value = t.anggota;
     });
   });
 
@@ -177,13 +203,11 @@ form.addEventListener('submit', e=>{
   const date = document.getElementById('transactionDate').value;
   const deskripsi = document.getElementById('deskripsi').value;
   const sumberDana = document.getElementById('sumberDana').value;
-  const anggotaVal = transactionAnggota.value;
+  const anggotaVal = document.getElementById('transactionAnggota').value;
 
   const transaction = { type, amount, note, date, deskripsi, sumberDana, anggota: anggotaVal };
-  if(editingIndex!==null){
-    transactions[editingIndex] = transaction;
-    editingIndex = null;
-  } else transactions.push(transaction);
+  if(editingIndex!==null){ transactions[editingIndex] = transaction; editingIndex = null; }
+  else transactions.push(transaction);
 
   localStorage.setItem('transactions', JSON.stringify(transactions));
   resetForm();
@@ -206,7 +230,7 @@ deleteSelectedBtn.addEventListener('click', ()=>{
 // ===== Apply Filter =====
 applyFilterBtn.addEventListener('click', e=>{ e.preventDefault(); renderTransactionsTable(); });
 
-// ===== Export CSV =====
+// ===== Export CSV / XLSX / PDF =====
 exportBtn.addEventListener('click', ()=> exportOptions.classList.toggle('hidden'));
 exportOptions.querySelectorAll('button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -216,9 +240,11 @@ exportOptions.querySelectorAll('button').forEach(btn=>{
       csv += `${t.date},${t.type},${t.amount},${t.note},${t.deskripsi},${t.sumberDana},${t.anggota}\n`;
     });
     const blob = new Blob([csv], { type:'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download=`transaksi.${type}`; a.click();
-    URL.revokeObjectURL(url);
+    const a = document.createElement('a'); 
+    a.href = URL.createObjectURL(blob); 
+    a.download = `transaksi.${type}`; 
+    a.click();
+    URL.revokeObjectURL(a.href);
     exportOptions.classList.add('hidden');
   });
 });
@@ -229,9 +255,22 @@ let chart;
 function updateChart(){
   const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  const data = { labels:['Pemasukan','Pengeluaran'], datasets:[{label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336']}] };
+  const data = {
+    labels:['Pemasukan','Pengeluaran'],
+    datasets:[{ label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336'] }]
+  };
   if(chart) chart.destroy();
-  chart = new Chart(ctx,{ type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true,text:'Grafik Transaksi'} } } });
+  chart = new Chart(ctx,{
+    type:'bar',
+    data:data,
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{ display:false },
+        title:{ display:true, text:'Grafik Transaksi' }
+      }
+    }
+  });
 }
 
 // ===== Init =====
