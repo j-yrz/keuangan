@@ -18,6 +18,7 @@
 </header>
 
 <main>
+  <!-- Home Section -->
   <section id="home">
     <div class="cards">
       <div class="card" id="card-saldo">Saldo: **** <span id="toggleSaldo">👁</span></div>
@@ -27,6 +28,7 @@
     <button id="showFormBtn" class="center-btn">Buat Catatan</button>
   </section>
 
+  <!-- Modal Form -->
   <section id="formModal" class="modal">
     <div class="modal-content">
       <span class="closeBtn">&times;</span>
@@ -53,7 +55,6 @@
         <input type="text" id="sumberDana">
 
         <label>Anggota</label>
-        <!-- Container anggota interaktif -->
         <div id="anggotaContainer"></div>
 
         <button type="submit">Simpan</button>
@@ -61,6 +62,8 @@
       </form>
     </div>
   </section>
+
+  <!-- History Section -->
   <section id="history">
     <div class="filter">
       <select id="filterType">
@@ -68,16 +71,13 @@
         <option value="Pemasukan">Pemasukan</option>
         <option value="Pengeluaran">Pengeluaran</option>
       </select>
-
       <select id="filterAnggota"></select>
-
       <input type="text" id="searchNote" placeholder="Cari Keterangan...">
       <button id="applyFilter">Filter</button>
     </div>
 
     <button id="deleteSelected" style="display:none;">Hapus Terpilih</button>
     <button id="exportBtn">Export</button>
-
     <div id="exportOptions" class="hidden">
       <button data-type="csv">CSV</button>
       <button data-type="xlsx">XLSX</button>
@@ -103,6 +103,7 @@
     </table>
   </section>
 
+  <!-- Chart Section -->
   <section id="chart">
     <canvas id="transactionChart"></canvas>
   </section>
