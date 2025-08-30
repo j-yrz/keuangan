@@ -8,6 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+<!-- ===== HEADER ===== -->
 <header>
   <button id="menuToggle">☰</button>
   <nav id="navMenu">
@@ -17,7 +19,9 @@
   </nav>
 </header>
 
+<!-- ===== MAIN ===== -->
 <main>
+  <!-- ===== HOME ===== -->
   <section id="home">
     <div class="cards">
       <div class="card" id="card-saldo">Saldo: **** <span id="toggleSaldo">👁</span></div>
@@ -26,7 +30,7 @@
     </div>
     <button id="showFormBtn" class="center-btn">Buat Catatan</button>
   </section>
-
+  <!-- ===== MODAL FORM ===== -->
   <section id="formModal" class="modal">
     <div class="modal-content">
       <span class="closeBtn">&times;</span>
@@ -41,7 +45,7 @@
         </select>
 
         <label for="amount">Jumlah</label>
-        <input type="number" id="amount" required>
+        <input type="number" id="amount" required placeholder="Masukkan jumlah">
 
         <label for="note">Keterangan</label>
         <input type="text" id="note">
@@ -54,13 +58,16 @@
 
         <label for="transactionAnggota">Anggota</label>
         <select id="transactionAnggota"></select>
+
         <input type="text" id="newAnggota" placeholder="Tambah anggota baru">
 
         <button type="submit">Simpan</button>
+        <button type="button" id="cancelBtn">Batal</button>
       </form>
     </div>
   </section>
 
+  <!-- ===== HISTORY ===== -->
   <section id="history">
     <div class="filter">
       <select id="filterType">
@@ -98,6 +105,7 @@
     </table>
   </section>
 
+  <!-- ===== CHART ===== -->
   <section id="chart">
     <canvas id="transactionChart"></canvas>
   </section>
