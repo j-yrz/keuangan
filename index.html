@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Keuangan</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -13,9 +12,9 @@
   <div class="logo">Keuangan</div>
   <div class="menu-toggle" id="menuToggle">☰</div>
   <nav id="navMenu">
-    <a href="#home" onclick="sectionsToggle('home')">Home</a>
-    <a href="#catatan" onclick="sectionsToggle('catatan')">History</a>
-    <a href="#grafik" onclick="sectionsToggle('grafik')">Grafik</a>
+    <a href="#home" onclick="navMenu.classList.remove('show')">Home</a>
+    <a href="#catatan" onclick="navMenu.classList.remove('show')">History</a>
+    <a href="#grafik" onclick="navMenu.classList.remove('show')">Grafik</a>
   </nav>
 </header>
 
@@ -35,37 +34,26 @@
       <div class="modal-content">
         <span class="closeBtn">&times;</span>
         <form id="transactionForm">
-          <label>Tanggal</label>
-          <input type="date" id="transactionDate" required>
+          <input type="date" id="transactionDate" required />
 
-          <label>Pilih Jenis</label>
-          <select id="type" required>
-            <option value="">--Pilih Jenis--</option>
-            <option value="Pemasukan">Pemasukan</option>
-            <option value="Pengeluaran">Pengeluaran</option>
-          </select>
+          <div class="popupWrapper">
+            <input type="text" id="type" placeholder="Pilih Jenis" readonly required/>
+            <div id="typePopup" class="popup">
+              <div class="popupItem" onclick="document.getElementById('type').value='Pemasukan'; typePopup.style.display='none';">Pemasukan</div>
+              <div class="popupItem" onclick="document.getElementById('type').value='Pengeluaran'; typePopup.style.display='none';">Pengeluaran</div>
+            </div>
+          </div>
 
-          <label>Pilih Anggota</label>
-<input type="text" id="transactionAnggotaInput" readonly placeholder="Klik untuk pilih anggota">
-<div class="popup-anggota hidden" id="anggotaPopup">
-  <!-- Daftar anggota akan di-render JS -->
-  <!-- Di bawah daftar akan ada input tambah anggota baru -->
-</div>
-          
-          <label>Sumber Dana</label>
-          <input type="text" id="sumberDana" placeholder="Sumber Dana">
+          <input type="text" id="transactionAnggotaInput" placeholder="Pilih Anggota" readonly required/>
+          <div id="anggotaPopup" class="popup"></div>
 
-          <label>Keterangan</label>
-          <input type="text" id="note" placeholder="Keterangan">
+          <input type="text" id="sumberDana" placeholder="Sumber Dana" required />
+          <input type="text" id="note" placeholder="Keterangan" required />
+          <input type="number" id="amount" placeholder="Jumlah" required />
+          <input type="text" id="deskripsi" placeholder="Deskripsi (opsional)" />
 
-          <label>Jumlah</label>
-          <input type="number" id="amount" placeholder="0" required>
-
-          <label>Deskripsi (opsional)</label>
-          <input type="text" id="deskripsi" placeholder="Deskripsi">
-
-          <button type="submit" id="simpanBtn">Simpan Catatan</button>
-          <button type="button" id="batalForm">Batal</button>
+          <button type="submit" style="background:#4CAF50;">Simpan Catatan</button>
+          <button type="button" id="batalForm" style="background:#F44336;">Batal</button>
         </form>
       </div>
     </div>
@@ -75,7 +63,7 @@
   <section id="catatan">
     <h2>History Transaksi</h2>
     <div id="filterContainer">
-      <input type="text" id="searchNote" placeholder="Cari keterangan...">
+      <input type="text" id="searchNote" placeholder="Cari keterangan..." />
       <select id="filterType">
         <option value="">Semua Jenis</option>
         <option value="Pemasukan">Pemasukan</option>
@@ -108,21 +96,13 @@
   </section>
 
   <!-- Grafik -->
-  <section id="grafik">
+  <section id="grafik" style="display:none;">
     <h2>Grafik Transaksi</h2>
     <canvas id="transactionChart"></canvas>
   </section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
-
-<script>
-function sectionsToggle(id){
-  document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
-  document.getElementById(id).style.display='block';
-  navMenu.classList.remove('show');
-}
-</script>
-
 </body>
 </html>
