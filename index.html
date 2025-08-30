@@ -1,108 +1,129 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keuangan</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keuangan</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<header>
-  <div class="logo">Keuangan</div>
-  <div class="menu-toggle" id="menuToggle">☰</div>
-  <nav id="navMenu">
-    <a href="#home" onclick="navMenu.classList.remove('show')">Home</a>
-    <a href="#catatan" onclick="navMenu.classList.remove('show')">History</a>
-    <a href="#grafik" onclick="navMenu.classList.remove('show')">Grafik</a>
-  </nav>
-</header>
+    <header>
+        <div class="logo">Keuangan</div>
+        <div class="menu-toggle" id="menuToggle">☰</div>
+        <nav id="navMenu">
+            <a href="#home">Home</a>
+            <a href="#catatan">History</a>
+            <a href="#grafik">Grafik</a>
+        </nav>
+    </header>
 
-<main>
-  <!-- Home -->
-  <section id="home">
-    <div class="summary-cards">
-      <div class="card" id="card-saldo">Saldo: Rp 0 <span id="toggleSaldo" style="cursor:pointer;">👁️</span></div>
-      <div class="card" id="card-pemasukan">Pemasukan: Rp 0</div>
-      <div class="card" id="card-pengeluaran">Pengeluaran: Rp 0</div>
-    </div>
-
-    <button id="showFormBtn">Buat Catatan</button>
-
-    <!-- Modal Form -->
-    <div id="formModal" class="modal">
-      <div class="modal-content">
-        <span class="closeBtn">&times;</span>
-        <form id="transactionForm">
-          <input type="date" id="transactionDate" required />
-
-          <div class="popupWrapper">
-            <input type="text" id="type" placeholder="Pilih Jenis" readonly required/>
-            <div id="typePopup" class="popup">
-              <div class="popupItem" onclick="document.getElementById('type').value='Pemasukan'; typePopup.style.display='none';">Pemasukan</div>
-              <div class="popupItem" onclick="document.getElementById('type').value='Pengeluaran'; typePopup.style.display='none';">Pengeluaran</div>
+    <main>
+        <!-- Home -->
+        <section id="home">
+            <div class="summary-cards">
+                <div class="card" id="card-saldo">
+                    Saldo: Rp 0
+                    <span id="toggleSaldo" style="cursor:pointer;">👁️</span>
+                </div>
+                <div class="card" id="card-pemasukan">Pemasukan: Rp 0</div>
+                <div class="card" id="card-pengeluaran">Pengeluaran: Rp 0</div>
             </div>
-          </div>
 
-          <input type="text" id="transactionAnggotaInput" placeholder="Pilih Anggota" readonly required/>
-          <div id="anggotaPopup" class="popup"></div>
+            <button id="showFormBtn">Buat Catatan</button>
 
-          <input type="text" id="sumberDana" placeholder="Sumber Dana" required />
-          <input type="text" id="note" placeholder="Keterangan" required />
-          <input type="number" id="amount" placeholder="Jumlah" required />
-          <input type="text" id="deskripsi" placeholder="Deskripsi (opsional)" />
+            <!-- Modal Form -->
+            <div id="formModal" class="modal">
+                <div class="modal-content">
+                    <span class="closeBtn">&times;</span>
+                    <form id="transactionForm">
+                        <input type="date" id="transactionDate" required />
+                        
+                        <!-- Popup Pilih Jenis -->
+                        <div class="popup" id="typePopup">
+                            <div class="popupItem">Pemasukan</div>
+                            <div class="popupItem">Pengeluaran</div>
+                        </div>
+                        <select id="type" required>
+                            <option value="">Pilih Jenis</option>
+                        </select>
 
-          <button type="submit" style="background:#4CAF50;">Simpan Catatan</button>
-          <button type="button" id="batalForm" style="background:#F44336;">Batal</button>
-        </form>
-      </div>
-    </div>
-  </section>
+                        <!-- Popup Pilih Anggota -->
+                        <div class="popup" id="anggotaPopup">
+                            <!-- Dinamis Anggota akan ditambahkan disini -->
+                        </div>
+                        <input type="text" id="transactionAnggotaInput" placeholder="Pilih Anggota" readonly />
 
-  <!-- History -->
-  <section id="catatan">
-    <h2>History Transaksi</h2>
-    <div id="filterContainer">
-      <input type="text" id="searchNote" placeholder="Cari keterangan..." />
-      <select id="filterType">
-        <option value="">Semua Jenis</option>
-        <option value="Pemasukan">Pemasukan</option>
-        <option value="Pengeluaran">Pengeluaran</option>
-      </select>
-      <select id="filterAnggota">
-        <option value="">Semua Anggota</option>
-      </select>
-      <button id="applyFilter">Terapkan Filter</button>
-    </div>
+                        <input type="text" id="sumberDana" placeholder="Sumber Dana" required />
+                        <input type="text" id="note" placeholder="Keterangan" />
+                        <input type="text" id="amount" placeholder="Jumlah" required />
+                        <input type="text" id="deskripsi" placeholder="Deskripsi (opsional)" />
 
-    <table id="transactionsTable">
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="checkAll"></th>
-          <th>No</th>
-          <th>Tanggal</th>
-          <th>Jenis</th>
-          <th>Anggota</th>
-          <th>Sumber Dana</th>
-          <th>Keterangan</th>
-          <th>Jumlah</th>
-          <th>Deskripsi</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <button id="deleteSelected" style="display:none;">Hapus Terpilih</button>
-  </section>
+                        <button type="submit">Simpan Catatan</button>
+                        <button type="button" id="cancelBtn">Batal</button>
+                    </form>
+                </div>
+            </div>
+        </section>
 
-  <!-- Grafik -->
-  <section id="grafik" style="display:none;">
-    <h2>Grafik Transaksi</h2>
-    <canvas id="transactionChart"></canvas>
-  </section>
-</main>
+        <!-- History -->
+        <section id="catatan">
+            <h2>History Transaksi</h2>
+            <div id="filterContainer">
+                <input type="text" id="searchNote" placeholder="Cari keterangan..." />
+                <input type="date" id="startDate" />
+                <span>s/d</span>
+                <input type="date" id="endDate" />
+                <select id="filterAnggota">
+                    <option value="">Semua Anggota</option>
+                </select>
+                <input type="text" id="filterSumberDana" placeholder="Sumber Dana" />
+                <select id="filterType">
+                    <option value="">Semua Jenis</option>
+                    <option value="Pemasukan">Pemasukan</option>
+                    <option value="Pengeluaran">Pengeluaran</option>
+                </select>
+                <button id="applyFilter">Terapkan Filter</button>
+            </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="script.js"></script>
+            <table id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="checkAll"></th>
+                        <th>No</th>
+                        <th>Tanggal</th>
+                        <th>Jenis</th>
+                        <th>Jumlah</th>
+                        <th>Keterangan</th>
+                        <th>Deskripsi</th>
+                        <th>Sumber Dana</th>
+                        <th>Anggota</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button id="deleteSelected" style="display:none;">Hapus Terpilih</button>
+
+            <button id="exportBtn">Restore & Backup</button>
+            <div id="exportOptions" class="hidden">
+                <button data-type="csv">CSV</button>
+                <button data-type="xlsx">XLSX</button>
+                <button data-type="pdf">PDF</button>
+            </div>
+        </section>
+
+        <!-- Grafik -->
+        <section id="grafik" style="display:none;">
+            <h2>Grafik Transaksi</h2>
+            <canvas id="transactionChart"></canvas>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>
