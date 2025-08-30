@@ -12,10 +12,8 @@ const transactionDate = document.getElementById('transactionDate');
 const typeInput = document.getElementById('type');
 const transactionAnggotaInput = document.getElementById('transactionAnggotaInput');
 const anggotaPopup = document.getElementById('anggotaPopup');
-const newAnggotaInput = document.getElementById('newAnggota');
 const transactionsTableBody = document.querySelector('#transactionsTable tbody');
 const deleteSelectedBtn = document.getElementById('deleteSelected');
-const checkAll = document.getElementById('checkAll');
 const filterAnggota = document.getElementById('filterAnggota');
 const applyFilterBtn = document.getElementById('applyFilter');
 const toggleSaldo = document.getElementById('toggleSaldo');
@@ -62,21 +60,29 @@ window.addEventListener('click', e=>{
   if(e.target===formModal) closeForm();
 });
 
-// ===== Popup Anggota =====
-transactionAnggotaInput.addEventListener('click', ()=>{
-  anggotaPopup.classList.toggle('hidden');
+// ===== Popup Anggota Minimalis =====
+transactionAnggotaInput.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  anggotaPopup.style.display = anggotaPopup.style.display==='block'?'none':'block';
   renderAnggotaPopup();
 });
 
-function renderAnggotaPopup(){
-  anggotaPopup.innerHTML = '';
+// Hide popup when clicking outside
+document.addEventListener('click', (e)=>{
+  if(!anggotaPopup.contains(e.target) && e.target!==transactionAnggotaInput){
+    anggotaPopup.style.display='none';
+  }
+});
 
+// Render anggota popup
+function renderAnggotaPopup(){
+  anggotaPopup.innerHTML='';
   anggota.forEach(a=>{
     const div = document.createElement('div');
     div.textContent = a;
     const removeBtn = document.createElement('span');
     removeBtn.textContent = '✖';
-    removeBtn.className = 'hapusAnggota';
+    removeBtn.className='hapusAnggota';
     removeBtn.onclick = (e)=>{
       e.stopPropagation();
       anggota = anggota.filter(x=>x!==a);
@@ -86,26 +92,25 @@ function renderAnggotaPopup(){
     div.appendChild(removeBtn);
     div.addEventListener('click', ()=>{
       transactionAnggotaInput.value = a;
-      anggotaPopup.classList.add('hidden');
+      anggotaPopup.style.display='none';
     });
     anggotaPopup.appendChild(div);
   });
 
   // Input tambah anggota baru
   const addDiv = document.createElement('div');
-  addDiv.style.display = 'flex';
-  addDiv.style.marginTop = '5px';
+  addDiv.style.display='flex';
+  addDiv.style.marginTop='5px';
   const input = document.createElement('input');
-  input.placeholder = 'Tambah anggota baru';
-  input.style.flex = '1';
+  input.placeholder='Tambah anggota baru';
   const addBtn = document.createElement('button');
-  addBtn.textContent = 'Tambah';
-  addBtn.type = 'button';
-  addBtn.onclick = ()=>{
-    const val = input.value.trim();
+  addBtn.type='button';
+  addBtn.textContent='Tambah';
+  addBtn.onclick=()=>{
+    const val=input.value.trim();
     if(val && !anggota.includes(val)){
       anggota.push(val);
-      input.value = '';
+      input.value='';
       renderAnggotaPopup();
       renderAnggotaDropdown();
     }
@@ -232,11 +237,17 @@ function updateChart(){
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
   const data = { labels:['Pemasukan','Pengeluaran'], datasets:[{label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336']}] };
   if(chart) chart.destroy();
-  chart = new Chart(ctx,{type:'bar',data:data,options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Grafik Transaksi'}}}});
+  chart = new Chart(ctx, { type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true, text:'Grafik Transaksi'} } } });
 }
 
+// ===== Filters =====
+applyFilterBtn.addEventListener('click', e=>{
+  e.preventDefault();
+  renderTransactionsTable();
+});
+
 // ===== Init =====
-sections.forEach(sec=>sec.style.display='none');
+sections.forEach(s=>s.style.display='none');
 document.getElementById('home').style.display='block';
 renderAnggotaDropdown();
 renderTransactionsTable();
