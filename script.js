@@ -59,27 +59,32 @@ function updateSummary() {
   pengeluaranCard.textContent = `Pengeluaran: Rp ${formatRupiah(pengeluaran)}`;
 }
 
-// ===== Render Anggota Container =====
-function renderAnggotaContainer() {
+// ===== Render Anggota Container Custom =====
+function renderAnggotaContainer(selectedAnggota = '') {
   anggotaContainer.innerHTML = '';
 
-  // Dropdown anggota
-  const select = document.createElement('select');
-  select.id = 'transactionAnggota';
-  anggota.forEach(a => {
-    const opt = document.createElement('option');
-    opt.value = a; opt.textContent = a;
-    select.appendChild(opt);
-  });
-  anggotaContainer.appendChild(select);
-
-  // Tombol ❌ di samping setiap nama anggota
+  // Daftar anggota interaktif
   const listDiv = document.createElement('div');
   listDiv.id = 'anggotaList';
   anggota.forEach((a, idx) => {
     const item = document.createElement('div');
     item.className = 'anggotaItem';
-    item.textContent = a;
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+    item.style.justifyContent = 'space-between';
+    item.style.marginBottom = '3px';
+    
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = a;
+    nameSpan.style.cursor = 'pointer';
+    if(a === selectedAnggota) nameSpan.style.fontWeight = 'bold';
+    nameSpan.addEventListener('click', () => {
+      // pilih anggota
+      document.querySelectorAll('.anggotaItem span').forEach(s=>s.style.fontWeight='normal');
+      nameSpan.style.fontWeight='bold';
+      item.dataset.selected='true';
+    });
+
     const delBtn = document.createElement('button');
     delBtn.type = 'button';
     delBtn.textContent = '❌';
@@ -87,39 +92,37 @@ function renderAnggotaContainer() {
     delBtn.addEventListener('click', () => {
       anggota.splice(idx, 1);
       localStorage.setItem('anggota', JSON.stringify(anggota));
-      renderAnggotaContainer();
+      renderAnggotaContainer(selectedAnggota);
     });
+
+    item.appendChild(nameSpan);
     item.appendChild(delBtn);
     listDiv.appendChild(item);
   });
   anggotaContainer.appendChild(listDiv);
 
-  // Input + tombol tambah anggota
+  // Input tambah anggota
   const addDiv = document.createElement('div');
-  addDiv.id = 'anggotaActions';
+  addDiv.style.display = 'flex';
+  addDiv.style.marginTop = '5px';
   const input = document.createElement('input');
-  input.type = 'text'; input.id = 'newAnggotaInput'; input.placeholder = 'Tambah anggota baru';
+  input.type = 'text'; input.placeholder = 'Tambah anggota baru';
+  input.style.flex='1';
   const addBtn = document.createElement('button');
   addBtn.type = 'button'; addBtn.textContent = 'Tambah';
+  addBtn.style.marginLeft='5px';
   addBtn.addEventListener('click', ()=>{
     const val = input.value.trim();
     if(val && !anggota.includes(val)){
       anggota.push(val);
       localStorage.setItem('anggota', JSON.stringify(anggota));
-      input.value = '';
+      input.value='';
       renderAnggotaContainer();
     }
   });
   addDiv.appendChild(input);
   addDiv.appendChild(addBtn);
   anggotaContainer.appendChild(addDiv);
-
-  // Update filter dropdown
-  filterAnggota.innerHTML = '<option value="">Semua Anggota</option>';
-  anggota.forEach(a=>{
-    const opt = document.createElement('option'); opt.value=a; opt.textContent=a;
-    filterAnggota.appendChild(opt);
-  });
 }
 
 // ===== Reset Form =====
@@ -136,7 +139,13 @@ closeBtn.addEventListener('click', () => formModal.style.display='none');
 window.addEventListener('click', e => { if(e.target === formModal) formModal.style.display='none'; });
 document.getElementById('cancelBtn').addEventListener('click', ()=> formModal.style.display='none');
 
-// ===== Render Transactions Table =====
+// ===== Ambil anggota terpilih =====
+function getSelectedAnggota() {
+  const selected = document.querySelector('#anggotaList .anggotaItem span[style*="bold"]');
+  return selected ? selected.textContent : '';
+}
+
+// ===== Render Table Transaksi =====
 function renderTransactionsTable() {
   transactionsTableBody.innerHTML = '';
   const typeFilterVal = document.getElementById('filterType').value;
@@ -172,8 +181,7 @@ function renderTransactionsTable() {
       document.getElementById('transactionDate').value = t.date;
       document.getElementById('deskripsi').value = t.deskripsi;
       document.getElementById('sumberDana').value = t.sumberDana;
-      renderAnggotaContainer();
-      document.getElementById('transactionAnggota').value = t.anggota;
+      renderAnggotaContainer(t.anggota);
     });
   });
 
@@ -194,7 +202,7 @@ checkAll.addEventListener('change', ()=>{
   deleteSelectedBtn.style.display = checked ? 'inline-block' : 'none';
 });
 
-// ===== Form Submit =====
+// ===== Submit Form =====
 form.addEventListener('submit', e=>{
   e.preventDefault();
   const type = document.getElementById('type').value;
@@ -203,10 +211,12 @@ form.addEventListener('submit', e=>{
   const date = document.getElementById('transactionDate').value;
   const deskripsi = document.getElementById('deskripsi').value;
   const sumberDana = document.getElementById('sumberDana').value;
-  const anggotaVal = document.getElementById('transactionAnggota').value;
+  const anggotaVal = getSelectedAnggota();
+
+  if(!anggotaVal){ alert('Pilih anggota!'); return; }
 
   const transaction = { type, amount, note, date, deskripsi, sumberDana, anggota: anggotaVal };
-  if(editingIndex!==null){ transactions[editingIndex] = transaction; editingIndex = null; }
+  if(editingIndex!==null){ transactions[editingIndex] = transaction; editingIndex=null; }
   else transactions.push(transaction);
 
   localStorage.setItem('transactions', JSON.stringify(transactions));
@@ -214,7 +224,7 @@ form.addEventListener('submit', e=>{
   renderTransactionsTable();
   updateSummary();
   formModal.style.display='none';
-});
+}
 
 // ===== Delete Selected =====
 deleteSelectedBtn.addEventListener('click', ()=>{
@@ -224,7 +234,7 @@ deleteSelectedBtn.addEventListener('click', ()=>{
   renderTransactionsTable();
   updateSummary();
   deleteSelectedBtn.style.display='none';
-  checkAll.checked = false;
+  checkAll.checked=false;
 });
 
 // ===== Apply Filter =====
@@ -255,22 +265,9 @@ let chart;
 function updateChart(){
   const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  const data = {
-    labels:['Pemasukan','Pengeluaran'],
-    datasets:[{ label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336'] }]
-  };
+  const data = { labels:['Pemasukan','Pengeluaran'], datasets:[{label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336']}] };
   if(chart) chart.destroy();
-  chart = new Chart(ctx,{
-    type:'bar',
-    data:data,
-    options:{
-      responsive:true,
-      plugins:{
-        legend:{ display:false },
-        title:{ display:true, text:'Grafik Transaksi' }
-      }
-    }
-  });
+  chart = new Chart(ctx,{ type:'bar', data:data, options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true, text:'Grafik Transaksi'} } } });
 }
 
 // ===== Init =====
