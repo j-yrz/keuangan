@@ -30,6 +30,7 @@
     </div>
     <button id="showFormBtn" class="center-btn">Buat Catatan</button>
   </section>
+
   <!-- ===== MODAL FORM ===== -->
   <section id="formModal" class="modal">
     <div class="modal-content">
@@ -57,9 +58,13 @@
         <input type="text" id="sumberDana">
 
         <label for="transactionAnggota">Anggota</label>
-        <select id="transactionAnggota"></select>
-
-        <input type="text" id="newAnggota" placeholder="Tambah anggota baru">
+        <div id="anggotaContainer">
+          <select id="transactionAnggota"></select>
+          <div id="anggotaActions">
+            <input type="text" id="newAnggotaInput" placeholder="Tambah anggota baru">
+            <button type="button" id="addAnggotaBtn">Tambah</button>
+          </div>
+        </div>
 
         <button type="submit">Simpan</button>
         <button type="button" id="cancelBtn">Batal</button>
