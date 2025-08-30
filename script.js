@@ -166,6 +166,7 @@ checkAll.addEventListener('change', ()=>{
   document.querySelectorAll('.rowCheckbox').forEach(cb=>cb.checked=checked);
   deleteSelectedBtn.style.display=checked?'inline-block':'none';
 });
+
 // ===== Submit Form =====
 form.addEventListener('submit', e=>{
   e.preventDefault();
@@ -243,20 +244,14 @@ function updateChart(){
   chart = new Chart(ctx,{
     type:'bar',
     data:data,
-    options:{
-      responsive:true,
-      plugins:{
-        legend:{display:false},
-        title:{display:true, text:'Grafik Transaksi'}
-      }
-    }
+    options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true, text:'Grafik Transaksi'} } }
   });
 }
 
-// ===== Init =====
+// ===== Initialize =====
 sections.forEach(sec=>sec.style.display='none');
 document.getElementById('home').style.display='block';
-resetForm();
+renderAnggotaContainer();
 renderTransactionsTable();
 updateSummary();
 updateChart();
