@@ -36,7 +36,10 @@ const exportOptions = document.getElementById('exportOptions');
 const menuToggle = document.getElementById('menuToggle');
 const navMenu = document.getElementById('navMenu');
 
-const anggotaContainer = document.getElementById('anggotaContainer');
+const anggotaDropdown = document.getElementById('anggotaDropdown');
+const anggotaList = document.getElementById('anggotaList');
+const newAnggotaInput = document.getElementById('newAnggotaInput');
+const addAnggotaBtn = document.getElementById('addAnggotaBtn');
 
 // ===== Menu Toggle =====
 menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
@@ -66,22 +69,19 @@ function closeForm() {
   formModal.style.display = 'none';
 }
 
-// ===== Dropdown Anggota Versi Baru =====
+// ===== Render Dropdown Anggota =====
 function renderAnggotaDropdown(selected='') {
-  anggotaContainer.innerHTML = '';
-  
+  anggotaList.innerHTML = '';
   anggota.forEach((a, idx)=>{
-    const item = document.createElement('div');
-    item.className='dropdown-item';
-
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = a;
-    if(a===selected) nameSpan.classList.add('selected');
-    nameSpan.addEventListener('click', ()=>{
-      document.querySelectorAll('#anggotaContainer span').forEach(s=>s.classList.remove('selected'));
-      nameSpan.classList.add('selected');
+    const div = document.createElement('div');
+    div.className='dropdown-item';
+    const span = document.createElement('span');
+    span.textContent = a;
+    if(a===selected) span.classList.add('selected');
+    span.addEventListener('click', ()=>{
+      document.querySelectorAll('#anggotaList span').forEach(s=>s.classList.remove('selected'));
+      span.classList.add('selected');
     });
-
     const delBtn = document.createElement('button');
     delBtn.type='button';
     delBtn.textContent='❌';
@@ -90,40 +90,28 @@ function renderAnggotaDropdown(selected='') {
       localStorage.setItem('anggota',JSON.stringify(anggota));
       renderAnggotaDropdown(selected);
     });
-
-    item.appendChild(nameSpan);
-    item.appendChild(delBtn);
-    anggotaContainer.appendChild(item);
+    div.appendChild(span);
+    div.appendChild(delBtn);
+    anggotaList.appendChild(div);
   });
-
-  // Input tambah anggota
-  const addDiv = document.createElement('div');
-  addDiv.className='add-anggota';
-  const input = document.createElement('input');
-  input.type='text';
-  input.placeholder='Tambah anggota baru';
-  const addBtn = document.createElement('button');
-  addBtn.type='button';
-  addBtn.textContent='Tambah';
-  addBtn.addEventListener('click', ()=>{
-    const val = input.value.trim();
-    if(val && !anggota.includes(val)) {
-      anggota.push(val);
-      localStorage.setItem('anggota',JSON.stringify(anggota));
-      input.value='';
-      renderAnggotaDropdown();
-    }
-  });
-  addDiv.appendChild(input);
-  addDiv.appendChild(addBtn);
-  anggotaContainer.appendChild(addDiv);
 }
 
-// Ambil anggota terpilih
+// Ambil anggota yang dipilih
 function getSelectedAnggota() {
-  const selected = document.querySelector('#anggotaContainer span.selected');
-  return selected ? selected.textContent : '';
+  const sel = document.querySelector('#anggotaList span.selected');
+  return sel ? sel.textContent : '';
 }
+
+// Tambah anggota baru
+addAnggotaBtn.addEventListener('click', ()=>{
+  const val = newAnggotaInput.value.trim();
+  if(val && !anggota.includes(val)){
+    anggota.push(val);
+    localStorage.setItem('anggota', JSON.stringify(anggota));
+    newAnggotaInput.value='';
+    renderAnggotaDropdown();
+  }
+});
 
 // ===== Summary =====
 function calculateSaldo(){
@@ -181,8 +169,7 @@ function renderTransactionsTable() {
     });
   });
 
-  const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
-  rowCheckboxes.forEach(cb=>{
+  document.querySelectorAll('.rowCheckbox').forEach(cb=>{
     cb.addEventListener('change', ()=>{
       deleteSelectedBtn.style.display = document.querySelectorAll('.rowCheckbox:checked').length>0 ? 'inline-block':'none';
     });
@@ -200,7 +187,7 @@ form.addEventListener('submit', e=>{
   const sumberDana = sumberDanaInput.value;
   const anggotaVal = getSelectedAnggota();
 
-  if(!anggotaVal) { alert('Pilih anggota'); return; }
+  if(!anggotaVal){ alert('Pilih anggota'); return; }
 
   const transaction = {type, amount, note, date, deskripsi, sumberDana, anggota:anggotaVal};
 
