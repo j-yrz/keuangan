@@ -46,6 +46,14 @@ window.addEventListener('click', e => {
     if (e.target === formModal) formModal.style.display = 'none';
 });
 
+// Tombol Batal
+const cancelBtn = document.getElementById('cancelBtn');
+cancelBtn.addEventListener('click', () => {
+    formModal.style.display = 'none';
+    form.reset();
+    transactionDate.value = new Date().toISOString().split('T')[0]; // Reset tanggal
+});
+
 // Tanggal otomatis
 const transactionDate = document.getElementById('transactionDate');
 transactionDate.value = new Date().toISOString().split('T')[0];
