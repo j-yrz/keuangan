@@ -8,8 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-<!-- ===== HEADER ===== -->
 <header>
   <button id="menuToggle">☰</button>
   <nav id="navMenu">
@@ -19,9 +17,7 @@
   </nav>
 </header>
 
-<!-- ===== MAIN ===== -->
 <main>
-  <!-- ===== HOME ===== -->
   <section id="home">
     <div class="cards">
       <div class="card" id="card-saldo">Saldo: **** <span id="toggleSaldo">👁</span></div>
@@ -31,7 +27,6 @@
     <button id="showFormBtn" class="center-btn">Buat Catatan</button>
   </section>
 
-  <!-- ===== MODAL FORM ===== -->
   <section id="formModal" class="modal">
     <div class="modal-content">
       <span class="closeBtn">&times;</span>
@@ -46,7 +41,7 @@
         </select>
 
         <label for="amount">Jumlah</label>
-        <input type="number" id="amount" required placeholder="Masukkan jumlah">
+        <input type="number" id="amount" required>
 
         <label for="note">Keterangan</label>
         <input type="text" id="note">
@@ -57,22 +52,15 @@
         <label for="sumberDana">Sumber Dana</label>
         <input type="text" id="sumberDana">
 
-        <label for="transactionAnggota">Anggota</label>
-        <div id="anggotaContainer">
-          <select id="transactionAnggota"></select>
-          <div id="anggotaActions">
-            <input type="text" id="newAnggotaInput" placeholder="Tambah anggota baru">
-            <button type="button" id="addAnggotaBtn">Tambah</button>
-          </div>
-        </div>
+        <label>Anggota</label>
+        <!-- Container anggota interaktif -->
+        <div id="anggotaContainer"></div>
 
         <button type="submit">Simpan</button>
         <button type="button" id="cancelBtn">Batal</button>
       </form>
     </div>
   </section>
-
-  <!-- ===== HISTORY ===== -->
   <section id="history">
     <div class="filter">
       <select id="filterType">
@@ -80,17 +68,22 @@
         <option value="Pemasukan">Pemasukan</option>
         <option value="Pengeluaran">Pengeluaran</option>
       </select>
+
       <select id="filterAnggota"></select>
+
       <input type="text" id="searchNote" placeholder="Cari Keterangan...">
       <button id="applyFilter">Filter</button>
     </div>
+
     <button id="deleteSelected" style="display:none;">Hapus Terpilih</button>
     <button id="exportBtn">Export</button>
+
     <div id="exportOptions" class="hidden">
       <button data-type="csv">CSV</button>
       <button data-type="xlsx">XLSX</button>
       <button data-type="pdf">PDF</button>
     </div>
+
     <table id="transactionsTable">
       <thead>
         <tr>
@@ -110,7 +103,6 @@
     </table>
   </section>
 
-  <!-- ===== CHART ===== -->
   <section id="chart">
     <canvas id="transactionChart"></canvas>
   </section>
