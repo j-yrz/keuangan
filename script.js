@@ -58,7 +58,7 @@ function openForm() {
   form.reset();
   transactionDate.value = new Date().toISOString().split('T')[0];
   editingIndex = null;
-  renderAnggotaContainer();
+  renderAnggotaDropdown();
   formModal.style.display = 'flex';
 }
 
@@ -66,16 +66,17 @@ function closeForm() {
   formModal.style.display = 'none';
 }
 
-// ===== Dropdown Anggota =====
-function renderAnggotaContainer(selectedAnggota='') {
+// ===== Dropdown Anggota Versi Baru =====
+function renderAnggotaDropdown(selected='') {
   anggotaContainer.innerHTML = '';
+  
   anggota.forEach((a, idx)=>{
     const item = document.createElement('div');
     item.className='dropdown-item';
 
     const nameSpan = document.createElement('span');
     nameSpan.textContent = a;
-    if(a===selectedAnggota) nameSpan.classList.add('selected');
+    if(a===selected) nameSpan.classList.add('selected');
     nameSpan.addEventListener('click', ()=>{
       document.querySelectorAll('#anggotaContainer span').forEach(s=>s.classList.remove('selected'));
       nameSpan.classList.add('selected');
@@ -87,7 +88,7 @@ function renderAnggotaContainer(selectedAnggota='') {
     delBtn.addEventListener('click', ()=>{
       anggota.splice(idx,1);
       localStorage.setItem('anggota',JSON.stringify(anggota));
-      renderAnggotaContainer(selectedAnggota);
+      renderAnggotaDropdown(selected);
     });
 
     item.appendChild(nameSpan);
@@ -95,6 +96,7 @@ function renderAnggotaContainer(selectedAnggota='') {
     anggotaContainer.appendChild(item);
   });
 
+  // Input tambah anggota
   const addDiv = document.createElement('div');
   addDiv.className='add-anggota';
   const input = document.createElement('input');
@@ -109,7 +111,7 @@ function renderAnggotaContainer(selectedAnggota='') {
       anggota.push(val);
       localStorage.setItem('anggota',JSON.stringify(anggota));
       input.value='';
-      renderAnggotaContainer();
+      renderAnggotaDropdown();
     }
   });
   addDiv.appendChild(input);
@@ -175,7 +177,7 @@ function renderTransactionsTable() {
       transactionDate.value=t.date;
       deskripsiInput.value=t.deskripsi;
       sumberDanaInput.value=t.sumberDana;
-      renderAnggotaContainer(t.anggota);
+      renderAnggotaDropdown(t.anggota);
     });
   });
 
@@ -277,7 +279,7 @@ function updateChart(){
 // ===== Init =====
 document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
 document.getElementById('home').style.display='block';
-renderAnggotaContainer();
+renderAnggotaDropdown();
 renderTransactionsTable();
 updateSummary();
 updateChart();
