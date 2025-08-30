@@ -63,37 +63,49 @@ window.addEventListener('click', e=>{
 });
 
 // ===== Popup Anggota =====
+transactionAnggotaInput.addEventListener('click', ()=>{
+  anggotaPopup.classList.toggle('hidden');
+  renderAnggotaPopup();
+});
+
 function renderAnggotaPopup(){
-  anggotaPopup.innerHTML='';
+  anggotaPopup.innerHTML = '';
+
   anggota.forEach(a=>{
     const div = document.createElement('div');
     div.textContent = a;
     const removeBtn = document.createElement('span');
     removeBtn.textContent = '✖';
     removeBtn.className = 'hapusAnggota';
-    removeBtn.onclick = ()=>{
+    removeBtn.onclick = (e)=>{
+      e.stopPropagation();
       anggota = anggota.filter(x=>x!==a);
       renderAnggotaPopup();
       renderAnggotaDropdown();
     };
     div.appendChild(removeBtn);
+    div.addEventListener('click', ()=>{
+      transactionAnggotaInput.value = a;
+      anggotaPopup.classList.add('hidden');
+    });
     anggotaPopup.appendChild(div);
   });
 
-  // Add new anggota inside popup
+  // Input tambah anggota baru
   const addDiv = document.createElement('div');
-  addDiv.style.display='flex';
+  addDiv.style.display = 'flex';
+  addDiv.style.marginTop = '5px';
   const input = document.createElement('input');
-  input.placeholder='Tambah anggota';
-  input.style.flex='1';
+  input.placeholder = 'Tambah anggota baru';
+  input.style.flex = '1';
   const addBtn = document.createElement('button');
-  addBtn.textContent='Tambah';
-  addBtn.type='button';
+  addBtn.textContent = 'Tambah';
+  addBtn.type = 'button';
   addBtn.onclick = ()=>{
     const val = input.value.trim();
     if(val && !anggota.includes(val)){
       anggota.push(val);
-      input.value='';
+      input.value = '';
       renderAnggotaPopup();
       renderAnggotaDropdown();
     }
@@ -102,20 +114,6 @@ function renderAnggotaPopup(){
   addDiv.appendChild(addBtn);
   anggotaPopup.appendChild(addDiv);
 }
-
-// Show anggota popup on click
-transactionAnggotaInput.addEventListener('click', ()=>{
-  anggotaPopup.classList.toggle('hidden');
-  renderAnggotaPopup();
-});
-
-// Select anggota from popup
-anggotaPopup.addEventListener('click', e=>{
-  if(e.target && !e.target.classList.contains('hapusAnggota') && e.target.tagName==='DIV'){
-    transactionAnggotaInput.value = e.target.childNodes[0].textContent;
-    anggotaPopup.classList.add('hidden');
-  }
-});
 
 // ===== Dropdown Anggota Filter =====
 function renderAnggotaDropdown(){
