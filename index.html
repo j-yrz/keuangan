@@ -31,33 +31,29 @@
             <button id="showFormBtn">Buat Catatan</button>
 
             <!-- Modal Form -->
-            <div id="formModal" class="modal">
-                <div class="modal-content">
-                    <span class="closeBtn">&times;</span>
-                    <form id="transactionForm">
-                        <input type="date" id="transactionDate" required />
-                        
-                        <!-- Popup Pilih Jenis -->
-                        <div class="popup" id="typePopup">
-                            <div class="popupItem" data-type="Pemasukan">Pemasukan</div>
-                            <div class="popupItem" data-type="Pengeluaran">Pengeluaran</div>
-                        </div>
-                        <input type="text" id="type" placeholder="Pilih Jenis" readonly required />
-
-                        <!-- Popup Pilih Anggota -->
-                        <div class="popup" id="anggotaPopup"></div>
-                        <input type="text" id="transactionAnggotaInput" placeholder="Pilih Anggota" readonly />
-
-                        <input type="text" id="sumberDana" placeholder="Sumber Dana" required />
-                        <input type="text" id="note" placeholder="Keterangan" />
-                        <input type="text" id="amount" placeholder="Jumlah" required />
-                        <input type="text" id="deskripsi" placeholder="Deskripsi (opsional)" />
-
-                        <button type="submit">Simpan Catatan</button>
-                        <button type="button" id="cancelBtn">Batal</button>
-                    </form>
-                </div>
+<div id="formModal" class="modal">
+    <div class="modal-content">
+        <span class="closeBtn">&times;</span>
+        <form id="transactionForm">
+            <input type="date" id="transactionDate" required />
+            
+            <!-- Popup Pilih Jenis -->
+            <div class="popup" id="typePopup">
+                <div class="popupItem">Pemasukan</div>
+                <div class="popupItem">Pengeluaran</div>
             </div>
+            <select id="type" required>
+                <option value="">Pilih Jenis</option>
+            </select>
+
+            <!-- Other form inputs here... -->
+
+            <button type="submit">Simpan Catatan</button>
+            <button type="button" id="cancelBtn">Batal</button>
+        </form>
+    </div>
+</div>
+
         </section>
 
         <!-- History -->
