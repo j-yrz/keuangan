@@ -1,8 +1,9 @@
-// ===== Data & DOM =====
+// ===== Data =====
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 let anggota = JSON.parse(localStorage.getItem('anggota')) || [];
 let editingIndex = null;
 
+// ===== DOM Elements =====
 const formModal = document.getElementById('formModal');
 const showFormBtn = document.getElementById('showFormBtn');
 const closeBtn = document.querySelector('.closeBtn');
@@ -12,88 +13,119 @@ const typeInput = document.getElementById('type');
 const transactionAnggotaInput = document.getElementById('transactionAnggotaInput');
 const anggotaPopup = document.getElementById('anggotaPopup');
 const newAnggotaInput = document.getElementById('newAnggota');
-const sumberDanaInput = document.getElementById('sumberDana');
-const noteInput = document.getElementById('note');
-const amountInput = document.getElementById('amount');
-const deskripsiInput = document.getElementById('deskripsi');
-const batalFormBtn = document.getElementById('batalForm');
-
 const transactionsTableBody = document.querySelector('#transactionsTable tbody');
 const deleteSelectedBtn = document.getElementById('deleteSelected');
 const checkAll = document.getElementById('checkAll');
-const filterType = document.getElementById('filterType');
 const filterAnggota = document.getElementById('filterAnggota');
 const applyFilterBtn = document.getElementById('applyFilter');
+const toggleSaldo = document.getElementById('toggleSaldo');
+const sections = document.querySelectorAll('main section');
 
+// Summary Cards
 const saldoCard = document.getElementById('card-saldo');
 const pemasukanCard = document.getElementById('card-pemasukan');
 const pengeluaranCard = document.getElementById('card-pengeluaran');
-const toggleSaldo = document.getElementById('toggleSaldo');
 
+// Menu
 const menuToggle = document.getElementById('menuToggle');
 const navMenu = document.getElementById('navMenu');
 
-const backupBtn = document.getElementById('backupBtn');
-
-// Backup & Restore Elements
-const backupModal = document.getElementById('backupModal');
-const restoreModal = document.getElementById('restoreModal');
-const backupAnggotaSelect = document.getElementById('backupAnggota');
-const backupRange = document.getElementById('backupRange');
-const backupFormat = document.getElementById('backupFormat');
-const backupNowBtn = document.getElementById('backupNow');
-const backupCancelBtn = document.getElementById('backupCancel');
-const restoreFileInput = document.getElementById('restoreFile');
-const restoreBox = document.getElementById('restoreBox');
-const restoreNowBtn = document.getElementById('restoreNow');
-const restoreCancelBtn = document.getElementById('restoreCancel');
-
-let saldoVisible = true;
+// Chart
+const ctx = document.getElementById('transactionChart').getContext('2d');
 let chart;
 
-// ===== Utilities =====
+// ===== Helper =====
 function formatRupiah(number){
-  return 'Rp '+Number(number).toLocaleString('id-ID',{minimumFractionDigits:2, maximumFractionDigits:2});
+  return "Rp " + Number(number).toLocaleString('id-ID', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
-// ===== Menu Toggle =====
-menuToggle.addEventListener('click', ()=>navMenu.classList.toggle('show'));
-navMenu.querySelectorAll('a').forEach(a=>{
-  a.addEventListener('click', ()=>navMenu.classList.remove('show'));
-});
+// Toggle mobile menu
+menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
 
-// ===== Toggle Saldo =====
+// Toggle saldo visibility
+let saldoVisible = true;
 toggleSaldo.addEventListener('click', ()=>{
   saldoVisible = !saldoVisible;
   updateSummary();
 });
 
-// ===== Modal Form =====
-showFormBtn.addEventListener('click', ()=> formModal.style.display='flex');
-closeBtn.addEventListener('click', ()=> formModal.style.display='none');
-batalFormBtn.addEventListener('click', ()=> formModal.style.display='none');
-window.addEventListener('click', e=>{ if(e.target===formModal) formModal.style.display='none'; });
-
-// Tanggal default
+// Auto date
 transactionDate.value = new Date().toISOString().split('T')[0];
 
-// ===== Render Anggota =====
+// ===== Modal Form =====
+function openForm(){ formModal.style.display='flex'; }
+function closeForm(){ formModal.style.display='none'; }
+showFormBtn.addEventListener('click', openForm);
+closeBtn.addEventListener('click', closeForm);
+document.getElementById('batalForm').addEventListener('click', closeForm);
+window.addEventListener('click', e=>{
+  if(e.target===formModal) closeForm();
+});
+
+// ===== Popup Anggota =====
 function renderAnggotaPopup(){
   anggotaPopup.innerHTML='';
   anggota.forEach(a=>{
     const div = document.createElement('div');
-    div.textContent=a;
-    const del = document.createElement('span'); del.textContent='✖'; del.className='hapusAnggota';
-    del.addEventListener('click', (e)=>{ e.stopPropagation(); anggotaPopup.removeChild(div); });
-    div.appendChild(del);
-    div.addEventListener('click', ()=>{ transactionAnggotaInput.value=a; anggotaPopup.classList.add('hidden'); });
+    div.textContent = a;
+    const removeBtn = document.createElement('span');
+    removeBtn.textContent = '✖';
+    removeBtn.className = 'hapusAnggota';
+    removeBtn.onclick = ()=>{
+      anggota = anggota.filter(x=>x!==a);
+      renderAnggotaPopup();
+      renderAnggotaDropdown();
+    };
+    div.appendChild(removeBtn);
     anggotaPopup.appendChild(div);
   });
+
+  // Add new anggota inside popup
+  const addDiv = document.createElement('div');
+  addDiv.style.display='flex';
+  const input = document.createElement('input');
+  input.placeholder='Tambah anggota';
+  input.style.flex='1';
+  const addBtn = document.createElement('button');
+  addBtn.textContent='Tambah';
+  addBtn.type='button';
+  addBtn.onclick = ()=>{
+    const val = input.value.trim();
+    if(val && !anggota.includes(val)){
+      anggota.push(val);
+      input.value='';
+      renderAnggotaPopup();
+      renderAnggotaDropdown();
+    }
+  };
+  addDiv.appendChild(input);
+  addDiv.appendChild(addBtn);
+  anggotaPopup.appendChild(addDiv);
 }
+
+// Show anggota popup on click
 transactionAnggotaInput.addEventListener('click', ()=>{
   anggotaPopup.classList.toggle('hidden');
   renderAnggotaPopup();
 });
+
+// Select anggota from popup
+anggotaPopup.addEventListener('click', e=>{
+  if(e.target && !e.target.classList.contains('hapusAnggota') && e.target.tagName==='DIV'){
+    transactionAnggotaInput.value = e.target.childNodes[0].textContent;
+    anggotaPopup.classList.add('hidden');
+  }
+});
+
+// ===== Dropdown Anggota Filter =====
+function renderAnggotaDropdown(){
+  filterAnggota.innerHTML='<option value="">Semua Anggota</option>';
+  anggota.forEach(a=>{
+    const opt = document.createElement('option');
+    opt.value=a; opt.textContent=a;
+    filterAnggota.appendChild(opt);
+  });
+}
 
 // ===== Summary =====
 function calculateSaldo(){
@@ -104,23 +136,23 @@ function calculateSaldo(){
 function updateSummary(){
   const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  saldoCard.textContent = saldoVisible ? formatRupiah(calculateSaldo()) : 'Saldo: ****';
+  saldoCard.textContent = saldoVisible ? `Saldo: ${formatRupiah(calculateSaldo())}` : 'Saldo: ****';
   saldoCard.appendChild(toggleSaldo);
-  pemasukanCard.textContent = 'Pemasukan: '+formatRupiah(pemasukan);
-  pengeluaranCard.textContent = 'Pengeluaran: '+formatRupiah(pengeluaran);
+  pemasukanCard.textContent = `Pemasukan: ${formatRupiah(pemasukan)}`;
+  pengeluaranCard.textContent = `Pengeluaran: ${formatRupiah(pengeluaran)}`;
 }
 
-// ===== Render Table =====
+// ===== Render Transactions Table =====
 function renderTransactionsTable(){
   transactionsTableBody.innerHTML='';
-  const typeVal = filterType.value;
-  const anggotaVal = filterAnggota.value;
-  const searchVal = document.getElementById('searchNote').value.toLowerCase();
+  const typeFilterVal = document.getElementById('filterType').value;
+  const anggotaFilterVal = filterAnggota.value;
+  const searchNoteVal = document.getElementById('searchNote').value.toLowerCase();
 
   transactions.forEach((t,i)=>{
-    if(typeVal && t.type!==typeVal) return;
-    if(anggotaVal && t.anggota!==anggotaVal) return;
-    if(searchVal && !t.note.toLowerCase().includes(searchVal)) return;
+    if(typeFilterVal && t.type!==typeFilterVal) return;
+    if(anggotaFilterVal && t.anggota!==anggotaFilterVal) return;
+    if(searchNoteVal && !t.note.toLowerCase().includes(searchNoteVal)) return;
 
     const tr = document.createElement('tr');
     tr.innerHTML=`
@@ -143,26 +175,24 @@ function renderTransactionsTable(){
     // Edit
     tr.querySelector('.editBtn').addEventListener('click', ()=>{
       editingIndex=i;
-      formModal.style.display='flex';
-      transactionDate.value=t.date;
+      openForm();
       typeInput.value=t.type;
+      transactionDate.value=t.date;
       transactionAnggotaInput.value=t.anggota;
-      sumberDanaInput.value=t.sumberDana;
-      noteInput.value=t.note;
-      amountInput.value=t.amount;
-      deskripsiInput.value=t.deskripsi;
-      newAnggotaInput.value='';
+      document.getElementById('sumberDana').value=t.sumberDana;
+      document.getElementById('note').value=t.note;
+      document.getElementById('amount').value=t.amount;
+      document.getElementById('deskripsi').value=t.deskripsi;
     });
 
     // Status
     tr.querySelector('.statusBtn').addEventListener('click', ()=>{
-      alert(t.lastEdited ? 'Terakhir di edit: '+t.lastEdited : 'Belum pernah diedit');
+      alert(`Transaksi terakhir diedit pada: ${t.edited? t.edited:'Belum diedit'}\nKeterangan: ${t.note}`);
     });
   });
 
-  // Checkbox
-  const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
-  rowCheckboxes.forEach(cb=>{
+  // Checkbox logic
+  document.querySelectorAll('.rowCheckbox').forEach(cb=>{
     cb.addEventListener('change', ()=>{
       deleteSelectedBtn.style.display = document.querySelectorAll('.rowCheckbox:checked').length>0 ? 'inline-block':'none';
     });
@@ -172,112 +202,45 @@ function renderTransactionsTable(){
 // ===== Form Submit =====
 form.addEventListener('submit', e=>{
   e.preventDefault();
-  let anggotaVal = transactionAnggotaInput.value;
-  const newAnggotaVal = newAnggotaInput.value.trim();
-  if(newAnggotaVal && !anggota.includes(newAnggotaVal)){ anggota.push(newAnggotaVal); anggotaVal=newAnggotaVal; }
-  const transaction = {
-    date: transactionDate.value,
-    type: typeInput.value,
-    anggota: anggotaVal,
-    sumberDana: sumberDanaInput.value,
-    note: noteInput.value,
-    amount: amountInput.value,
-    deskripsi: deskripsiInput.value,
-    lastEdited: new Date().toLocaleString('id-ID')
-  };
-  if(editingIndex!==null){ transactions[editingIndex]=transaction; editingIndex=null; } else transactions.push(transaction);
-  localStorage.setItem('transactions', JSON.stringify(transactions));
-  localStorage.setItem('anggota', JSON.stringify(anggota));
+  const type = typeInput.value;
+  const date = transactionDate.value;
+  const anggotaVal = transactionAnggotaInput.value.trim();
+  const sumberDana = document.getElementById('sumberDana').value.trim();
+  const note = document.getElementById('note').value.trim();
+  const amount = document.getElementById('amount').value.trim();
+  const deskripsi = document.getElementById('deskripsi').value.trim();
+
+  if(!type || !anggotaVal || !amount) return alert("Lengkapi form!");
+
+  const transaction = {type,date,anggota:anggotaVal,sumberDana,note,amount,deskripsi,edited:null};
+  if(editingIndex!==null){
+    transaction.edited = new Date().toLocaleString();
+    transactions[editingIndex]=transaction;
+    editingIndex=null;
+  } else transactions.push(transaction);
+
+  localStorage.setItem('transactions',JSON.stringify(transactions));
   form.reset();
   transactionDate.value = new Date().toISOString().split('T')[0];
+  closeForm();
   renderTransactionsTable();
   updateSummary();
   updateChart();
-  formModal.style.display='none';
 });
-
-// ===== Delete Selected =====
-deleteSelectedBtn.addEventListener('click', ()=>{
-  const indexes = Array.from(document.querySelectorAll('.rowCheckbox:checked')).map(cb=>parseInt(cb.dataset.index));
-  transactions = transactions.filter((_,i)=>!indexes.includes(i));
-  localStorage.setItem('transactions', JSON.stringify(transactions));
-  renderTransactionsTable();
-  updateSummary();
-  deleteSelectedBtn.style.display='none';
-  checkAll.checked=false;
-});
-
-// ===== Filter =====
-applyFilterBtn.addEventListener('click', e=>{ e.preventDefault(); renderTransactionsTable(); });
 
 // ===== Chart =====
-const ctx = document.getElementById('transactionChart').getContext('2d');
 function updateChart(){
   const pemasukan = transactions.filter(t=>t.type==='Pemasukan').reduce((a,b)=>a+Number(b.amount),0);
   const pengeluaran = transactions.filter(t=>t.type==='Pengeluaran').reduce((a,b)=>a+Number(b.amount),0);
-  const data={labels:['Pemasukan','Pengeluaran'], datasets:[{label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336']}]};
+  const data = { labels:['Pemasukan','Pengeluaran'], datasets:[{label:'Jumlah (Rp)', data:[pemasukan,pengeluaran], backgroundColor:['#4CAF50','#F44336']}] };
   if(chart) chart.destroy();
-  chart = new Chart(ctx,{type:'bar', data:data, options:{responsive:true, plugins:{legend:{display:false}, title:{display:true,text:'Grafik Transaksi'}}}});
+  chart = new Chart(ctx,{type:'bar',data:data,options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Grafik Transaksi'}}}});
 }
 
 // ===== Init =====
-document.querySelectorAll('main section').forEach(s=>s.style.display='none');
+sections.forEach(sec=>sec.style.display='none');
 document.getElementById('home').style.display='block';
-renderAnggotaPopup();
+renderAnggotaDropdown();
 renderTransactionsTable();
 updateSummary();
 updateChart();
-
-// ===== Backup & Restore =====
-// Backup
-backupBtn.addEventListener('click', ()=>{
-  backupModal.style.display='flex';
-  backupAnggotaSelect.innerHTML='<option value="">Semua Anggota</option>';
-  anggota.forEach(a=>{ const opt=document.createElement('option'); opt.value=a; opt.textContent=a; backupAnggotaSelect.appendChild(opt); });
-});
-document.querySelector('.closeBackup').addEventListener('click', ()=> backupModal.style.display='none');
-backupCancelBtn.addEventListener('click', ()=> backupModal.style.display='none');
-window.addEventListener('click', e=>{ if(e.target===backupModal) backupModal.style.display='none'; });
-
-// Backup Action
-backupNowBtn.addEventListener('click', ()=>{
-  let dataToBackup = [...transactions];
-  const selAnggota = backupAnggotaSelect.value;
-  if(selAnggota) dataToBackup = dataToBackup.filter(t=>t.anggota===selAnggota);
-  const csv='Tanggal,Jenis,Anggota,Sumber Dana,Keterangan,Jumlah,Deskripsi\n'+dataToBackup.map(t=>`${t.date},${t.type},${t.anggota},${t.sumberDana},${t.note},${t.amount},${t.deskripsi}`).join('\n');
-  const blob=new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='backup_transaksi.csv'; a.click();
-  URL.revokeObjectURL(url);
-  backupModal.style.display='none';
-});
-
-// Restore
-document.querySelector('.closeRestore').addEventListener('click', ()=> restoreModal.style.display='none');
-restoreCancelBtn.addEventListener('click', ()=> restoreModal.style.display='none');
-restoreBox.addEventListener('click', ()=> restoreFileInput.click());
-let restoreData = null;
-restoreFileInput.addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(evt){
-    const text = evt.target.result;
-    const lines = text.split('\n').slice(1);
-    restoreData = lines.map(line=>{
-      const [date,type,anggota,sumberDana,note,amount,deskripsi] = line.split(',');
-      return {date,type,anggota,sumberDana,note,amount,deskripsi,lastEdited:new Date().toLocaleString('id-ID')};
-    });
-  };
-  reader.readAsText(file);
-});
-restoreNowBtn.addEventListener('click', ()=>{
-  if(!restoreData){ alert('Silahkan pilih file!'); return; }
-  transactions = restoreData;
-  localStorage.setItem('transactions', JSON.stringify(transactions));
-  renderTransactionsTable();
-  updateSummary();
-  updateChart();
-  restoreModal.style.display='none';
-  restoreData=null;
-});
