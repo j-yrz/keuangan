@@ -1,3 +1,4 @@
+// Data transaksi & anggota
 let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 let anggota = JSON.parse(localStorage.getItem('anggota')) || [];
 let editingIndex = null;
@@ -56,6 +57,27 @@ cancelBtn.addEventListener('click', () => {
 // Tanggal otomatis
 const transactionDate = document.getElementById('transactionDate');
 transactionDate.value = new Date().toISOString().split('T')[0];
+
+// Popup Pilih Jenis
+typeSelect.addEventListener('click', () => {
+    typePopup.style.display = 'block';  // Tampilkan popup
+});
+
+// Menangani pilihan dalam popup
+const popupItems = document.querySelectorAll('#typePopup .popupItem');
+popupItems.forEach(item => {
+    item.addEventListener('click', () => {
+        typeSelect.value = item.textContent; // Menetapkan pilihan ke select input
+        typePopup.style.display = 'none'; // Menyembunyikan popup setelah memilih
+    });
+});
+
+// Menutup popup jika pengguna klik di luar area popup
+window.addEventListener('click', (e) => {
+    if (e.target === typePopup) {
+        typePopup.style.display = 'none'; // Menutup popup jika klik di luar popup
+    }
+});
 
 // Render anggota dropdown
 function renderAnggotaDropdown() {
