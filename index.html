@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Keuangan</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -12,10 +13,9 @@
   <div class="logo">Keuangan</div>
   <div class="menu-toggle" id="menuToggle">☰</div>
   <nav id="navMenu">
-    <a href="#home">Home</a>
-    <a href="#catatan">History</a>
-    <a href="#grafik">Grafik</a>
-    <a href="#" id="backupBtn">Restore & Backup</a>
+    <a href="#home" onclick="sectionsToggle('home')">Home</a>
+    <a href="#catatan" onclick="sectionsToggle('catatan')">History</a>
+    <a href="#grafik" onclick="sectionsToggle('grafik')">Grafik</a>
   </nav>
 </header>
 
@@ -23,9 +23,7 @@
   <!-- Home -->
   <section id="home">
     <div class="summary-cards">
-      <div class="card" id="card-saldo">
-        Saldo: Rp 0 <span id="toggleSaldo" style="cursor:pointer;">👁️</span>
-      </div>
+      <div class="card" id="card-saldo">Saldo: Rp 0 <span id="toggleSaldo" style="cursor:pointer;">👁️</span></div>
       <div class="card" id="card-pemasukan">Pemasukan: Rp 0</div>
       <div class="card" id="card-pengeluaran">Pengeluaran: Rp 0</div>
     </div>
@@ -37,20 +35,33 @@
       <div class="modal-content">
         <span class="closeBtn">&times;</span>
         <form id="transactionForm">
-          <input type="date" id="transactionDate" required />
+          <label>Tanggal</label>
+          <input type="date" id="transactionDate" required>
+
+          <label>Pilih Jenis</label>
           <select id="type" required>
-            <option value="">Pilih Jenis</option>
+            <option value="">--Pilih Jenis--</option>
             <option value="Pemasukan">Pemasukan</option>
             <option value="Pengeluaran">Pengeluaran</option>
           </select>
-          <input type="text" id="transactionAnggotaInput" placeholder="Pilih Anggota" readonly required />
-          <div id="anggotaPopup" class="popup-anggota hidden"></div>
-          <input type="text" id="newAnggota" placeholder="Tambah anggota baru" />
-          <input type="text" id="sumberDana" placeholder="Sumber Dana" />
-          <input type="text" id="note" placeholder="Keterangan" />
-          <input type="number" id="amount" placeholder="Jumlah" required />
-          <input type="text" id="deskripsi" placeholder="Deskripsi (opsional)" />
-          <button type="submit">Simpan Catatan</button>
+
+          <label>Pilih Anggota</label>
+          <input type="text" id="transactionAnggotaInput" readonly placeholder="Klik untuk pilih anggota">
+          <div class="popup-anggota hidden" id="anggotaPopup"></div>
+
+          <label>Sumber Dana</label>
+          <input type="text" id="sumberDana" placeholder="Sumber Dana">
+
+          <label>Keterangan</label>
+          <input type="text" id="note" placeholder="Keterangan">
+
+          <label>Jumlah</label>
+          <input type="number" id="amount" placeholder="0" required>
+
+          <label>Deskripsi (opsional)</label>
+          <input type="text" id="deskripsi" placeholder="Deskripsi">
+
+          <button type="submit" id="simpanBtn">Simpan Catatan</button>
           <button type="button" id="batalForm">Batal</button>
         </form>
       </div>
@@ -61,13 +72,15 @@
   <section id="catatan">
     <h2>History Transaksi</h2>
     <div id="filterContainer">
-      <input type="text" id="searchNote" placeholder="Cari keterangan..." />
+      <input type="text" id="searchNote" placeholder="Cari keterangan...">
       <select id="filterType">
         <option value="">Semua Jenis</option>
         <option value="Pemasukan">Pemasukan</option>
         <option value="Pengeluaran">Pengeluaran</option>
       </select>
-      <select id="filterAnggota"></select>
+      <select id="filterAnggota">
+        <option value="">Semua Anggota</option>
+      </select>
       <button id="applyFilter">Terapkan Filter</button>
     </div>
 
@@ -92,52 +105,21 @@
   </section>
 
   <!-- Grafik -->
-  <section id="grafik" style="display:none;">
+  <section id="grafik">
     <h2>Grafik Transaksi</h2>
     <canvas id="transactionChart"></canvas>
   </section>
 </main>
 
-<!-- Backup Modal -->
-<div id="backupModal" class="modal">
-  <div class="modal-content">
-    <span class="closeBackup">&times;</span>
-    <h3>Backup</h3>
-    <label>Anggota:</label>
-    <select id="backupAnggota"></select>
-    <label>Rentang Waktu:</label>
-    <select id="backupRange">
-      <option value="minggu">Per Minggu</option>
-      <option value="bulan">Per Bulan</option>
-      <option value="tahun">Per Tahun</option>
-    </select>
-    <label>Format Export:</label>
-    <select id="backupFormat">
-      <option value="csv">CSV</option>
-      <option value="xlsx">XLSX</option>
-      <option value="pdf">PDF</option>
-    </select>
-    <button id="backupNow">Backup Sekarang</button>
-    <button id="backupCancel">Batal</button>
-  </div>
-</div>
-
-<!-- Restore Modal -->
-<div id="restoreModal" class="modal">
-  <div class="modal-content">
-    <span class="closeRestore">&times;</span>
-    <h3>Restore</h3>
-    <div id="restoreBox" style="border:2px dashed #ccc; padding:20px; text-align:center; cursor:pointer;">
-      <span style="font-size:2em;">＋</span><br>
-      Klik untuk upload file
-    </div>
-    <input type="file" id="restoreFile" style="display:none;">
-    <button id="restoreNow">Restore</button>
-    <button id="restoreCancel">Batal</button>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
+
+<script>
+function sectionsToggle(id){
+  document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
+  document.getElementById(id).style.display='block';
+  navMenu.classList.remove('show');
+}
+</script>
+
 </body>
 </html>
