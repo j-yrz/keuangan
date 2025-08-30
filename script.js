@@ -8,6 +8,7 @@ let selectedAnggota = "";
 const formModal = document.getElementById('formModal');
 const showFormBtn = document.getElementById('showFormBtn');
 const closeBtn = document.querySelector('.closeBtn');
+const cancelBtn = document.getElementById('cancelBtn');
 const form = document.getElementById('transactionForm');
 const transactionDate = document.getElementById('transactionDate');
 const transactionsTableBody = document.querySelector('#transactionsTable tbody');
@@ -24,11 +25,12 @@ const pengeluaranCard = document.getElementById('card-pengeluaran');
 
 // Dropdown anggota
 const anggotaBtn = document.getElementById('anggotaBtn');
+const dropdownContainer = document.getElementById('dropdownContainer');
 const anggotaList = document.getElementById('anggotaList');
 const newAnggotaInput = document.getElementById('newAnggotaInput');
 const addAnggotaBtn = document.getElementById('addAnggotaBtn');
 
-// ===== Toggle Menu Mobile =====
+// ===== Toggle menu mobile =====
 const menuToggle = document.getElementById('menuToggle');
 const navMenu = document.getElementById('navMenu');
 menuToggle.addEventListener('click', ()=> navMenu.classList.toggle('show'));
@@ -44,7 +46,7 @@ toggleSaldo.addEventListener('click', ()=>{
 // ===== Modal Form =====
 showFormBtn.addEventListener('click', ()=> openForm());
 closeBtn.addEventListener('click', ()=> closeForm());
-document.getElementById('cancelBtn').addEventListener('click', ()=> closeForm());
+cancelBtn.addEventListener('click', ()=> closeForm());
 window.addEventListener('click', e=> { if(e.target===formModal) closeForm(); });
 
 function openForm(){
@@ -52,8 +54,7 @@ function openForm(){
   transactionDate.value = new Date().toISOString().split('T')[0];
   selectedAnggota = "";
   anggotaBtn.textContent = "Pilih Anggota ▼";
-  anggotaList.innerHTML = "";
-  renderAnggotaDropdown();
+  dropdownContainer.classList.remove('show');
   editingIndex = null;
   formModal.style.display='flex';
 }
@@ -61,9 +62,6 @@ function openForm(){
 function closeForm(){
   formModal.style.display='none';
 }
-
-// ===== Tanggal otomatis =====
-transactionDate.value = new Date().toISOString().split('T')[0];
 
 // ===== Render Dropdown Anggota =====
 function renderAnggotaDropdown(){
@@ -78,7 +76,7 @@ function renderAnggotaDropdown(){
     li.querySelector('span:first-child').addEventListener('click', ()=>{
       selectedAnggota = a;
       anggotaBtn.textContent = a + " ▼";
-      anggotaList.classList.remove('show');
+      dropdownContainer.classList.remove('show');
     });
 
     // Hapus anggota dari dropdown (tidak hapus history)
@@ -91,12 +89,12 @@ function renderAnggotaDropdown(){
   });
 }
 
-// Toggle dropdown
+// Toggle dropdown anggota
 anggotaBtn.addEventListener('click', ()=>{
-  anggotaList.classList.toggle('show');
+  dropdownContainer.classList.toggle('show');
 });
 
-// Tambah anggota baru
+// Tambah anggota baru di dropdown
 addAnggotaBtn.addEventListener('click', ()=>{
   const val = newAnggotaInput.value.trim();
   if(val && !anggota.includes(val)){
@@ -146,9 +144,7 @@ function renderTransactionsTable(){
       <td>${t.deskripsi}</td>
       <td>${t.sumberDana}</td>
       <td>${t.anggota}</td>
-      <td>
-        <button class="editBtn">✎</button>
-      </td>
+      <td><button class="editBtn">✎</button></td>
     `;
     transactionsTableBody.appendChild(tr);
 
@@ -266,3 +262,10 @@ renderAnggotaDropdown();
 renderTransactionsTable();
 updateSummary();
 updateChart();
+
+// ===== Close dropdown saat klik luar =====
+window.addEventListener('click', e=>{
+  if(!dropdownContainer.contains(e.target) && e.target!==anggotaBtn){
+    dropdownContainer.classList.remove('show');
+  }
+});
