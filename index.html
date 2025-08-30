@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
 <header>
   <button id="menuToggle">☰</button>
   <nav id="navMenu">
@@ -18,6 +19,7 @@
 </header>
 
 <main>
+  <!-- Ringkasan Saldo -->
   <section id="home">
     <div class="cards">
       <div class="card" id="card-saldo">Saldo: **** <span id="toggleSaldo">👁</span></div>
@@ -27,6 +29,7 @@
     <button id="showFormBtn" class="center-btn">Buat Catatan</button>
   </section>
 
+  <!-- Form Modal -->
   <section id="formModal" class="modal">
     <div class="modal-content">
       <span class="closeBtn">&times;</span>
@@ -52,11 +55,16 @@
         <label for="sumberDana">Sumber Dana</label>
         <input type="text" id="sumberDana">
 
+        <!-- Dropdown Anggota Interaktif -->
         <label>Anggota</label>
-        <div class="custom-dropdown" id="anggotaDropdown">
-          <summary>-- Pilih Anggota --</summary>
-          <div class="dropdown-content" id="anggotaContainer"></div>
-        </div>
+        <details id="anggotaDropdown">
+          <summary>Pilih Anggota</summary>
+          <div id="anggotaList"></div>
+          <div id="addAnggotaDiv">
+            <input type="text" id="newAnggotaInput" placeholder="Tambah anggota baru">
+            <button type="button" id="addAnggotaBtn">Tambah</button>
+          </div>
+        </details>
 
         <button type="submit">Simpan</button>
         <button type="button" id="cancelBtn">Batal</button>
@@ -64,6 +72,7 @@
     </div>
   </section>
 
+  <!-- History -->
   <section id="history">
     <div class="filter">
       <select id="filterType">
@@ -101,6 +110,7 @@
     </table>
   </section>
 
+  <!-- Chart -->
   <section id="chart">
     <canvas id="transactionChart"></canvas>
   </section>
